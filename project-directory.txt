@@ -1,0 +1,75 @@
+# 小米AIoT边缘安全防护研究平台 - 目录结构
+
+```
+xiaomi-aiot-edge-security/
+├── src/                        # 源代码目录
+│   ├── device_simulator/       # 边缘设备模拟器
+│   │   ├── gateway.py          # 网关设备模拟器
+│   │   ├── router.py           # 路由器模拟器
+│   │   ├── speaker.py          # 小爱音箱模拟器
+│   │   ├── camera.py           # 摄像头模拟器
+│   │   ├── simulator_base.py   # 模拟器基类
+│   │   └── __init__.py         # 包初始化文件
+│   ├── platform_connector/     # 平台连接器
+│   │   ├── edgex_connector.py  # EdgeX Foundry连接器
+│   │   ├── thingsboard_connector.py # ThingsBoard Edge连接器
+│   │   ├── connector_base.py   # 连接器基类
+│   │   └── __init__.py         # 包初始化文件
+│   ├── security/               # 安全防护模块
+│   │   ├── attack_detector.py  # 攻击检测器
+│   │   ├── protection_engine.py # 防护引擎
+│   │   ├── security_logger.py  # 安全日志记录
+│   │   ├── rules/              # 防护规则
+│   │   │   ├── ddos_rules.py   # DDoS防护规则
+│   │   │   ├── mitm_rules.py   # 中间人攻击防护规则
+│   │   │   ├── firmware_rules.py # 固件攻击防护规则
+│   │   │   ├── credential_rules.py # 凭证攻击防护规则
+│   │   │   └── __init__.py     # 包初始化文件
+│   │   └── __init__.py         # 包初始化文件
+│   ├── analytics/              # 数据分析模块
+│   │   ├── data_collector.py   # 数据收集器
+│   │   ├── statistical_analyzer.py # 统计分析器
+│   │   ├── report_generator.py # 报告生成器
+│   │   └── __init__.py         # 包初始化文件
+│   ├── dashboard/              # 控制面板
+│   │   ├── app.py              # 控制面板应用
+│   │   ├── device_manager.py   # 设备管理器
+│   │   ├── security_config.py  # 安全配置管理
+│   │   ├── visualization.py    # 数据可视化
+│   │   ├── static/             # 静态资源
+│   │   ├── templates/          # HTML模板
+│   │   └── __init__.py         # 包初始化文件
+│   ├── utils/                  # 工具类
+│   │   ├── config.py           # 配置管理
+│   │   ├── logger.py           # 日志工具
+│   │   ├── crypto.py           # 加密工具
+│   │   ├── protocol.py         # 协议处理
+│   │   └── __init__.py         # 包初始化文件
+│   └── __init__.py             # 包初始化文件
+├── config/                     # 配置文件目录
+│   ├── simulator.yaml          # 模拟器配置
+│   ├── edgex.yaml              # EdgeX连接配置
+│   ├── thingsboard.yaml        # ThingsBoard连接配置
+│   ├── security.yaml           # 安全防护配置
+│   └── logging.yaml            # 日志配置
+├── tests/                      # 测试目录
+│   ├── test_simulator.py       # 模拟器测试
+│   ├── test_connector.py       # 连接器测试
+│   ├── test_security.py        # 安全模块测试
+│   └── test_analytics.py       # 分析模块测试
+├── docs/                       # 文档目录
+│   ├── setup.md                # 安装指南
+│   ├── usage.md                # 使用指南
+│   ├── architecture.md         # 架构说明
+│   └── api.md                  # API文档
+├── scripts/                    # 脚本目录
+│   ├── setup.sh                # 环境设置脚本
+│   ├── start_simulation.sh     # 启动仿真脚本
+│   ├── stop_simulation.sh      # 停止仿真脚本
+│   └── generate_report.sh      # 生成报告脚本
+├── .gitignore                  # Git忽略文件
+├── README.md                   # 项目说明
+├── requirements.txt            # Python依赖
+├── setup.py                    # 安装脚本
+└── docker-compose.yml          # Docker编排文件
+```

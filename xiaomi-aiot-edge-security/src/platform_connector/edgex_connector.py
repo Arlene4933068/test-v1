@@ -26,7 +26,8 @@ class EdgeXConnector(connector_base.ConnectorBase):
                 - service_name: 设备服务名称
                 - profile_name: 设备配置文件名称
         """
-        super().__init__(config)
+        super().__init__()
+        self.config = config
         self.base_url = config.get('url', 'http://localhost:48080')
         self.core_metadata_url = config.get('core_metadata_url', 'http://localhost:48081') 
         self.core_data_url = config.get('core_data_url', 'http://localhost:48080')

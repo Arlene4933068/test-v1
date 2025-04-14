@@ -1,17 +1,34 @@
 # src/utils/logger.py
 import os
-import logging
 import yaml
-from logging.handlers import RotatingFileHandler
+import logging
+import logging.config
+import logging.handlers
+from pathlib import Path
 
-# 全局日志配置
-_log_config = None
 _loggers = {}
 
-def setup_logging():
-    """设置日志配置"""
-    _load_log_config()
+def setup_logger():
+    """初始化日志配置
+    
+    从配置文件加载日志配置并应用
+    """
+    config_path = Path(__file__).parent.parent.parent / 'config' / 'logging.yaml'
+    if not config_path.exists():
+        raise FileNotFoundError(f'日志配置文件不存在: {config_path}')
+        
+    with open(config_path, 'r', encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+        
+    # 确保日志目录存在
+    log_dir = Path(config['handlers']['file']['filename']).parent
+    log_dir.mkdir(parents=True, exist_ok=True)
+    
+    # 应用配置
+    logging.config.dictConfig(config)
 
+
+_log_config = None
 
 def _load_log_config():
     """加载日志配置"""
@@ -121,7 +138,8 @@ def get_logger(name):
     logger.addHandler(file_handler)
     
     # 设置日志级别
-    logger.setLevel(config['loggers']['']['level'])
+    logger.setLevel(config['root']['level'])
     
     _loggers[name] = logger
     return logger
+from logging.handlers import RotatingFileHandler

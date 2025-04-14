@@ -9,6 +9,112 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
 from .logger import get_logger
 
+def encrypt_data(data, key):
+    """加密数据
+    
+    Args:
+        data: 待加密数据
+        key: 加密密钥
+        
+    Returns:
+        bytes: 加密后的数据
+    """
+    if isinstance(data, str):
+        data = data.encode('utf-8')
+    iv = os.urandom(16)
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    padder = padding.PKCS7(128).padder()
+    padded_data = padder.update(data) + padder.finalize()
+    encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
+    return iv + encrypted_data
+
+def decrypt_data(encrypted_data, key):
+    """解密数据
+    
+    Args:
+        encrypted_data: 加密数据
+        key: 解密密钥
+        
+    Returns:
+        bytes: 解密后的数据
+    """
+    iv = encrypted_data[:16]
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    decryptor = cipher.decryptor()
+    unpadder = padding.PKCS7(128).unpadder()
+    decrypted_padded = decryptor.update(encrypted_data[16:]) + decryptor.finalize()
+    decrypted = unpadder.update(decrypted_padded) + unpadder.finalize()
+    return decrypted
+
+def generate_key_pair():
+    """生成密钥对
+    
+    Returns:
+        tuple: (公钥, 私钥)
+    """
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+        backend=default_backend()
+    )
+    public_key = private_key.public_key()
+    return public_key, private_key
+
+def sign_data(data, private_key):
+    """签名数据
+    
+    Args:
+        data: 待签名数据
+        private_key: 私钥
+        
+    Returns:
+        bytes: 签名
+    """
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padding
+    if isinstance(data, str):
+        data = data.encode('utf-8')
+    signature = private_key.sign(
+        data,
+        asymmetric_padding.PSS(
+            mgf=asymmetric_padding.MGF1(hashes.SHA256()),
+            salt_length=asymmetric_padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature
+
+def verify_signature(data, signature, public_key):
+    """验证签名
+    
+    Args:
+        data: 原始数据
+        signature: 签名
+        public_key: 公钥
+        
+    Returns:
+        bool: 验证结果
+    """
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padding
+    if isinstance(data, str):
+        data = data.encode('utf-8')
+    try:
+        public_key.verify(
+            signature,
+            data,
+            asymmetric_padding.PSS(
+                mgf=asymmetric_padding.MGF1(hashes.SHA256()),
+                salt_length=asymmetric_padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return True
+    except:
+        return False
+
 class CryptoUtils:
     """加密工具：提供加密、解密、哈希、签名等功能"""
     

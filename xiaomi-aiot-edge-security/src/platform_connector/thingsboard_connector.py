@@ -26,7 +26,8 @@ class ThingsBoardConnector(connector_base.ConnectorBase):
                 - username: 登录用户名
                 - password: 登录密码
         """
-        super().__init__(config)
+        super().__init__()
+        self.config = config
         self.base_url = config.get('url', 'http://localhost:8080')
         self.username = config.get('username', 'tenant@thingsboard.org')
         self.password = config.get('password', 'tenant')

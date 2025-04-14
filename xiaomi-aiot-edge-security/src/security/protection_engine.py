@@ -48,6 +48,25 @@ class ProtectionEngine:
             
     def load_protection_rules(self):
         """加载所有防护规则"""
+        
+    def handle_alert(self, alert_data: Dict[str, Any]):
+        """处理安全告警
+        
+        Args:
+            alert_data: 告警数据
+        """
+        alert_type = alert_data.get('type')
+        severity = alert_data.get('severity', 'medium')
+        
+        self.logger.warning(f"收到安全告警: {alert_type} - 严重程度: {severity}")
+        
+        # 根据告警类型和严重程度执行相应的防护措施
+        if alert_type in self.protection_rules:
+            protection_rule = self.protection_rules[alert_type]
+            protection_rule.execute(alert_data)
+        else:
+            self.logger.error(f"未找到告警类型 {alert_type} 对应的防护规则")
+
         # 动态导入规则模块
         rules_path = os.path.join(os.path.dirname(__file__), "rules")
         rule_modules = [f[:-3] for f in os.listdir(rules_path) 

@@ -40,5 +40,5 @@
 
 1. 克隆代码仓库：
    ```bash
-   git clone https://github.com/your-username/xiaomi-aiot-edge-security.git
-   cd xiaomi-aiot-edge-security
+   git clone https://github.com/xiaomi/aiot-edge-security.git
+   cd aiot-edge-security

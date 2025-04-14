@@ -1,0 +1,39 @@
+# ThingsBoard Edge 连接配置
+thingsboard:
+  # 服务连接配置
+  url: http://localhost:8080  # ThingsBoard服务地址
+  ws_url: ws://localhost:8080/ws  # WebSocket连接地址
+
+  # 认证配置
+  auth:
+    username: tenant@thingsboard.org  # 用户名
+    password: tenant  # 密码
+    token: ""  # JWT令牌（如果使用token认证）
+
+  # 设备配置
+  device:
+    type: "edge-gateway"  # 设备类型
+    name: "xiaomi-edge-01"  # 设备名称
+    profile: "default"  # 设备配置文件
+
+  # 数据上报配置
+  telemetry:
+    buffer_size: 1000  # 遥测数据缓冲区大小
+    batch_size: 100  # 批处理大小
+    interval: 5  # 数据上报间隔（秒）
+
+  # 安全配置
+  security:
+    ssl_verify: true  # 是否验证SSL证书
+    cert_file: ""  # 客户端证书文件路径
+    key_file: ""  # 客户端密钥文件路径
+
+  # 重连配置
+  reconnect:
+    max_retries: 5  # 最大重试次数
+    interval: 10  # 重连间隔（秒）
+
+  # 日志配置
+  logging:
+    level: INFO  # 日志级别：DEBUG, INFO, WARN, ERROR
+    file: logs/thingsboard.log  # 日志文件路径

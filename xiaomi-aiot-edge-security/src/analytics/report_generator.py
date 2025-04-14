@@ -391,3 +391,8 @@ class ReportGenerator:
                         f.write("\n3. 响应性能分析结论: 系统整体响应时间较长，可能影响用户体验，建议进一步优化处理流程。\n")
                     else:
                         f.write("\n3. 响应性能分析结论: 系统响应时间表现良好，各设备类型均保持在可接受范围内。\n")
+        except Exception as e:
+                    self.logger.error(f"生成报告结论时出错: {str(e)}")
+        finally:
+                if 'f' in locals():
+                    f.close()

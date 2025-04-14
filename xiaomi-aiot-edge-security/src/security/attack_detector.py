@@ -46,6 +46,14 @@ class AttackDetector:
         # 初始化异常行为检测器
         self.register_detector("anomaly", self._detect_anomaly_behavior)
     
+    def add_alert_callback(self, callback: Callable):
+        """添加告警回调函数
+        
+        Args:
+            callback: 回调函数
+        """
+        self.alert_callbacks.append(callback)
+    
     def register_detector(self, detector_name: str, detector_func: Callable):
         """
         注册攻击检测器
@@ -136,7 +144,8 @@ class AttackDetector:
                 # 执行所有注册的检测器
                 for detector_name, detector_func in self.detectors.items():
                     try:
-                        detector_func()
+                        attack_info = {'device_id': attack_info.get('device_id'), 'request_count': attack_info.get('request_count', 0), 'time_window': attack_info.get('time_window', self.config.get('detection', {}).get('ddos', {}).get('time_window', 60))}
+                        detector_func(attack_info)
                     except Exception as e:
                         self.logger.error(f"检测器 {detector_name} 执行异常: {str(e)}")
                 
@@ -165,122 +174,133 @@ class AttackDetector:
             except Exception as e:
                 self.logger.error(f"警报回调函数执行异常: {str(e)}")
     
-    def _detect_ddos_attack(self):
-        """检测DDoS攻击"""
-        # 实现DDoS攻击检测逻辑
-        threshold = self.config.get('ddos_threshold', 100)
-        window_size = self.config.get('ddos_window', 60)  # 窗口大小，单位秒
-        current_time = time.time()
+    def _detect_ddos_attack(self, attack_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """检测DDoS攻击
         
-        for device_id, device_data in self.device_data.items():
-            # 计算窗口内的请求数
-            request_count = 0
-            for record in device_data['data_history']:
-                if current_time - record['timestamp'] <= window_size:
-                    request_count += 1
+        Args:
+            attack_info: 攻击信息
             
-            # 如果请求数超过阈值，触发警报
-            if request_count > threshold:
-                self.trigger_alert({
-                    'type': 'ddos',
-                    'device_id': device_id,
-                    'description': f"DDoS攻击: {request_count} 个请求在 {window_size} 秒内",
-                    'request_count': request_count,
-                    'threshold': threshold,
-                    'window_size': window_size
-                })
-    
-    def _detect_mitm_attack(self):
-        """检测中间人攻击"""
-        # 实现中间人攻击检测逻辑
-        # 检查通信延迟异常、证书变化等
-        for device_id, device_data in self.device_data.items():
-            # 获取最近的数据记录
-            if not device_data['data_history']:
-                continue
-            
-            latest_data = device_data['data_history'][-1]['data']
-            
-            # 检查是否存在证书警告
-            if latest_data.get('ssl_warning', False):
-                self.trigger_alert({
-                    'type': 'mitm',
-                    'device_id': device_id,
-                    'description': "可能存在中间人攻击: SSL证书验证失败",
-                    'ssl_warning': True
-                })
-                
-            # 检查通信延迟异常
-            if 'latency' in latest_data and 'avg_latency' in device_data:
-                latency = latest_data['latency']
-                avg_latency = device_data['avg_latency']
-                threshold = self.config.get('mitm_latency_threshold', 3.0)  # 延迟倍数阈值
-                
-                if latency > avg_latency * threshold:
-                    self.trigger_alert({
-                        'type': 'mitm',
-                        'device_id': device_id,
-                        'description': f"可能存在中间人攻击: 通信延迟异常 ({latency:.2f}ms > {avg_latency:.2f}ms)",
-                        'latency': latency,
-                        'avg_latency': avg_latency,
-                        'threshold': threshold
-                    })
-    
-    def _detect_firmware_attack(self):
-        """检测固件攻击"""
-        # 实现固件攻击检测逻辑
-        for device_id, device_data in self.device_data.items():
-            # 获取最近的数据记录
-            if not device_data['data_history']:
-                continue
-            
-            latest_data = device_data['data_history'][-1]['data']
-            
-            # 检查固件版本变化
-            if 'firmware_version' in latest_data and 'last_firmware_version' in device_data:
-                current_version = latest_data['firmware_version']
-                last_version = device_data['last_firmware_version']
-                
-                if current_version != last_version:
-                    # 检查是否为预期的更新
-                    expected_update = self.config.get('expected_firmware_updates', {})
-                    if device_id not in expected_update or expected_update[device_id] != current_version:
-                        self.trigger_alert({
-                            'type': 'firmware',
-                            'device_id': device_id,
-                            'description': f"可能存在固件攻击: 固件版本意外变化 ({last_version} -> {current_version})",
-                            'current_version': current_version,
-                            'last_version': last_version
-                        })
-            
-            # 更新记录的固件版本
-            if 'firmware_version' in latest_data:
-                device_data['last_firmware_version'] = latest_data['firmware_version']
-    
-    def _detect_credential_attack(self):
-        """检测凭证攻击"""
-        # 实现凭证攻击检测逻辑
-        threshold = self.config.get('failed_auth_threshold', 5)
-        window_size = self.config.get('failed_auth_window', 300)  # 窗口大小，单位秒
-        current_time = time.time()
+        Returns:
+            检测结果
+        """
+        # 获取配置参数
+        ddos_config = self.config.get('detection', {}).get('ddos', {})
+        threshold = ddos_config.get('request_rate_threshold', 100)
+        window_size = ddos_config.get('time_window', 60)
         
-        for device_id, device_data in self.device_data.items():
-            # 如果设备记录了认证失败
-            if 'auth_failures' in device_data:
-                # 筛选窗口内的认证失败
-                recent_failures = [f for f in device_data['auth_failures'] if current_time - f <= window_size]
-                device_data['auth_failures'] = recent_failures
-                
-                # 如果失败次数超过阈值，触发警报
-                if len(recent_failures) >= threshold:
-                    self.trigger_alert({
-                        'type': 'credential',
-                        'device_id': device_id,
-                        'description': f"可能存在凭证攻击: {len(recent_failures)} 次认证失败在 {window_size} 秒内",
-                        'failure_count': len(recent_failures),
-                        'threshold': threshold,
-                        'window_size': window_size
-                    })
+        # 获取攻击信息
+        device_id = attack_info.get('device_id')
+        request_count = attack_info.get('request_count', 0)
+        time_window = attack_info.get('time_window', window_size)
+        
+        # 如果请求数超过阈值，触发警报
+        if request_count > threshold:
+            alert_info = {
+                'type': 'ddos',
+                'device_id': device_id,
+                'description': f"DDoS攻击: {request_count} 个请求在 {time_window} 秒内",
+                'request_count': request_count,
+                'threshold': threshold,
+                'time_window': time_window
+            }
+            self.trigger_alert(alert_info)
+            return alert_info
+        
+        return None
+    
+    def _detect_mitm_attack(self, attack_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """检测中间人攻击
+        
+        Args:
+            attack_info: 攻击信息
+            
+        Returns:
+            检测结果
+        """
+        # 获取配置参数
+        mitm_config = self.config.get('detection', {}).get('mitm', {})
+        threshold = mitm_config.get('interception_rate_threshold', 10)
+        window_size = mitm_config.get('time_window', 60)
+        
+        # 获取攻击信息
+        device_id = attack_info.get('device_id')
+        interception_count = attack_info.get('interception_count', 0)
+        time_window = attack_info.get('time_window', window_size)
+        
+        # 如果拦截数超过阈值，触发警报
+        if interception_count > threshold:
+            alert_info = {
+                'type': 'mitm',
+                'device_id': device_id,
+                'description': f"中间人攻击: {interception_count} 次拦截在 {time_window} 秒内",
+                'timestamp': time.time()
+            }
+            self.trigger_alert(alert_info)
+            return alert_info
+        
+        return None
+    
+    def _detect_firmware_attack(self, attack_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """检测固件攻击
+        
+        Args:
+            attack_info: 攻击信息
+            
+        Returns:
+            检测结果
+        """
+        # 获取配置参数
+        firmware_config = self.config.get('detection', {}).get('firmware', {})
+        threshold = firmware_config.get('change_rate_threshold', 10)
+        window_size = firmware_config.get('time_window', 60)
+        
+        # 获取攻击信息
+        device_id = attack_info.get('device_id')
+        change_count = attack_info.get('change_count', 0)
+        time_window = attack_info.get('time_window', window_size)
+        
+        # 如果变化数超过阈值，触发警报
+        if change_count > threshold:
+            alert_info = {
+                'type': 'firmware',
+                'device_id': device_id,
+                'description': f"固件攻击: {change_count} 次变化在 {time_window} 秒内",
+                'timestamp': time.time()
+            }
+            self.trigger_alert(alert_info)
+            return alert_info
+        return None
+    
+    def _detect_credential_attack(self, attack_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """检测凭证攻击
+        
+        Args:
+            attack_info: 攻击信息
+            
+        Returns:
+            检测结果
+        """
+        # 获取配置参数
+        credential_config = self.config.get('detection', {}).get('credential', {})
+        threshold = credential_config.get('failed_attempts_threshold', 5)
+        window_size = credential_config.get('time_window', 60)
+        
+        # 获取攻击信息
+        device_id = attack_info.get('device_id')
+        failed_attempts = attack_info.get('failed_attempts', 0)
+        time_window = attack_info.get('time_window', window_size)
+        
+        # 如果失败尝试数超过阈值，触发警报
+        if failed_attempts > threshold:
+            alert_info = {
+                'type': 'credential',
+                'device_id': device_id,
+                'description': f"凭证攻击: {failed_attempts} 次失败尝试在 {time_window} 秒内",
+                'timestamp': time.time()
+            }
+            self.trigger_alert(alert_info)
+            return alert_info
+        return None
     
     def _detect_anomaly_behavior(self):
         """检测异常行为"""
@@ -343,7 +363,8 @@ class AttackDetector:
         self.device_data[device_id]['auth_failures'].append(time.time())
         
         # 检查是否需要立即触发警报
-        self._detect_credential_attack()
+        attack_info = {'device_id': device_id, 'failed_attempts': attack_params.get('failure_count', 0), 'time_window': attack_params.get('time_span', 60)}
+        self._detect_credential_attack(attack_info)
     
     def simulate_attack(self, attack_type: str, device_id: str, attack_params: Dict[str, Any] = None):
         """
@@ -382,7 +403,8 @@ class AttackDetector:
                 })
             
             # 触发检测
-            self._detect_ddos_attack()
+            attack_info = {'device_id': device_id, 'request_count': request_count, 'time_window': window_size}
+            self._detect_ddos_attack(attack_info)
             
         elif attack_type == "mitm":
             # 模拟中间人攻击
@@ -410,7 +432,8 @@ class AttackDetector:
             })
             
             # 触发检测
-            self._detect_mitm_attack()
+            attack_info = {'device_id': device_id, 'interception_count': attack_params.get('interception_count', 0), 'time_window': window_size}
+            self._detect_mitm_attack(attack_info)
             
         elif attack_type == "firmware":
             # 模拟固件攻击
@@ -434,7 +457,8 @@ class AttackDetector:
             })
             
             # 触发检测
-            self._detect_firmware_attack()
+            attack_info = {'device_id': device_id, 'change_count': attack_params.get('change_count', 0), 'time_window': window_size}
+            self._detect_firmware_attack(attack_info)
             
         elif attack_type == "credential":
             # 模拟凭证攻击
@@ -460,7 +484,8 @@ class AttackDetector:
             self.device_data[device_id]['auth_failures'] = auth_failures
             
             # 触发检测
-            self._detect_credential_attack()
+            attack_info = {'device_id': device_id, 'failed_attempts': failure_count, 'time_window': time_span}
+            self._detect_credential_attack(attack_info)
             
         elif attack_type == "anomaly":
             # 模拟异常行为
@@ -497,3 +522,30 @@ class AttackDetector:
         
         else:
             self.logger.error(f"未知的攻击类型: {attack_type}")
+
+    def detect_attacks(self, attack_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """检测攻击
+        
+        Args:
+            attack_info: 攻击信息
+            
+        Returns:
+            检测结果，如果检测到攻击则返回攻击详情，否则返回None
+        """
+        attack_type = attack_info.get('type')
+        if attack_type not in self.detectors:
+            self.logger.warning(f"未知的攻击类型: {attack_type}")
+            return None
+            
+        detector = self.detectors[attack_type]
+        result = detector(attack_info)
+        
+        if result:
+            # 触发告警回调
+            for callback in self.alert_callbacks:
+                try:
+                    callback(result)
+                except Exception as e:
+                    self.logger.error(f"执行告警回调时出错: {str(e)}")
+        
+        return result

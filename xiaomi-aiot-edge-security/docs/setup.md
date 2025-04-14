@@ -43,8 +43,8 @@ docker ps | grep thingsboard
 ## 克隆仓库
 
 ```bash
-git clone https://github.com/your-username/xiaomi-aiot-edge-security.git
-cd xiaomi-aiot-edge-security
+git clone https://github.com/xiaomi/aiot-edge-security.git
+cd aiot-edge-security
 ```
 
 ## 安装依赖

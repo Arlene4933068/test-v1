@@ -7,7 +7,7 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 from .device_manager import DeviceManager
 from .security_config import SecurityConfig
 from .visualization import Visualization
-from ..utils.logger import get_logger
+from src.utils.logger import get_logger
 
 app = Flask(__name__, static_url_path='/static', static_folder='static', template_folder='templates')
 

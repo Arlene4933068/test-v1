@@ -1,0 +1,93 @@
+# 安全配置文件
+
+# 检测器配置
+detection:
+  # 检测间隔（秒）
+  interval: 1.0
+  
+  # DDoS攻击检测
+  ddos:
+    # 请求速率阈值（每秒请求数）
+    request_rate_threshold: 100
+    # 时间窗口（秒）
+    time_window: 60
+    # 最大连接数
+    max_connections: 1000
+  
+  # 中间人攻击检测
+  mitm:
+    # 数据完整性检查间隔（秒）
+    integrity_check_interval: 5
+    # 数据偏差阈值
+    data_deviation_threshold: 0.2
+  
+  # 凭证攻击检测
+  credential:
+    # 最大失败尝试次数
+    max_failed_attempts: 5
+    # 锁定时间（秒）
+    lockout_duration: 300
+    # 检测时间窗口（秒）
+    detection_window: 3600
+  
+  # 固件攻击检测
+  firmware:
+    # 固件完整性检查间隔（秒）
+    integrity_check_interval: 3600
+    # 允许的版本列表
+    allowed_versions:
+      - "1.0.0"
+      - "1.0.1"
+      - "1.1.0"
+
+# 防护配置
+protection:
+  # DDoS防护
+  ddos:
+    # 限流策略
+    rate_limit:
+      # 每秒最大请求数
+      requests_per_second: 50
+      # 突发请求数
+      burst: 100
+    # IP黑名单超时时间（秒）
+    blacklist_timeout: 3600
+  
+  # 中间人攻击防护
+  mitm:
+    # 数据加密算法
+    encryption_algorithm: "AES-256-GCM"
+    # 密钥轮换间隔（秒）
+    key_rotation_interval: 86400
+  
+  # 凭证攻击防护
+  credential:
+    # 密码策略
+    password_policy:
+      min_length: 8
+      require_uppercase: true
+      require_lowercase: true
+      require_numbers: true
+      require_special_chars: true
+    # 双因素认证
+    two_factor_auth: true
+  
+  # 固件攻击防护
+  firmware:
+    # 固件签名验证
+    signature_verification: true
+    # 安全启动
+    secure_boot: true
+    # 回滚保护
+    rollback_protection: true
+
+# 日志配置
+logging:
+  # 日志级别
+  level: "INFO"
+  # 日志文件路径
+  file_path: "logs/security/security.log"
+  # 日志保留天数
+  retention_days: 30
+  # 日志轮换大小（MB）
+  rotation_size: 10

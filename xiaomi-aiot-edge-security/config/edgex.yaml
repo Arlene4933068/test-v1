@@ -1,0 +1,34 @@
+# EdgeX Foundry 连接配置
+edgex:
+  # Core Services
+  url: http://localhost:48080  # Core Data服务地址
+  metadata_url: http://localhost:48081  # Core Metadata服务地址
+  command_url: http://localhost:48082  # Core Command服务地址
+  
+  # 认证配置
+  auth:
+    enabled: false  # 是否启用认证
+    token: ""  # 认证令牌
+
+  # 服务健康检查配置
+  health_check:
+    interval: 30  # 健康检查间隔（秒）
+    timeout: 5  # 请求超时时间（秒）
+    retries: 3  # 重试次数
+
+  # 数据采集配置
+  data:
+    buffer_size: 1000  # 数据缓冲区大小
+    batch_size: 100  # 批处理大小
+    interval: 5  # 数据采集间隔（秒）
+
+  # 日志配置
+  logging:
+    level: INFO  # 日志级别：DEBUG, INFO, WARN, ERROR
+    file: logs/edgex.log  # 日志文件路径
+
+  # 安全配置
+  security:
+    ssl_verify: true  # 是否验证SSL证书
+    cert_file: ""  # 客户端证书文件路径
+    key_file: ""  # 客户端密钥文件路径

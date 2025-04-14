@@ -1,0 +1,111 @@
+"""
+攻击数据可视化模块 - 使用图表展示攻击类型、频率和影响
+"""
+import time
+import logging
+from typing import Dict, List
+import matplotlib.pyplot as plt
+import pandas as pd
+
+class AttackVisualizer:
+    """攻击数据可视化类"""
+    
+    def __init__(self, detector: Optional[Any] = None):
+        self.logger = logging.getLogger(__name__)
+        self.attack_data = []
+        self.simulation_data = []
+        self.fig, self.ax = plt.subplots(figsize=(10, 6))
+        self.detector = detector
+        if detector:
+            detector.add_alert_callback(self.add_attack_data)
+        
+    def add_attack_data(self, attack_info: Dict[str, Any]):
+        """添加攻击数据"""
+        self.attack_data.append({
+            'timestamp': attack_info.get('timestamp', time.time()),
+            'type': attack_info['type'],
+            'device_id': attack_info.get('device_id', 'unknown'),
+            'severity': attack_info.get('severity', 50)
+        })
+        self.logger.info(f"记录攻击数据: {attack_info['type']}")
+    
+    def show_attack_types(self):
+        """显示攻击类型分布"""
+        df = pd.DataFrame(self.attack_data)
+        type_counts = df['type'].value_counts()
+        
+        self.ax.clear()
+        type_counts.plot(kind='bar', ax=self.ax)
+        self.ax.set_title('攻击类型分布')
+        self.ax.set_xlabel('攻击类型')
+        self.ax.set_ylabel('次数')
+        plt.show()
+    
+    def show_attack_timeline(self):
+        """显示攻击时间线"""
+        df = pd.DataFrame(self.attack_data)
+        df['time'] = pd.to_datetime(df['timestamp'], unit='s')
+        
+        self.ax.clear()
+        for attack_type in df['type'].unique():
+            subset = df[df['type'] == attack_type]
+            self.ax.scatter(subset['time'], subset['type'], label=attack_type)
+        
+        self.ax.set_title('攻击时间线')
+        self.ax.set_xlabel('时间')
+        self.ax.set_ylabel('攻击类型')
+        self.ax.legend()
+        plt.show()
+    
+    def show_attack_severity(self):
+        """显示攻击严重程度"""
+        df = pd.DataFrame(self.attack_data)
+        
+        self.ax.clear()
+        df.boxplot(column='severity', by='type', ax=self.ax)
+        self.ax.set_title('攻击严重程度')
+        self.ax.set_xlabel('攻击类型')
+        self.ax.set_ylabel('严重程度')
+        plt.suptitle('')
+        plt.show()
+        
+    def add_simulation_data(self, attack_info: Dict[str, Any]):
+        """添加仿真攻击数据"""
+        self.simulation_data.append({
+            'timestamp': attack_info.get('timestamp', time.time()),
+            'type': attack_info['type'],
+            'device_id': attack_info.get('device_id', 'unknown'),
+            'params': attack_info.get('params', {})
+        })
+        self.logger.info(f"记录仿真攻击数据: {attack_info['type']}")
+    
+    def show_simulation_stats(self):
+        """显示仿真攻击统计数据"""
+        df = pd.DataFrame(self.simulation_data)
+        
+        self.ax.clear()
+        df['type'].value_counts().plot(kind='pie', autopct='%1.1f%%', ax=self.ax)
+        self.ax.set_title('仿真攻击类型分布')
+        plt.show()
+        
+        # 显示仿真参数统计
+        for attack_type in df['type'].unique():
+            subset = df[df['type'] == attack_type]
+            print(f"\n攻击类型: {attack_type}")
+            print(f"模拟次数: {len(subset)}")
+            print("常用参数:")
+            for param in subset.iloc[0]['params']:
+                print(f"  {param}: {subset.iloc[0]['params'][param]}")
+                
+    def connect_to_detector(self, detector: Any):
+        """连接攻击检测器"""
+        self.detector = detector
+        detector.add_alert_callback(self.add_attack_data)
+        detector.simulate_attack = self.add_simulation_data
+    
+    def update_visualization(self):
+        """更新可视化界面以展示最新的攻击数据"""
+        self.show_attack_types()
+        self.show_attack_timeline()
+        self.show_attack_severity()
+        self.show_simulation_stats()

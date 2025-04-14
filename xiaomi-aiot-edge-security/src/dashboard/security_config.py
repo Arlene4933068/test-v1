@@ -3,7 +3,7 @@ import os
 import yaml
 import json
 import time
-from ..utils.logger import get_logger
+from src.utils.logger import get_logger
 
 class SecurityConfig:
     """安全配置管理：管理安全防护规则和配置"""

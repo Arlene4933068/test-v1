@@ -1,4 +1,11 @@
-pyyaml==6.0.1
+# 基础依赖
+scapy>=2.4.5
+pyyaml>=5.4.1
+
+# 可视化依赖
+dash>=2.9.0
+plotly>=5.13.0
+pandas>=1.5.3
 python-dotenv==1.0.0
 requests==2.31.0
 pyserial==3.5

@@ -1,4 +1,97 @@
-# 生成随机录制时间
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+摄像头设备模拟器
+模拟小米AIoT摄像头设备
+"""
+
+import random
+import time
+import uuid
+import math
+from datetime import datetime, timedelta
+
+from .simulator_base import DeviceSimulator
+
+class CameraSimulator(DeviceSimulator):
+    """摄像头设备模拟器类"""
+    
+    def __init__(self, config_path=None):
+        """
+        初始化摄像头模拟器
+        
+        Args:
+            config_path (str, optional): 配置文件路径. 默认为None.
+        """
+        super().__init__("camera", config_path)
+        
+        # 摄像头特有属性
+        self.camera_model = self.device_config.get("model", "Xiaomi AIoT Camera Pro")
+        self.firmware_version = self.device_config.get("firmware_version", "2.3.7")
+        
+        # 视频参数
+        self.resolution = self.device_config.get("resolution", "1080p")  # 分辨率
+        self.fps = self.device_config.get("fps", 30)  # 帧率
+        self.bitrate = self.device_config.get("bitrate", 2000)  # Kbps
+        self.encoding = self.device_config.get("encoding", "H.264")  # 编码格式
+        self.night_vision = self.device_config.get("night_vision", True)  # 夜视功能
+        self.wide_dynamic_range = self.device_config.get("wide_dynamic_range", True)  # 宽动态范围
+        
+        # 当前状态
+        self.is_streaming = False  # 是否正在流式传输
+        self.is_recording = False  # 是否正在录制
+        self.recording_start_time = None  # 录制开始时间
+        self.ptz_enabled = self.device_config.get("ptz_enabled", False)  # 是否支持云台
+        self.current_position = {
+            "pan": 0,  # 水平旋转角度 (-180 到 180)
+            "tilt": 0,  # 垂直旋转角度 (-90 到 90)
+            "zoom": 1.0  # 缩放比例 (1.0 到 10.0)
+        } if self.ptz_enabled else None
+        
+        # 连接和存储
+        self.wifi_connected = True
+        self.wifi_signal_strength = random.randint(70, 100)  # 0-100
+        self.storage_total = self.device_config.get("storage", 32) * 1024  # MB
+        self.storage_used = 0  # MB
+        
+        # 事件检测
+        self.motion_detection = self.device_config.get("motion_detection", True)
+        self.face_recognition = self.device_config.get("face_recognition", False)
+        self.object_detection = self.device_config.get("object_detection", False)
+        self.detected_events = []
+        
+        # 流量统计
+        self.bandwidth_usage = 0.0  # Kbps
+        self.total_data_sent = 0.0  # MB
+        self.total_data_received = 0.0  # MB
+        
+        # 性能指标
+        self.cpu_usage = 0.0
+        self.memory_usage = 0.0
+        self.temperature = random.uniform(35.0, 45.0)  # 摄像头往往会发热
+        self.uptime = 0
+        
+        # 电源状态
+        self.power_source = self.device_config.get("power_source", "AC")  # AC或Battery
+        self.battery_level = 100 if self.power_source == "Battery" else None
+        
+        # 安全设置
+        self.encryption_enabled = self.security_settings.get("encryption_enabled", True)
+        self.auth_required = self.security_settings.get("auth_required", True)
+        self.access_token = self.security_settings.get("access_token", str(uuid.uuid4()))
+        
+        # 初始化存储
+        self._initialize_storage()
+        
+        self.logger.info(f"摄像头设备 {self.device_id} 初始化完成, 型号: {self.camera_model}")
+    
+    def _initialize_storage(self):
+        """初始化模拟存储"""
+        self.storage_used = random.uniform(0.1, 0.4) * self.storage_total
+        num_recordings = random.randint(5, 20)
+        
+        for i in range(num_recordings):
+            # 生成随机录制时间
             days_ago = random.randint(0, 30)
             hours_ago = random.randint(0, 23)
             minutes_ago = random.randint(0, 59)
@@ -400,6 +493,98 @@
         if self.is_recording:
             self.logger.warning(f"设备 {self.device_id} 已经在录制中")
             return False
+    
+    def toggle_detection_features(self, motion=None, face=None, object_detection=None):
+        """切换检测功能"""
+        changes = []
+        
+        # 更新运动检测
+        if motion is not None:
+            if isinstance(motion, bool):
+                old_motion = self.motion_detection
+                self.motion_detection = motion
+                changes.append(f"运动检测: {'开启' if motion else '关闭'}")
+            else:
+                self.logger.warning(f"设备 {self.device_id} 无效的运动检测值: {motion}")
+        
+        # 更新人脸识别
+        if face is not None:
+            if isinstance(face, bool):
+                old_face = self.face_recognition
+                self.face_recognition = face
+                changes.append(f"人脸识别: {'开启' if face else '关闭'}")
+            else:
+                self.logger.warning(f"设备 {self.device_id} 无效的人脸识别值: {face}")
+        
+        # 更新物体检测
+        if object_detection is not None:
+            if isinstance(object_detection, bool):
+                old_object = self.object_detection
+                self.object_detection = object_detection
+                changes.append(f"物体检测: {'开启' if object_detection else '关闭'}")
+            else:
+                self.logger.warning(f"设备 {self.device_id} 无效的物体检测值: {object_detection}")
+        
+        if changes:
+            self.logger.info(f"设备 {self.device_id} 检测功能已更新: {', '.join(changes)}")
+            return True
+        
+        return False
+    
+    def get_detected_events(self, limit=10, event_type=None, start_time=None, end_time=None):
+        """获取检测到的事件"""
+        # 过滤事件
+        filtered_events = self.detected_events
+        
+        # 按事件类型过滤
+        if event_type:
+            filtered_events = [e for e in filtered_events if e["type"] == event_type]
+        
+        # 按时间范围过滤
+        if start_time:
+            start_dt = datetime.fromisoformat(start_time) if isinstance(start_time, str) else start_time
+            filtered_events = [e for e in filtered_events if datetime.fromisoformat(e["time"]) >= start_dt]
+        
+        if end_time:
+            end_dt = datetime.fromisoformat(end_time) if isinstance(end_time, str) else end_time
+            filtered_events = [e for e in filtered_events if datetime.fromisoformat(e["time"]) <= end_dt]
+        
+        # 排序（最新的在前）
+        sorted_events = sorted(filtered_events, key=lambda e: e["time"], reverse=True)
+        
+        # 限制数量
+        return sorted_events[:limit]
+    
+    def get_network_stats(self):
+        """获取网络统计信息"""
+        return {
+            "wifi_connected": self.wifi_connected,
+            "signal_strength": self.wifi_signal_strength if self.wifi_connected else 0,
+            "bandwidth": {
+                "upload": round(self.bandwidth_usage, 2),
+                "download": round(self.bandwidth_usage * 0.1, 2)
+            },
+            "data_usage": {
+                "sent": round(self.total_data_sent, 2),
+                "received": round(self.total_data_received, 2)
+            }
+        }
+    
+    def toggle_night_vision(self, enabled=None):
+        """切换夜视功能"""
+        if enabled is None:
+            # 切换当前状态
+            self.night_vision = not self.night_vision
+        else:
+            self.night_vision = enabled
+        
+        self.logger.info(f"设备 {self.device_id} 夜视功能: {'开启' if self.night_vision else '关闭'}")
+        return self.night_vision
+        
+    def _send_telemetry(self, data):
+        """发送遥测数据（需要在子类中实现）"""
+        # 这个方法应该在继承类中被实现，用于发送遥测数据到服务器
+        pass
         
         # 检查存储空间
         storage_percent = (self.storage_used / self.storage_total) * 100
@@ -843,188 +1028,3 @@
             return True
         
         return False
-    
-    def toggle_detection_features(self, motion=None, face=None, object_detection=None):
-        """切换检测功能"""
-        changes = []
-        
-        # 更新运动检测
-        if motion is not None:
-            if isinstance(motion, bool):
-                old_motion = self.motion_detection
-                self.motion_detection = motion
-                changes.append(f"运动检测: {'开启' if motion else '关闭'}")
-            else:
-                self.logger.warning(f"设备 {self.device_id} 无效的运动检测值: {motion}")
-        
-        # 更新人脸识别
-        if face is not None:
-            if isinstance(face, bool):
-                old_face = self.face_recognition
-                self.face_recognition = face
-                changes.append(f"人脸识别: {'开启' if face else '关闭'}")
-            else:
-                self.logger.warning(f"设备 {self.device_id} 无效的人脸识别值: {face}")
-        
-        # 更新物体检测
-        if object_detection is not None:
-            if isinstance(object_detection, bool):
-                old_object = self.object_detection
-                self.object_detection = object_detection
-                changes.append(f"物体检测: {'开启' if object_detection else '关闭'}")
-            else:
-                self.logger.warning(f"设备 {self.device_id} 无效的物体检测值: {object_detection}")
-        
-        if changes:
-            self.logger.info(f"设备 {self.device_id} 检测功能已更新: {', '.join(changes)}")
-            return True
-        
-        return False
-    
-    def get_detected_events(self, limit=10, event_type=None, start_time=None, end_time=None):
-        """获取检测到的事件"""
-        # 过滤事件
-        filtered_events = self.detected_events
-        
-        # 按事件类型过滤
-        if event_type:
-            filtered_events = [e for e in filtered_events if e["type"] == event_type]
-        
-        # 按时间范围过滤
-        if start_time:
-            start_dt = datetime.fromisoformat(start_time) if isinstance(start_time, str) else start_time
-            filtered_events = [e for e in filtered_events if datetime.fromisoformat(e["time"]) >= start_dt]
-        
-        if end_time:
-            end_dt = datetime.fromisoformat(end_time) if isinstance(end_time, str) else end_time
-            filtered_events = [e for e in filtered_events if datetime.fromisoformat(e["time"]) <= end_dt]
-        
-        # 排序（最新的在前）
-        sorted_events = sorted(filtered_events, key=lambda e: e["time"], reverse=True)
-        
-        # 限制数量
-        return sorted_events[:limit]
-    
-    def get_network_stats(self):
-        """获取网络统计信息"""
-        return {
-            "wifi_connected": self.wifi_connected,
-            "signal_strength": self.wifi_signal_strength if self.wifi_connected else 0,
-            "bandwidth": {
-                "upload": round(self.bandwidth_usage, 2),
-                "download": round(self.bandwidth_usage * 0.1, 2)
-            },
-            "data_usage": {
-                "sent": round(self.total_data_sent, 2),
-                "received": round(self.total_data_received, 2)
-            }
-        }
-    
-    def toggle_night_vision(self, enabled=None):
-        """切换夜视功能"""
-        if enabled is None:
-            # 切换当前状态
-            self.night_vision = not self.night_vision
-        else:
-            self.night_vision = enabled
-        
-        self.logger.info(f"设备 {self.device_id} 夜视功能: {'开启' if self.night_vision else '关闭'}")
-        return self.night_vision#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-摄像头设备模拟器
-模拟小米AIoT摄像头设备
-"""
-
-import random
-import time
-import uuid
-import math
-from datetime import datetime, timedelta
-
-from .simulator_base import DeviceSimulator
-
-class CameraSimulator(DeviceSimulator):
-    """摄像头设备模拟器类"""
-    
-    def __init__(self, config_path=None):
-        """
-        初始化摄像头模拟器
-        
-        Args:
-            config_path (str, optional): 配置文件路径. 默认为None.
-        """
-        super().__init__("camera", config_path)
-        
-        # 摄像头特有属性
-        self.camera_model = self.device_config.get("model", "Xiaomi AIoT Camera Pro")
-        self.firmware_version = self.device_config.get("firmware_version", "2.3.7")
-        
-        # 视频参数
-        self.resolution = self.device_config.get("resolution", "1080p")  # 分辨率
-        self.fps = self.device_config.get("fps", 30)  # 帧率
-        self.bitrate = self.device_config.get("bitrate", 2000)  # Kbps
-        self.encoding = self.device_config.get("encoding", "H.264")  # 编码格式
-        self.night_vision = self.device_config.get("night_vision", True)  # 夜视功能
-        self.wide_dynamic_range = self.device_config.get("wide_dynamic_range", True)  # 宽动态范围
-        
-        # 当前状态
-        self.is_streaming = False  # 是否正在流式传输
-        self.is_recording = False  # 是否正在录制
-        self.recording_start_time = None  # 录制开始时间
-        self.ptz_enabled = self.device_config.get("ptz_enabled", False)  # 是否支持云台
-        self.current_position = {
-            "pan": 0,  # 水平旋转角度 (-180 到 180)
-            "tilt": 0,  # 垂直旋转角度 (-90 到 90)
-            "zoom": 1.0  # 缩放比例 (1.0 到 10.0)
-        } if self.ptz_enabled else None
-        
-        # 连接和存储
-        self.wifi_connected = True
-        self.wifi_signal_strength = random.randint(70, 100)  # 0-100
-        self.storage_total = self.device_config.get("storage", 32) * 1024  # MB
-        self.storage_used = 0  # MB
-        
-        # 事件检测
-        self.motion_detection = self.device_config.get("motion_detection", True)
-        self.face_recognition = self.device_config.get("face_recognition", False)
-        self.object_detection = self.device_config.get("object_detection", False)
-        self.detected_events = []
-        
-        # 流量统计
-        self.bandwidth_usage = 0.0  # Kbps
-        self.total_data_sent = 0.0  # MB
-        self.total_data_received = 0.0  # MB
-        
-        # 性能指标
-        self.cpu_usage = 0.0
-        self.memory_usage = 0.0
-        self.temperature = random.uniform(35.0, 45.0)  # 摄像头往往会发热
-        self.uptime = 0
-        
-        # 电源状态
-        self.power_source = self.device_config.get("power_source", "AC")  # AC或Battery
-        self.battery_level = 100 if self.power_source == "Battery" else None
-        
-        # 安全设置
-        self.encryption_enabled = self.security_settings.get("encryption_enabled", True)
-        self.auth_required = self.security_settings.get("auth_required", True)
-        self.access_token = self.security_settings.get("access_token", str(uuid.uuid4()))
-        
-        # 初始化存储
-        self._initialize_storage()
-        
-        self.logger.info(f"摄像头设备 {self.device_id} 初始化完成, 型号: {self.camera_model}")
-    
-    def _initialize_storage(self):
-        """初始化模拟存储"""
-        # 随机初始化已用存储空间
-        self.storage_used = random.uniform(0.1, 0.4) * self.storage_total
-        
-        # 初始化一些随机事件和录像
-        num_recordings = random.randint(5, 20)
-        
-        for i in range(num_recordings):
-            # 生成随机录制时间
-            days_ago = random.randint(0, 30)
-            hours_ago = random.randint(0, 23)

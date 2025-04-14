@@ -1,18 +1,18 @@
 # src/dashboard/device_manager.py
 import uuid
 import time
-from ..utils.logger import get_logger
-from ..platform_connector.edgex_connector import EdgeXConnector
-from ..platform_connector.thingsboard_connector import ThingsBoardConnector
+from src.utils.logger import get_logger
+from src.platform_connector.edgex_connector import EdgeXConnector
+from src.platform_connector.thingsboard_connector import ThingsBoardConnector
 
 class DeviceManager:
     """设备管理器：管理边缘设备的创建、删除和监控"""
     
     def __init__(self, config=None):
         self.logger = get_logger("DeviceManager")
-        self.config = config
-        self.edgex_connector = EdgeXConnector(config)
-        self.thingsboard_connector = ThingsBoardConnector(config)
+        self.config = config or {}
+        self.edgex_connector = EdgeXConnector(self.config)
+        self.thingsboard_connector = ThingsBoardConnector(self.config)
         self.devices = {}  # 本地设备缓存
         self.logger.info("设备管理器初始化完成")
     

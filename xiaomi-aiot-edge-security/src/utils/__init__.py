@@ -6,7 +6,7 @@
 """
 
 from .config import ConfigManager, load_config
-from .logger import setup_logging, get_logger
+from .logger import setup_logger, get_logger
 from .crypto import encrypt_data, decrypt_data, generate_key_pair, sign_data, verify_signature
 from .protocol import (
     ProtocolHandler, 

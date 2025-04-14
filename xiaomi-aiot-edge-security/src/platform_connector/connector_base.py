@@ -17,8 +17,12 @@ from ..utils.logger import setup_logger
 
 class PlatformConnector(ABC):
     """平台连接器基类"""
-    
-    def __init__(self, platform_name, config_path=None):
+    pass
+
+# 为向后兼容保留的别名
+ConnectorBase = PlatformConnector
+
+def __init__(self, platform_name, config_path=None):
         """
         初始化平台连接器
         
@@ -72,7 +76,7 @@ class PlatformConnector(ABC):
         
         self.logger.info(f"初始化 {platform_name} 平台连接器")
     
-    def connect(self):
+def connect(self):
         """连接到平台"""
         if self.connected:
             self.logger.warning(f"{self.platform_name} 连接器已连接")
@@ -109,7 +113,7 @@ class PlatformConnector(ABC):
             self._trigger_callbacks("on_error", error=str(e), error_type="connection")
             return False
     
-    def disconnect(self):
+def disconnect(self):
         """断开与平台的连接"""
         if not self.connected:
             self.logger.warning(f"{self.platform_name} 连接器未连接")
@@ -145,7 +149,7 @@ class PlatformConnector(ABC):
             self.connected = False
             return False
     
-    def register_device(self, device_info):
+def register_device(self, device_info):
         """
         在平台上注册设备
         
@@ -189,7 +193,7 @@ class PlatformConnector(ABC):
             self._trigger_callbacks("on_error", error=str(e), error_type="device_registration", device_id=device_id)
             return False
     
-    def remove_device(self, device_id):
+def remove_device(self, device_id):
         """
         从平台上移除设备
         
@@ -232,7 +236,7 @@ class PlatformConnector(ABC):
             self._trigger_callbacks("on_error", error=str(e), error_type="device_removal", device_id=device_id)
             return False
     
-    def send_telemetry(self, device_id, telemetry_data):
+def send_telemetry(self, device_id, telemetry_data):
         """
         发送设备遥测数据到平台
         
@@ -267,7 +271,7 @@ class PlatformConnector(ABC):
             self._trigger_callbacks("on_error", error=str(e), error_type="telemetry_sending", device_id=device_id)
             return False
     
-    def update_device_attributes(self, device_id, attributes):
+def update_device_attributes(self, device_id, attributes):
         """
         更新设备属性
         
@@ -308,7 +312,7 @@ class PlatformConnector(ABC):
             self._trigger_callbacks("on_error", error=str(e), error_type="attribute_update", device_id=device_id)
             return False
     
-    def get_device_commands(self, device_id):
+def get_device_commands(self, device_id):
         """
         获取平台发送给设备的命令
         
@@ -340,7 +344,7 @@ class PlatformConnector(ABC):
             self._trigger_callbacks("on_error", error=str(e), error_type="command_retrieval", device_id=device_id)
             return []
     
-    def respond_to_command(self, device_id, command_id, response):
+def respond_to_command(self, device_id, command_id, response):
         """
         响应设备命令
         
@@ -376,7 +380,7 @@ class PlatformConnector(ABC):
             self._trigger_callbacks("on_error", error=str(e), error_type="command_response", device_id=device_id)
             return False
     
-    def is_device_registered(self, device_id):
+def is_device_registered(self, device_id):
         """
         检查设备是否已注册
         
@@ -388,7 +392,7 @@ class PlatformConnector(ABC):
         """
         return device_id in self.registered_devices
     
-    def get_registered_devices(self):
+def get_registered_devices(self):
         """
         获取所有已注册设备
         
@@ -397,7 +401,7 @@ class PlatformConnector(ABC):
         """
         return self.registered_devices
     
-    def add_callback(self, event_type, callback):
+def add_callback(self, event_type, callback):
         """
         添加回调函数
         
@@ -419,7 +423,7 @@ class PlatformConnector(ABC):
         self.callbacks[event_type].append(callback)
         return True
     
-    def remove_callback(self, event_type, callback):
+def remove_callback(self, event_type, callback):
         """
         移除回调函数
         
@@ -441,7 +445,7 @@ class PlatformConnector(ABC):
             self.logger.warning(f"未找到指定的回调函数")
             return False
     
-    def _trigger_callbacks(self, event_type, **kwargs):
+def _trigger_callbacks(self, event_type, **kwargs):
         """
         触发回调函数
         
@@ -458,7 +462,7 @@ class PlatformConnector(ABC):
             except Exception as e:
                 self.logger.error(f"执行 {event_type} 回调时出错: {str(e)}")
     
-    def _maintain_connection(self):
+def _maintain_connection(self):
         """维护与平台的连接（在线程中运行）"""
         self.logger.info(f"启动 {self.platform_name} 连接维护线程")
         
@@ -514,8 +518,8 @@ class PlatformConnector(ABC):
         
         self.logger.info(f"{self.platform_name} 连接维护线程已停止")
     
-    @abstractmethod
-    def _connect_to_platform(self):
+@abstractmethod
+def _connect_to_platform(self):
         """
         连接到具体平台的实现
         
@@ -524,18 +528,18 @@ class PlatformConnector(ABC):
         """
         pass
     
-    @abstractmethod
-    def _disconnect_from_platform(self):
-        """
-        断开与具体平台连接的实现
-        
-        Returns:
-            bool: 是否成功断开连接
-        """
-        pass
+@abstractmethod
+def _disconnect_from_platform(self):
+    """
+    断开与具体平台连接的实现
     
-    @abstractmethod
-    def _check_connection(self):
+    Returns:
+        bool: 是否成功断开连接
+    """
+    pass
+    
+@abstractmethod
+def _check_connection(self):
         """
         检查与平台的连接状态
         
@@ -544,13 +548,13 @@ class PlatformConnector(ABC):
         """
         pass
     
-    @abstractmethod
-    def _receive_platform_data(self):
+@abstractmethod
+def _receive_platform_data(self):
         """接收并处理平台数据"""
         pass
     
-    @abstractmethod
-    def _register_device_to_platform(self, device_info):
+@abstractmethod
+def _register_device_to_platform(self, device_info):
         """
         在具体平台上注册设备的实现
         
@@ -562,8 +566,8 @@ class PlatformConnector(ABC):
         """
         pass
     
-    @abstractmethod
-    def _remove_device_from_platform(self, device_id):
+@abstractmethod
+def _remove_device_from_platform(self, device_id):
         """
         从具体平台上移除设备的实现
         
@@ -575,8 +579,8 @@ class PlatformConnector(ABC):
         """
         pass
     
-    @abstractmethod
-    def _send_telemetry_to_platform(self, device_id, telemetry_data):
+@abstractmethod
+def _send_telemetry_to_platform(self, device_id, telemetry_data):
         """
         向具体平台发送遥测数据的实现
         
@@ -589,8 +593,8 @@ class PlatformConnector(ABC):
         """
         pass
     
-    @abstractmethod
-    def _update_device_attributes_on_platform(self, device_id, attributes):
+@abstractmethod
+def _update_device_attributes_on_platform(self, device_id, attributes):
         """
         在具体平台上更新设备属性的实现
         
@@ -603,8 +607,8 @@ class PlatformConnector(ABC):
         """
         pass
     
-    @abstractmethod
-    def _get_device_commands_from_platform(self, device_id):
+@abstractmethod
+def _get_device_commands_from_platform(self, device_id):
         """
         从具体平台获取设备命令的实现
         
@@ -616,8 +620,8 @@ class PlatformConnector(ABC):
         """
         pass
     
-    @abstractmethod
-    def _respond_to_command_on_platform(self, device_id, command_id, response):
+@abstractmethod
+def _respond_to_command_on_platform(self, device_id, command_id, response):
         """
         在具体平台上响应设备命令的实现
         

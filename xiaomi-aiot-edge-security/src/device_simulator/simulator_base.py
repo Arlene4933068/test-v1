@@ -74,6 +74,16 @@ class DeviceSimulator(ABC):
         
         self.logger.info(f"初始化设备模拟器: {self.device_id}, 类型: {self.device_type}")
     
+        # 新增基础资源监控属性初始化
+        self.cpu_usage = 0.0
+        self.memory_usage = 0.0 
+        self.uptime = 0
+        self.network_usage = {"up": 0.0, "down": 0.0}
+        
+        # 新增设备状态标志初始化
+        self._is_active = False
+        self._operation_mode = "normal"
+    
     def connect(self):
         """连接到平台"""
         if self.connected:
@@ -158,6 +168,12 @@ class DeviceSimulator(ABC):
         if "credentials" in self.security_settings:
             device_info["credentials"] = self.security_settings.get("credentials")
         
+        # 修改为安全访问方式
+        device_info.update({
+            "auto_update": self.security_settings.get("auto_update", True),
+            "encryption_enabled": self.security_settings.get("encrypt_telemetry", False),
+            "auth_mode": self.security_settings.get("auth_mode", "basic")
+        })
         self.logger.info(f"正在注册设备 {self.device_id}")
         # 这里应该调用平台连接器的注册方法
         # 在子类中实现具体的注册逻辑
@@ -305,3 +321,36 @@ class DeviceSimulator(ABC):
         设备特定行为（由子类实现）
         """
         pass
+    
+    def _update_resource_usage(self):
+        """更新设备资源使用情况（基类实现）"""
+        # 基础资源模拟
+        self.cpu_usage = max(0.0, min(100.0, 
+            self.cpu_usage + random.uniform(-5.0, 5.0)))
+        self.memory_usage = max(0.0, min(100.0,
+            self.memory_usage + random.uniform(-3.0, 3.0)))
+        self.uptime += 1
+        
+        # 网络流量模拟
+        self.network_usage["up"] = random.expovariate(1/50)
+        self.network_usage["down"] = random.expovariate(1/100)
+        
+        return {
+            "cpu": self.cpu_usage,
+            "memory": self.memory_usage,
+            "uptime": self.uptime,
+            "network": self.network_usage
+        }
+
+@property
+def is_active(self):
+    """设备是否处于活动状态"""
+    return self._is_active
+
+    @is_active.setter
+    def is_active(self, value):
+        old_state = self._is_active
+        self._is_active = bool(value)
+        if old_state != self._is_active:
+            event = "activated" if self._is_active else "deactivated"
+            self.logger.info(f"设备 {self.device_id} {event}")

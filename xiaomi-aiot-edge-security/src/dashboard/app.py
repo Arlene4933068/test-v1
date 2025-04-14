@@ -204,11 +204,18 @@ class DashboardApp:
         
         # Error handler for 404
         app.register_error_handler(404, self.page_not_found)
+        # Add this line after the 404 error handler registration
+        app.register_error_handler(500, self.internal_server_error)
     
     def page_not_found(self, e):
         """404错误处理"""
         self.logger.warning(f"页面未找到: {request.path}")
         return render_template('404.html'), 404
+
+    def internal_server_error(self, e):
+        """500错误处理"""
+        self.logger.error(f"服务器内部错误: {str(e)}")
+        return render_template('500.html'), 500
     
     def index(self):
         """首页视图"""

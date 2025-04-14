@@ -1,21 +1,11 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-设备模拟器模块
-提供各种边缘设备的模拟功能
+设备模拟器模块初始化文件
 """
+from .devices import DeviceBase, Gateway, Router, SmartSpeaker, Camera
+from .device_factory import DeviceFactory
+from .device_simulator import DeviceSimulator
 
-from .simulator_base import DeviceSimulator
-from .gateway import GatewaySimulator
-from .router import RouterSimulator
-from .speaker import SpeakerSimulator
-from .camera import CameraSimulator
-
-# 导出所有类
 __all__ = [
-    'DeviceSimulator',
-    'GatewaySimulator',
-    'RouterSimulator',
-    'SpeakerSimulator',
-    'CameraSimulator'
+    'DeviceBase', 'Gateway', 'Router', 'SmartSpeaker', 'Camera',
+    'DeviceFactory', 'DeviceSimulator'
 ]

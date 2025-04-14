@@ -1,145 +1,103 @@
-# src/utils/logger.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+日志工具模块
+提供配置和获取日志记录器的功能
+"""
+
 import os
-import yaml
 import logging
 import logging.config
-import logging.handlers
-from pathlib import Path
+from typing import Dict, Any, Optional
 
-_loggers = {}
-
-def setup_logger():
-    """初始化日志配置
-    
-    从配置文件加载日志配置并应用
-    """
-    config_path = Path(__file__).parent.parent.parent / 'config' / 'logging.yaml'
-    if not config_path.exists():
-        raise FileNotFoundError(f'日志配置文件不存在: {config_path}')
-        
-    with open(config_path, 'r', encoding='utf-8') as f:
-        config = yaml.safe_load(f)
-        
-    # 确保日志目录存在
-    log_dir = Path(config['handlers']['file']['filename']).parent
-    log_dir.mkdir(parents=True, exist_ok=True)
-    
-    # 应用配置
-    logging.config.dictConfig(config)
-
-
-_log_config = None
-
-def _load_log_config():
-    """加载日志配置"""
-    global _log_config
-    
-    if _log_config is not None:
-        return _log_config
-    
-    # 默认配置
-    default_config = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'standard': {
-                'format': '%(asctime)s [%(levelname)s] [%(name)s] %(message)s'
-            },
+# 默认日志配置
+DEFAULT_LOG_CONFIG = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         },
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'level': 'INFO',
-                'formatter': 'standard',
-                'stream': 'ext://sys.stdout',
-            },
-            'file': {
-                'class': 'logging.handlers.RotatingFileHandler',
-                'level': 'DEBUG',
-                'formatter': 'standard',
-                'filename': 'logs/xiaomi_aiot_edge_security.log',
-                'maxBytes': 10485760,  # 10MB
-                'backupCount': 5,
-                'encoding': 'utf8',
-            },
-        },
-        'loggers': {
-            '': {  # root logger
-                'handlers': ['console', 'file'],
-                'level': 'DEBUG',
-                'propagate': True
-            }
+        'detailed': {
+            'format': '%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(message)s'
         }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'INFO',
+            'formatter': 'standard',
+            'stream': 'ext://sys.stdout'
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'DEBUG',
+            'formatter': 'detailed',
+            'filename': 'logs/aiot_edge_security.log',
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 5
+        }
+    },
+    'root': {
+        'level': 'INFO',
+        'handlers': ['console', 'file']
     }
+}
+
+_logger_initialized = False
+_log_config = DEFAULT_LOG_CONFIG.copy()
+
+def setup_logger(config: Optional[Dict[str, Any]] = None, level: int = logging.INFO) -> None:
+    """
+    配置日志系统
     
-    # 尝试从配置文件加载
-    config_file = os.path.join('config', 'logging.yaml')
-    if os.path.exists(config_file):
-        try:
-            with open(config_file, 'r', encoding='utf-8') as f:
-                loaded_config = yaml.safe_load(f)
-                _log_config = loaded_config
-                return _log_config
-        except Exception:
-            pass
+    Args:
+        config: 日志配置字典
+        level: 日志级别
+    """
+    global _logger_initialized, _log_config
     
-    # 使用默认配置
-    _log_config = default_config
+    # 如果提供了配置，则使用提供的配置
+    if config:
+        _log_config = config
     
     # 确保日志目录存在
-    log_dir = os.path.dirname(default_config['handlers']['file']['filename'])
+    log_dir = os.path.dirname(_log_config['handlers']['file']['filename'])
     if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
+        os.makedirs(log_dir, exist_ok=True)
     
-    return _log_config
+    # 更新根日志级别
+    _log_config['root']['level'] = level
+    
+    # 配置日志系统
+    logging.config.dictConfig(_log_config)
+    
+    _logger_initialized = True
 
-def get_logger(name):
-    """获取日志记录器
+def get_logger(name: str) -> logging.Logger:
+    """
+    获取指定名称的日志记录器
     
     Args:
         name: 日志记录器名称
-        
+    
     Returns:
         logging.Logger: 日志记录器
     """
-    global _loggers
+    global _logger_initialized, _log_config
     
-    if name in _loggers:
-        return _loggers[name]
+    # 如果日志系统尚未初始化，则进行初始化
+    if not _logger_initialized:
+        setup_logger()
     
-    # 加载配置
-    config = _load_log_config()
-    
-    # 创建日志记录器
+    # 获取日志记录器
     logger = logging.getLogger(name)
     
-    # 如果已经配置了处理程序，则跳过
-    if logger.handlers:
-        _loggers[name] = logger
-        return logger
+    # 确保日志记录器具有正确的级别
+    if _log_config and 'root' in _log_config and 'level' in _log_config['root']:
+        logger.setLevel(_log_config['root']['level'])
+    else:
+        # 如果配置中没有根级别，则使用默认级别
+        logger.setLevel(logging.INFO)
     
-    # 配置控制台输出
-    console_handler = logging.StreamHandler()
-    console_formatter = logging.Formatter(config['formatters']['standard']['format'])
-    console_handler.setFormatter(console_formatter)
-    console_handler.setLevel(config['handlers']['console']['level'])
-    logger.addHandler(console_handler)
-    
-    # 配置文件输出
-    file_handler = RotatingFileHandler(
-        filename=config['handlers']['file']['filename'],
-        maxBytes=config['handlers']['file']['maxBytes'],
-        backupCount=config['handlers']['file']['backupCount'],
-        encoding=config['handlers']['file']['encoding'],
-    )
-    file_formatter = logging.Formatter(config['formatters']['standard']['format'])
-    file_handler.setFormatter(file_formatter)
-    file_handler.setLevel(config['handlers']['file']['level'])
-    logger.addHandler(file_handler)
-    
-    # 设置日志级别
-    logger.setLevel(config['root']['level'])
-    
-    _loggers[name] = logger
     return logger
-from logging.handlers import RotatingFileHandler

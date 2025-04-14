@@ -1,65 +1,80 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-ThingsBoard Edge 连接器 - 通过REST API与ThingsBoard Edge通信
+ThingsBoard Edge 连接器
+提供与Docker中部署的ThingsBoard Edge实例的连接和交互功能
 """
-import json
-import uuid
-import time
-import logging
+
 import requests
-from typing import Dict, Any, List, Optional
-from requests.exceptions import RequestException
+import json
+import logging
+import time
+from typing import Dict, List, Any, Optional
+from .connector_base import ConnectorBase
+import paho.mqtt.client as mqtt
 
-from . import connector_base
-
-class ThingsBoardConnector(connector_base.ConnectorBase):
-    """
-    ThingsBoard Edge连接器，通过REST API与ThingsBoard Edge通信
-    """
+class ThingsBoardConnector(ConnectorBase):
+    """ThingsBoard Edge 平台连接器"""
     
     def __init__(self, config: Dict[str, Any]):
         """
-        初始化ThingsBoard Edge连接器
+        初始化ThingsBoard连接器
         
         Args:
-            config: 连接配置信息，必须包含:
-                - url: ThingsBoard Edge API的基础URL
-                - username: 登录用户名
-                - password: 登录密码
+            config: 包含连接配置的字典
+                - host: ThingsBoard主机地址 (默认为 'localhost')
+                - port: ThingsBoard HTTP端口 (默认为 8080)
+                - mqtt_port: ThingsBoard MQTT端口 (默认为 1883)
+                - username: 用户名
+                - password: 密码
+                - tenant_id: 租户ID (可选)
         """
-        super().__init__()
-        self.config = config
-        self.base_url = config.get('url', 'http://localhost:8080')
-        self.username = config.get('username', 'tenant@thingsboard.org')
-        self.password = config.get('password', 'tenant')
-        self.token = None
-        self.device_cache = {}  # 缓存已创建的设备信息
+        super().__init__(config)
         self.logger = logging.getLogger(__name__)
+        
+        # 设置连接参数
+        self.host = config.get('host', 'localhost')
+        self.port = config.get('port', 8080)  # 与您环境中的ThingsBoard端口一致
+        self.mqtt_port = config.get('mqtt_port', 1883)  # 与您环境中的MQTT端口一致
+        self.username = config.get('username')
+        self.password = config.get('password')
+        self.tenant_id = config.get('tenant_id', None)
+        
+        # 设置基础URL
+        self.base_url = f"http://{self.host}:{self.port}/api"
+        
+        # 认证令牌
+        self.auth_token = None
+        self.jwt_token = None
+        
+        # MQTT客户端
+        self.mqtt_client = None
     
     def connect(self) -> bool:
         """
-        连接到ThingsBoard Edge，获取认证令牌
+        连接到ThingsBoard Edge实例
         
         Returns:
-            连接是否成功
+            bool: 连接成功返回True，否则返回False
         """
         try:
-            # 登录获取JWT令牌
-            login_url = f"{self.base_url}/api/auth/login"
+            # 登录以获取JWT令牌
+            login_payload = {"username": self.username, "password": self.password}
             response = requests.post(
-                login_url,
-                json={"username": self.username, "password": self.password}
+                f"{self.base_url}/auth/login",
+                headers={"Content-Type": "application/json", "Accept": "application/json"},
+                json=login_payload
             )
             
             if response.status_code == 200:
-                self.token = response.json()['token']
-                self.is_connected = True
-                self.logger.info("成功连接到ThingsBoard Edge")
+                self.jwt_token = response.json().get('token')
+                self.logger.info("成功连接到ThingsBoard Edge实例")
                 return True
             else:
-                self.logger.error(f"ThingsBoard Edge登录失败: HTTP {response.status_code}, {response.text}")
+                self.logger.error(f"无法连接到ThingsBoard Edge实例，登录失败: {response.status_code}")
                 return False
-        except RequestException as e:
-            self.logger.error(f"连接ThingsBoard Edge失败: {str(e)}")
+        except Exception as e:
+            self.logger.error(f"连接ThingsBoard Edge实例时发生错误: {str(e)}")
             return False
     
     def disconnect(self) -> bool:
@@ -67,292 +82,221 @@ class ThingsBoardConnector(connector_base.ConnectorBase):
         断开与ThingsBoard Edge的连接
         
         Returns:
-            断开连接是否成功
+            bool: 断开连接成功返回True，否则返回False
         """
-        self.token = None
-        self.is_connected = False
-        self.logger.info("已断开与ThingsBoard Edge的连接")
-        return True
+        try:
+            # 断开MQTT连接（如果存在）
+            if self.mqtt_client and self.mqtt_client.is_connected():
+                self.mqtt_client.disconnect()
+            
+            self.jwt_token = None
+            self.auth_token = None
+            self.logger.info("已断开与ThingsBoard Edge的连接")
+            return True
+        except Exception as e:
+            self.logger.error(f"断开ThingsBoard Edge连接时发生错误: {str(e)}")
+            return False
     
-    def create_device(self, device_info: Dict[str, Any]) -> str:
+    def _get_headers(self) -> Dict[str, str]:
+        """
+        获取带有JWT令牌的请求头
+        
+        Returns:
+            Dict[str, str]: 请求头字典
+        """
+        return {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-Authorization": f"Bearer {self.jwt_token}"
+        }
+    
+    def create_device(self, name: str, type: str, label: Optional[str] = None) -> Dict[str, Any]:
         """
         在ThingsBoard中创建设备
         
         Args:
-            device_info: 设备信息，应包含:
-                - name: 设备名称
-                - type: 设备类型
-                - label: 设备标签
-                
+            name: 设备名称
+            type: 设备类型
+            label: 设备标签 (可选)
+        
         Returns:
-            创建的设备ID
+            Dict[str, Any]: 创建的设备信息，失败时返回空字典
         """
-        if not self.is_connected or not self.token:
-            self.logger.error("未连接到ThingsBoard Edge，无法创建设备")
-            return ""
-        
-        # 生成唯一设备名称（如果未提供）
-        if 'name' not in device_info:
-            device_info['name'] = f"xiaomi-aiot-{device_info.get('type', 'device')}-{str(uuid.uuid4())[:8]}"
-        
-        # 准备设备创建请求
-        device_data = {
-            "name": device_info['name'],
-            "type": device_info.get('type', 'default'),
-            "label": device_info.get('label', '小米AIoT模拟设备')
-        }
-        
-        headers = {
-            "Content-Type": "application/json",
-            "X-Authorization": f"Bearer {self.token}"
-        }
-        
         try:
-            # 创建设备
+            device_data = {
+                "name": name,
+                "type": type
+            }
+            
+            if label:
+                device_data["label"] = label
+            
             response = requests.post(
-                f"{self.base_url}/api/device",
-                headers=headers,
+                f"{self.base_url}/device",
+                headers=self._get_headers(),
                 json=device_data
             )
             
-            if response.status_code == 200:
-                device_id = response.json()['id']['id']
-                self.logger.info(f"成功在ThingsBoard创建设备: {device_info['name']}, ID: {device_id}")
-                
-                # 缓存设备信息
-                self.device_cache[device_id] = {
-                    "name": device_info['name'],
-                    "type": device_info.get('type', 'default')
-                }
-                
-                # 获取设备访问令牌
-                credentials_response = requests.get(
-                    f"{self.base_url}/api/device/{device_id}/credentials",
-                    headers=headers
-                )
-                
-                if credentials_response.status_code == 200:
-                    access_token = credentials_response.json()['credentialsId']
-                    self.device_cache[device_id]['access_token'] = access_token
-                    self.logger.info(f"获取设备访问令牌: {access_token}")
-                else:
-                    self.logger.warning(f"获取设备访问令牌失败: HTTP {credentials_response.status_code}")
-                
-                return device_id
+            if response.status_code in [200, 201]:
+                device_info = response.json()
+                self.logger.info(f"成功创建设备: {name} (ID: {device_info.get('id', {}).get('id')})")
+                return device_info
             else:
-                self.logger.error(f"创建设备失败: HTTP {response.status_code}, {response.text}")
-                return ""
-        except RequestException as e:
-            self.logger.error(f"创建设备请求异常: {str(e)}")
-            return ""
-    
-    def delete_device(self, device_id: str) -> bool:
-        """
-        删除ThingsBoard中的设备
-        
-        Args:
-            device_id: 设备ID
-            
-        Returns:
-            删除是否成功
-        """
-        if not self.is_connected or not self.token:
-            self.logger.error("未连接到ThingsBoard Edge，无法删除设备")
-            return False
-        
-        headers = {
-            "Content-Type": "application/json",
-            "X-Authorization": f"Bearer {self.token}"
-        }
-        
-        try:
-            # 删除设备
-            response = requests.delete(
-                f"{self.base_url}/api/device/{device_id}",
-                headers=headers
-            )
-            
-            if response.status_code == 200:
-                self.logger.info(f"成功删除设备: {device_id}")
-                # 从缓存中移除设备
-                if device_id in self.device_cache:
-                    del self.device_cache[device_id]
-                return True
-            else:
-                self.logger.error(f"删除设备失败: HTTP {response.status_code}, {response.text}")
-                return False
-        except RequestException as e:
-            self.logger.error(f"删除设备请求异常: {str(e)}")
-            return False
-    
-    def send_telemetry(self, device_id: str, data: Dict[str, Any]) -> bool:
-        """
-        发送设备遥测数据到ThingsBoard
-        
-        Args:
-            device_id: 设备ID
-            data: 遥测数据，键值对形式
-            
-        Returns:
-            发送是否成功
-        """
-        if not self.is_connected:
-            self.logger.error("未连接到ThingsBoard Edge，无法发送遥测数据")
-            return False
-        
-        if device_id not in self.device_cache or 'access_token' not in self.device_cache[device_id]:
-            self.logger.error(f"设备ID {device_id} 未在缓存中找到或缺少访问令牌")
-            return False
-        
-        access_token = self.device_cache[device_id]['access_token']
-        
-        try:
-            # 发送遥测数据
-            response = requests.post(
-                f"{self.base_url}/api/v1/{access_token}/telemetry",
-                json=data
-            )
-            
-            if response.status_code == 200:
-                self.logger.debug(f"成功发送遥测数据: {self.device_cache[device_id]['name']}")
-                return True
-            else:
-                self.logger.error(f"发送遥测数据失败: HTTP {response.status_code}, {response.text}")
-                return False
-        except RequestException as e:
-            self.logger.error(f"发送遥测数据请求异常: {str(e)}")
-            return False
-    
-    def get_commands(self, device_id: str) -> List[Dict[str, Any]]:
-        """
-        获取发送给设备的RPC命令
-        
-        Args:
-            device_id: 设备ID
-            
-        Returns:
-            命令列表
-        """
-        # ThingsBoard的设备RPC命令需要通过MQTT或WebSocket订阅获取
-        # 这里实现一个模拟的命令列表
-        self.logger.info(f"获取设备 {device_id} 的命令")
-        
-        # 返回模拟的命令列表
-        return []
-    
-    def send_command_response(self, device_id: str, command_id: str, response: Dict[str, Any]) -> bool:
-        """
-        发送命令执行结果
-        
-        Args:
-            device_id: 设备ID
-            command_id: 命令ID
-            response: 命令执行结果
-            
-        Returns:
-            发送是否成功
-        """
-        if not self.is_connected or not self.token:
-            self.logger.error("未连接到ThingsBoard Edge，无法发送命令响应")
-            return False
-        
-        if device_id not in self.device_cache or 'access_token' not in self.device_cache[device_id]:
-            self.logger.error(f"设备ID {device_id} 未在缓存中找到或缺少访问令牌")
-            return False
-        
-        access_token = self.device_cache[device_id]['access_token']
-        
-        try:
-            # 发送RPC响应
-            response_url = f"{self.base_url}/api/v1/{access_token}/rpc/{command_id}"
-            response = requests.post(
-                response_url,
-                json=response
-            )
-            
-            if response.status_code == 200:
-                self.logger.info(f"成功发送命令响应: {command_id}")
-                return True
-            else:
-                self.logger.error(f"发送命令响应失败: HTTP {response.status_code}, {response.text}")
-                return False
-        except RequestException as e:
-            self.logger.error(f"发送命令响应请求异常: {str(e)}")
-            return False
-    
-    def get_device_attributes(self, device_id: str) -> Dict[str, Any]:
-        """
-        获取设备属性
-        
-        Args:
-            device_id: 设备ID
-            
-        Returns:
-            设备属性字典
-        """
-        if not self.is_connected or not self.token:
-            self.logger.error("未连接到ThingsBoard Edge，无法获取设备属性")
-            return {}
-        
-        headers = {
-            "Content-Type": "application/json",
-            "X-Authorization": f"Bearer {self.token}"
-        }
-        
-        try:
-            # 获取设备属性
-            response = requests.get(
-                f"{self.base_url}/api/plugins/telemetry/DEVICE/{device_id}/values/attributes",
-                headers=headers
-            )
-            
-            if response.status_code == 200:
-                attributes = {}
-                for attr in response.json():
-                    attributes[attr['key']] = attr['value']
-                self.logger.debug(f"获取设备属性成功: {device_id}")
-                return attributes
-            else:
-                self.logger.error(f"获取设备属性失败: HTTP {response.status_code}, {response.text}")
+                self.logger.error(f"创建设备失败: {response.status_code}, {response.text}")
                 return {}
-        except RequestException as e:
-            self.logger.error(f"获取设备属性请求异常: {str(e)}")
+        except Exception as e:
+            self.logger.error(f"创建设备时发生错误: {str(e)}")
             return {}
     
-    def set_device_attributes(self, device_id: str, attributes: Dict[str, Any]) -> bool:
+    def get_device_credentials(self, device_id: str) -> Dict[str, Any]:
         """
-        设置设备属性
+        获取设备凭证
         
         Args:
             device_id: 设备ID
-            attributes: 设备属性字典
-            
+        
         Returns:
-            设置是否成功
+            Dict[str, Any]: 设备凭证信息，失败时返回空字典
         """
-        if not self.is_connected or not self.token:
-            self.logger.error("未连接到ThingsBoard Edge，无法设置设备属性")
-            return False
-        
-        if device_id not in self.device_cache or 'access_token' not in self.device_cache[device_id]:
-            self.logger.error(f"设备ID {device_id} 未在缓存中找到或缺少访问令牌")
-            return False
-        
-        access_token = self.device_cache[device_id]['access_token']
-        
         try:
-            # 设置客户端属性
-            response = requests.post(
-                f"{self.base_url}/api/v1/{access_token}/attributes",
-                json=attributes
+            response = requests.get(
+                f"{self.base_url}/device/{device_id}/credentials",
+                headers=self._get_headers()
             )
             
             if response.status_code == 200:
-                self.logger.debug(f"设置设备属性成功: {device_id}")
+                credentials = response.json()
+                self.logger.debug(f"成功获取设备凭证: {device_id}")
+                return credentials
+            else:
+                self.logger.error(f"获取设备凭证失败: {response.status_code}, {response.text}")
+                return {}
+        except Exception as e:
+            self.logger.error(f"获取设备凭证时发生错误: {str(e)}")
+            return {}
+    
+    def connect_mqtt_device(self, access_token: str) -> bool:
+        """
+        使用MQTT连接设备
+        
+        Args:
+            access_token: 设备访问令牌
+        
+        Returns:
+            bool: 连接成功返回True，否则返回False
+        """
+        try:
+            # 创建新的MQTT客户端
+            self.mqtt_client = mqtt.Client()
+            self.mqtt_client.username_pw_set(access_token)
+            
+            # 连接回调
+            def on_connect(client, userdata, flags, rc):
+                if rc == 0:
+                    self.logger.info(f"MQTT设备连接成功，访问令牌: {access_token}")
+                else:
+                    self.logger.error(f"MQTT设备连接失败，访问令牌: {access_token}，返回码: {rc}")
+            
+            self.mqtt_client.on_connect = on_connect
+            
+            # 连接到MQTT代理
+            self.mqtt_client.connect(self.host, self.mqtt_port, 60)
+            self.mqtt_client.loop_start()
+            
+            # 等待连接确认
+            time.sleep(1)
+            
+            return self.mqtt_client.is_connected()
+        except Exception as e:
+            self.logger.error(f"MQTT设备连接时发生错误: {str(e)}")
+            return False
+    
+    def send_telemetry(self, access_token: str, telemetry_data: Dict[str, Any]) -> bool:
+        """
+        发送设备遥测数据
+        
+        Args:
+            access_token: 设备访问令牌
+            telemetry_data: 遥测数据
+        
+        Returns:
+            bool: 发送成功返回True，否则返回False
+        """
+        try:
+            # 如果没有现有的MQTT连接或连接已关闭，则创建新连接
+            if not self.mqtt_client or not self.mqtt_client.is_connected():
+                if not self.connect_mqtt_device(access_token):
+                    return False
+            
+            result = self.mqtt_client.publish("v1/devices/me/telemetry", json.dumps(telemetry_data))
+            if result.rc == mqtt.MQTT_ERR_SUCCESS:
+                self.logger.debug(f"成功发送遥测数据，访问令牌: {access_token}")
                 return True
             else:
-                self.logger.error(f"设置设备属性失败: HTTP {response.status_code}, {response.text}")
+                self.logger.error(f"发送遥测数据失败: {result.rc}")
                 return False
-        except RequestException as e:
-            self.logger.error(f"设置设备属性请求异常: {str(e)}")
+        except Exception as e:
+            self.logger.error(f"发送遥测数据时发生错误: {str(e)}")
             return False
+    
+    def send_attributes(self, access_token: str, attributes: Dict[str, Any]) -> bool:
+        """
+        发送设备属性数据
+        
+        Args:
+            access_token: 设备访问令牌
+            attributes: 属性数据
+        
+        Returns:
+            bool: 发送成功返回True，否则返回False
+        """
+        try:
+            # 如果没有现有的MQTT连接或连接已关闭，则创建新连接
+            if not self.mqtt_client or not self.mqtt_client.is_connected():
+                if not self.connect_mqtt_device(access_token):
+                    return False
+            
+            result = self.mqtt_client.publish("v1/devices/me/attributes", json.dumps(attributes))
+            if result.rc == mqtt.MQTT_ERR_SUCCESS:
+                self.logger.debug(f"成功发送属性数据，访问令牌: {access_token}")
+                return True
+            else:
+                self.logger.error(f"发送属性数据失败: {result.rc}")
+                return False
+        except Exception as e:
+            self.logger.error(f"发送属性数据时发生错误: {str(e)}")
+            return False
+    
+    def create_dashboard(self, title: str, configuration: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        创建仪表板
+        
+        Args:
+            title: 仪表板标题
+            configuration: 仪表板配置
+        
+        Returns:
+            Dict[str, Any]: 创建的仪表板信息，失败时返回空字典
+        """
+        try:
+            dashboard_data = {
+                "title": title,
+                "configuration": configuration
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/dashboard",
+                headers=self._get_headers(),
+                json=dashboard_data
+            )
+            
+            if response.status_code in [200, 201]:
+                dashboard_info = response.json()
+                self.logger.info(f"成功创建仪表板: {title}")
+                return dashboard_info
+            else:
+                self.logger.error(f"创建仪表板失败: {response.status_code}, {response.text}")
+                return {}
+        except Exception as e:
+            self.logger.error(f"创建仪表板时发生错误: {str(e)}")
+            return {}

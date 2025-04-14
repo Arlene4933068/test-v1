@@ -1,0 +1,123 @@
+# 平台连接配置
+platform:
+  # EdgeX Foundry配置
+  edgex:
+    host: "localhost"
+    port: 59880  # core-data端口
+    metadata_port: 59881  # metadata端口
+    core_command_port: 59882  # command端口
+    # EdgeX API版本
+    api_version: "v2"
+    # 设备服务名称
+    device_service_name: "xiaomi-device-service"
+    # 如果需要身份验证，可以在这里添加token
+
+  # ThingsBoard Edge配置
+  thingsboard:
+    host: "localhost"
+    port: 8080
+    mqtt_port: 1883
+    username: "tenant@thingsboard.org"  # 默认用户名，根据实际情况修改
+    password: "tenant"  # 默认密码，根据实际情况修改
+    # tenant_id: "optional-tenant-id"
+
+# 设备模拟配置
+devices:
+  # 是否自动创建设备
+  auto_create: true
+  
+  # 设备列表
+  list:
+    - type: "gateway"
+      name: "xiaomi_gateway_01"
+      platform: "both"  # both, edgex, thingsboard
+      properties:
+        max_connected_devices: 20
+        init_connected_devices: 5
+        telemetry_interval: 5  # 秒
+
+    - type: "router"
+      name: "xiaomi_router_01"
+      platform: "both"
+      properties:
+        max_bandwidth: 1000  # Mbps
+        wifi_channels: ["2.4GHz", "5GHz"]
+        telemetry_interval: 5  # 秒
+
+    - type: "smart_speaker"
+      name: "xiaomi_speaker_01"
+      platform: "both"
+      properties:
+        max_volume: 100
+        max_bluetooth_devices: 5
+        telemetry_interval: 5  # 秒
+
+    - type: "camera"
+      name: "xiaomi_camera_01"
+      platform: "both"
+      properties:
+        available_resolutions: ["640x480", "1280x720", "1920x1080"]
+        night_vision: true
+        motion_detection: true
+        telemetry_interval: 5  # 秒
+
+# 安全防护配置
+security:
+  # 是否启用分布式安全框架
+  distributed: true
+  
+  # 节点配置
+  nodes:
+    - node_id: "security_node_coordinator"
+      node_type: "coordinator"
+      roles: ["detector", "protector", "logger"]
+      network:
+        host: "127.0.0.1"
+        port: 5555
+        discovery_port: 5556
+    
+    - node_id: "security_node_gateway"
+      node_type: "worker"
+      roles: ["detector", "protector"]
+      network:
+        coordinator: "127.0.0.1:5555"
+      associated_devices: ["xiaomi_gateway_01"]
+
+    - node_id: "security_node_router"
+      node_type: "worker" 
+      roles: ["detector"]
+      network:
+        coordinator: "127.0.0.1:5555"
+      associated_devices: ["xiaomi_router_01"]
+  
+  # 攻击模拟配置
+  attack_simulator:
+    attacks_enabled:
+      ddos: true
+      mitm: true
+      credential: true
+      firmware: true
+      protocol: true
+      data_exfiltration: true
+      iot_botnet: true
+      physical_tampering: true
+    simulation_interval: 30  # 秒
+    intensity: "medium"  # low, medium, high
+
+# 数据分析配置
+analytics:
+  data_dir: "data"
+  output_dir: "output"
+  
+  analysis:
+    time_window: "daily"  # daily, weekly, monthly
+    metrics: 
+      - "cpu_usage"
+      - "memory_usage"
+      - "network_throughput"
+      - "attack_detection_rate"
+  
+  visualization:
+    enabled: true
+    format: "png"
+    dpi: 300

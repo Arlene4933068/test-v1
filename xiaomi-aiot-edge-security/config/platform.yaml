@@ -10,16 +10,31 @@ platform:
     api_version: "v2"
     # 设备服务名称
     device_service_name: "xiaomi-device-service"
-    # 如果需要身份验证，可以在这里添加token
+    # 认证配置
+    auth:
+      enabled: true
+      token: "${EDGEX_TOKEN}"  # 从环境变量获取令牌
 
   # ThingsBoard Edge配置
   thingsboard:
     host: "localhost"
     port: 8080
     mqtt_port: 1883
-    username: "tenant@thingsboard.org"  # 默认用户名，根据实际情况修改
-    password: "tenant"  # 默认密码，根据实际情况修改
-    # tenant_id: "optional-tenant-id"
+    ws_url: "wss://localhost:8080/ws"  # 使用安全WebSocket连接
+    # 认证配置
+    auth:
+      username: "${TB_USERNAME}"  # 从环境变量获取用户名
+      password: "${TB_PASSWORD}"  # 从环境变量获取密码
+      token: "${TB_TOKEN}"  # 从环境变量获取JWT令牌
+    # 安全配置
+    security:
+      ssl_verify: true  # 启用SSL验证
+      cert_file: "certs/client.crt"  # 客户端证书路径
+      key_file: "certs/client.key"  # 客户端密钥路径
+    # 重连配置
+    reconnect:
+      max_retries: 10  # 增加最大重试次数
+      interval: 30  # 增加重连间隔
 
 # 设备模拟配置
 devices:

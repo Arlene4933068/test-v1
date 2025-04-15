@@ -129,7 +129,7 @@ def run_platform(config: Dict[str, Any], logger):
     analytics_config = config.get("analytics", {})
     data_collector = DataCollector(analytics_config)
     statistical_analyzer = StatisticalAnalyzer(analytics_config)
-    report_generator = ReportGenerator(analytics_config)
+    report_generator = ReportGenerator(analytics_config.get('output_dir', 'output'))
     
     try:
         # 启动设备模拟

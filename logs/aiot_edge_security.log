@@ -1,0 +1,8 @@
+2025-04-15 13:54:06,759 - DeviceManager - INFO - d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard\device_manager.py:17 - 设备管理器初始化完成
+2025-04-15 13:54:06,760 - SecurityConfig - INFO - d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard\security_config.py:100 - 配置保存成功: D:\0pj\test-v1\config\security.yaml
+2025-04-15 13:54:06,760 - SecurityConfig - INFO - d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard\security_config.py:86 - 创建默认配置文件: D:\0pj\test-v1\config\security.yaml
+2025-04-15 13:54:06,760 - SecurityConfig - INFO - d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard\security_config.py:63 - 安全配置管理器初始化完成
+2025-04-15 13:54:06,760 - dashboard_runner - ERROR - d:\0pj\test-v1\xiaomi-aiot-edge-security\run_dashboard.py:49 - Failed to start dashboard application: StatisticalAnalyzer.__init__() missing 1 required positional argument: 'config'
+2025-04-15 14:16:14,073 - __main__ - ERROR - d:\0pj\test-v1\xiaomi-aiot-edge-security\src\main.py:210 - 加载配置失败，退出程序
+2025-04-15 14:30:53,552 - __main__ - ERROR - d:\0pj\test-v1\xiaomi-aiot-edge-security\src\main.py:210 - 加载配置失败，退出程序
+2025-04-15 14:39:41,102 - __main__ - ERROR - d:\0pj\test-v1\xiaomi-aiot-edge-security\src\main.py:210 - 加载配置失败，退出程序

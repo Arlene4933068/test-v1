@@ -1,0 +1,24 @@
+protection:
+  auto_update: true
+  enabled: true
+  log_level: info
+response:
+  alert: true
+  block: true
+  quarantine: false
+rules:
+  credential:
+    enabled: true
+    lockout_threshold: 5
+    lockout_time: 300
+  ddos:
+    enabled: true
+    threshold: 100
+    window: 60
+  firmware:
+    enabled: true
+    verify_checksum: true
+    verify_signature: true
+  mitm:
+    certificate_verification: true
+    enabled: true

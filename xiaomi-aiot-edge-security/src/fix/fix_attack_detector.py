@@ -1,9 +1,62 @@
 #!/usr/bin/env python3
+# 完整修复攻击检测器中的变量错误和关闭问题
+
+import os
+import sys
+import re
+
+def main():
+    print("开始全面修复攻击检测器...\n")
+    
+    # 确定正确的项目根目录路径
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # 尝试多个可能的项目根路径
+    possible_roots = [
+        os.getcwd(),                                  # 当前工作目录
+        os.path.dirname(script_dir),                  # 脚本的父目录
+        os.path.dirname(os.path.dirname(script_dir)), # 脚本的祖父目录
+        "D:/0pj/test-v1/xiaomi-aiot-edge-security"   # 明确指定的项目路径
+    ]
+    
+    # 找到正确的项目根目录
+    root_dir = None
+    for path in possible_roots:
+        main_file_path = os.path.join(path, "src", "main.py")
+        if os.path.isfile(main_file_path):
+            root_dir = path
+            break
+    
+    if not root_dir:
+        print("错误：无法找到项目根目录")
+        sys.exit(1)
+    
+    print(f"已找到项目根目录: {root_dir}")
+    
+    # 完全重写 attack_detector.py 文件
+    detector_path = os.path.join(root_dir, "src", "security", "attack_detector.py")
+    detector_backup_path = detector_path + ".bak"
+    
+    if not os.path.isfile(detector_path):
+        print(f"错误：无法找到 AttackDetector 文件: {detector_path}")
+        sys.exit(1)
+    
+    # 备份原始文件
+    try:
+        with open(detector_path, "r", encoding="utf-8") as src:
+            with open(detector_backup_path, "w", encoding="utf-8") as dst:
+                dst.write(src.read())
+        print(f"✅ 已备份原始 AttackDetector 到: {detector_backup_path}")
+    except Exception as e:
+        print(f"警告：无法备份 AttackDetector: {e}")
+    
+    # 新的 AttackDetector 内容
+    new_detector_content = """#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
+\"\"\"
 攻击检测器模块
 负责检测针对设备和系统的各种攻击行为
-"""
+\"\"\"
 
 import time
 import logging
@@ -13,15 +66,15 @@ from typing import Dict, List, Any, Optional
 import queue
 
 class AttackDetector:
-    """攻击检测器，负责检测多种类型的攻击"""
+    \"\"\"攻击检测器，负责检测多种类型的攻击\"\"\"
     
     def __init__(self, config: Dict[str, Any]):
-        """
+        \"\"\"
         初始化攻击检测器
         
         Args:
             config: 检测器配置
-        """
+        \"\"\"
         self.logger = logging.getLogger(__name__)
         self.config = config
         self.running = False
@@ -45,7 +98,7 @@ class AttackDetector:
         self.detection_results = []
     
     def start(self):
-        """启动检测器"""
+        \"\"\"启动检测器\"\"\"
         if self.running:
             return
         
@@ -56,7 +109,7 @@ class AttackDetector:
         self.logger.info("攻击检测器已启动")
     
     def stop(self):
-        """停止检测器"""
+        \"\"\"停止检测器\"\"\"
         if not self.running:
             return
             
@@ -73,16 +126,16 @@ class AttackDetector:
         self.logger.info("攻击检测器已停止")
     
     def register_attack_callback(self, callback):
-        """
+        \"\"\"
         注册攻击检测回调函数
         
         Args:
             callback: 当检测到攻击时调用的回调函数，接受attack_info作为参数
-        """
+        \"\"\"
         self.on_attack_detected = callback
     
     def _detection_loop(self):
-        """检测循环，在单独的线程中运行"""
+        \"\"\"检测循环，在单独的线程中运行\"\"\"
         while self.running:
             try:
                 # 执行各种攻击检测
@@ -110,12 +163,12 @@ class AttackDetector:
                     time.sleep(1.0)  # 发生错误时短暂暂停
     
     def _detect_ddos_attack(self) -> Dict[str, Any]:
-        """
+        \"\"\"
         检测DDoS攻击
         
         Returns:
             Dict[str, Any]: 如果检测到攻击，返回攻击信息，否则返回None
-        """
+        \"\"\"
         try:
             # 初始化攻击信息
             attack_info = {
@@ -143,12 +196,12 @@ class AttackDetector:
             return None
     
     def _detect_mitm_attack(self) -> Dict[str, Any]:
-        """
+        \"\"\"
         检测中间人攻击
         
         Returns:
             Dict[str, Any]: 如果检测到攻击，返回攻击信息，否则返回None
-        """
+        \"\"\"
         try:
             # 初始化攻击信息
             attack_info = {
@@ -175,12 +228,12 @@ class AttackDetector:
             return None
     
     def _detect_credential_attack(self) -> Dict[str, Any]:
-        """
+        \"\"\"
         检测凭证攻击（暴力破解、凭证泄露等）
         
         Returns:
             Dict[str, Any]: 如果检测到攻击，返回攻击信息，否则返回None
-        """
+        \"\"\"
         try:
             # 初始化攻击信息
             attack_info = {
@@ -207,12 +260,12 @@ class AttackDetector:
             return None
     
     def _detect_firmware_attack(self) -> Dict[str, Any]:
-        """
+        \"\"\"
         检测固件攻击（恶意固件更新等）
         
         Returns:
             Dict[str, Any]: 如果检测到攻击，返回攻击信息，否则返回None
-        """
+        \"\"\"
         try:
             # 初始化攻击信息
             attack_info = {
@@ -239,12 +292,12 @@ class AttackDetector:
             return None
     
     def _detect_anomaly_attack(self) -> Dict[str, Any]:
-        """
+        \"\"\"
         检测异常行为（可疑的设备行为模式）
         
         Returns:
             Dict[str, Any]: 如果检测到攻击，返回攻击信息，否则返回None
-        """
+        \"\"\"
         try:
             # 初始化攻击信息
             attack_info = {
@@ -270,3 +323,104 @@ class AttackDetector:
         except Exception as e:
             self.logger.error(f"异常行为检测异常: {str(e)}")
             return None
+"""
+    
+    # 写入新内容
+    with open(detector_path, "w", encoding="utf-8") as f:
+        f.write(new_detector_content)
+    
+    print("✅ 已完全重写 AttackDetector 类，修复了所有变量错误")
+    
+    # 修复 SecurityNode 类的 stop 方法
+    node_path = os.path.join(root_dir, "src", "security", "security_node.py")
+    
+    if os.path.isfile(node_path):
+        with open(node_path, "r", encoding="utf-8") as f:
+            node_content = f.read()
+        
+        # 查找 stop 方法
+        stop_pattern = r"def stop\(self\):(.*?)(?=\n    def|\n\n|$)"
+        stop_match = re.search(stop_pattern, node_content, re.DOTALL)
+        
+        if stop_match:
+            old_stop = stop_match.group(0)  # 包括方法签名
+            
+            # 创建新的 stop 方法
+            new_stop = """def stop(self):
+        \"\"\"停止安全节点\"\"\"
+        try:
+            if hasattr(self, 'detector') and self.detector:
+                try:
+                    self.detector.stop()
+                except Exception as e:
+                    self.logger.error(f"停止检测器时发生错误: {str(e)}")
+                
+            if hasattr(self, 'protector') and self.protector:
+                try:
+                    self.protector.stop()
+                except Exception as e:
+                    self.logger.error(f"停止保护器时发生错误: {str(e)}")
+                
+            self.logger.info(f"安全节点 {self.node_id} 已停止")
+        except Exception as e:
+            self.logger.error(f"停止安全节点时发生错误: {str(e)}")"""
+            
+            # 替换 stop 方法
+            node_content = node_content.replace(old_stop, new_stop)
+            
+            with open(node_path, "w", encoding="utf-8") as f:
+                f.write(node_content)
+            
+            print("✅ 已修复 SecurityNode 的 stop 方法")
+        else:
+            print("警告：无法找到 SecurityNode 的 stop 方法")
+    
+    # 修复 main.py 文件中的关闭逻辑
+    main_path = os.path.join(root_dir, "src", "main.py")
+    
+    if os.path.isfile(main_path):
+        with open(main_path, "r", encoding="utf-8") as f:
+            main_content = f.read()
+        
+        # 寻找 run_platform 函数中的关闭逻辑
+        run_platform_pattern = r"def run_platform\(.*?\):(.*?)(?=\ndef|\n\n|$)"
+        run_platform_match = re.search(run_platform_pattern, main_content, re.DOTALL)
+        
+        if run_platform_match:
+            old_run_platform = run_platform_match.group(0)  # 包括函数签名
+            
+            # 找到关闭安全节点的代码部分
+            node_stop_pattern = r"(# 关闭安全节点.*?for node in security_nodes.*?)(?=\n    # |$)"
+            node_stop_match = re.search(node_stop_pattern, old_run_platform, re.DOTALL)
+            
+            if node_stop_match:
+                old_node_stop = node_stop_match.group(1)
+                new_node_stop = """    # 关闭安全节点
+    logger.info("正在关闭安全节点...")
+    for node in security_nodes:
+        try:
+            node.stop()
+        except Exception as e:
+            logger.error(f"关闭安全节点时出错: {str(e)}")"""
+                
+                # 替换安全节点关闭代码
+                new_run_platform = old_run_platform.replace(old_node_stop, new_node_stop)
+                
+                # 更新 main.py 内容
+                main_content = main_content.replace(old_run_platform, new_run_platform)
+                
+                with open(main_path, "w", encoding="utf-8") as f:
+                    f.write(main_content)
+                
+                print("✅ 已修复 main.py 中的安全节点关闭逻辑")
+            else:
+                print("警告：无法找到 main.py 中的安全节点关闭代码")
+        else:
+            print("警告：无法找到 main.py 中的 run_platform 函数")
+    
+    print("\n🚀 所有修复已完成！现在您可以运行主程序:")
+    print(f"python {os.path.join(root_dir, 'src', 'main.py')}")
+    print("\n程序应该不再显示任何 'cannot access local variable attack_info' 错误了")
+
+if __name__ == "__main__":
+    main()

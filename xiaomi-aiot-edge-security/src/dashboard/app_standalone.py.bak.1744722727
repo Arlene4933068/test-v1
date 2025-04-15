@@ -1,0 +1,123 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+独立运行的Dashboard应用
+"""
+
+import os
+import sys
+import logging
+import traceback
+from flask import Flask, render_template, request
+from datetime import datetime
+
+# 配置日志
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+
+logger = logging.getLogger(__name__)
+
+# 确保目录路径
+base_dir = os.path.dirname(os.path.abspath(__file__))
+templates_dir = os.path.join(base_dir, 'templates')
+static_dir = os.path.join(base_dir, 'static')
+
+# 创建必要的目录
+os.makedirs(templates_dir, exist_ok=True)
+os.makedirs(static_dir, exist_ok=True)
+os.makedirs(os.path.join(static_dir, 'css'), exist_ok=True)
+os.makedirs(os.path.join(static_dir, 'js'), exist_ok=True)
+
+# 创建Flask应用
+app = Flask(__name__, 
+           template_folder=templates_dir,
+           static_folder=static_dir)
+app.config['DEBUG'] = True
+
+# 创建一个简单的500错误模板，如果不存在
+error_template_path = os.path.join(templates_dir, '500.html')
+if not os.path.exists(error_template_path):
+    with open(error_template_path, 'w', encoding='utf-8') as f:
+        f.write("""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>服务器错误</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { color: #e53e3e; }
+        .container { max-width: 800px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>500 - 服务器内部错误</h1>
+        <p>抱歉，服务器遇到了内部错误，无法完成您的请求。</p>
+        <p>错误信息: {{ error }}</p>
+        <p>时间: {{ current_time }}</p>
+        <p>用户: {{ current_user }}</p>
+        <p><a href="/">返回首页</a></p>
+    </div>
+</body>
+</html>""")
+    logger.info(f"创建了500错误模板: {error_template_path}")
+
+@app.route('/')
+def index():
+    """首页"""
+    try:
+        logger.info("访问首页")
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>小米AIoT边缘安全防护研究平台</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { color: #ff6700; }
+            </style>
+        </head>
+        <body>
+            <h1>小米AIoT边缘安全防护研究平台</h1>
+            <p>系统运行正常！</p>
+            <p>当前时间: """ + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + """</p>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        logger.error(f"首页渲染错误: {str(e)}")
+        logger.error(traceback.format_exc())
+        return str(e), 500
+
+@app.errorhandler(500)
+def internal_error(error):
+    """处理500错误"""
+    logger.error(f'服务器错误: {error}')
+    logger.error(traceback.format_exc())
+    
+    try:
+        return render_template('500.html', 
+                             current_user='Guest', 
+                             current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
+                             error=str(error)), 500
+    except Exception as e:
+        logger.error(f"渲染错误模板失败: {str(e)}")
+        return f"严重错误: {str(error)}", 500
+
+if __name__ == "__main__":
+    print("="*50)
+    print(" 小米AIoT边缘安全防护研究平台 ".center(50))
+    print("="*50)
+    print(f"• 工作目录: {os.getcwd()}")
+    print(f"• 应用目录: {base_dir}")
+    print(f"• 模板目录: {templates_dir}")
+    print(f"• 静态目录: {static_dir}")
+    
+    try:
+        app.run(host='0.0.0.0', port=5000, debug=True)
+    except Exception as e:
+        print(f"启动失败: {str(e)}")
+        traceback.print_exc()

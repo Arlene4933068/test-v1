@@ -3,13 +3,9 @@
 """
 import time
 import logging
-from typing import Dict, List, Optional, Any
-import matplotlib
-matplotlib.use('Agg')  # 使用非交互式后端，避免在无GUI环境下报错
-
+from typing import Dict, List
 import matplotlib.pyplot as plt
 import pandas as pd
-
 
 class AttackVisualizer:
     """攻击数据可视化类"""

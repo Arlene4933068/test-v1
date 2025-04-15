@@ -11,14 +11,6 @@ import traceback
 from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime
 
-# 辅助函数定义
-def banner(message):
-    """打印格式化的横幅"""
-    line = "=" * 70
-    print(f"\n{line}")
-    print(f"{message:^70}")
-    print(f"{line}\n")
-
 # 禁用Matplotlib的交互模式，避免在无GUI环境中出错
 try:
     import matplotlib
@@ -250,7 +242,8 @@ def debug():
         
         for name, version in dependencies.items():
             status = "success" if version != "未安装" else "error"
-            html += f'<li><span class="{status}">{name}: {version}</span></li>'
+            html += f'<li><span class="{status}">{name}: {version}</span></li>
+'
         
         html += """
                 </ul>
@@ -262,17 +255,23 @@ def debug():
         
         for name, info in dirs.items():
             status = "success" if info['exists'] else "error"
-            html += f'<h3>{name} <span class="{status}">{"存在" if info["exists"] else "不存在"}</span></h3>'
-            html += f'<pre>{info["path"]}</pre>'
+            html += f'<h3>{name} <span class="{status}">{"存在" if info["exists"] else "不存在"}</span></h3>
+'
+            html += f'<pre>{info["path"]}</pre>
+'
             
             if info['exists']:
                 if info['files']:
-                    html += '<ul>'
+                    html += '<ul>
+'
                     for file in sorted(info['files']):
-                        html += f'<li>{file}</li>'
-                    html += '</ul>'
+                        html += f'<li>{file}</li>
+'
+                    html += '</ul>
+'
                 else:
-                    html += '<p>目录为空</p>'
+                    html += '<p>目录为空</p>
+'
         
         html += """
             </div>
@@ -343,10 +342,12 @@ if __name__ == "__main__":
         print(f"• 模板目录: {templates_dir}")
         print(f"• 静态目录: {static_dir}")
         
-        print("\n启动服务器，访问 http://localhost:5000 查看应用...")
+        print("
+启动服务器，访问 http://localhost:5000 查看应用...")
         app.run(host='0.0.0.0', port=5000, debug=True)
     except Exception as e:
         logger.critical(f"启动失败: {str(e)}")
         logger.critical(traceback.format_exc())
-        print(f"\n严重错误: {str(e)}")
+        print(f"
+严重错误: {str(e)}")
         print("请查看日志获取更多信息。")

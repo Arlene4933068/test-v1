@@ -9,11 +9,12 @@ import pandas as pd
 from datetime import datetime
 import json
 import os
+from typing import Dict, List, Optional, Any
+import matplotlib
+matplotlib.use('Agg')
 
-class PacketVisualizer:
-    """数据包可视化器，用于展示网络流量和攻击数据"""
-    
-    def __init__(self, capture_dir: str):
+class AttackVisualizer:
+    def __init__(self, detector: Optional[Any] = None):
         """初始化可视化器
         
         Args:

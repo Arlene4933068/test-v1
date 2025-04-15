@@ -1,0 +1,16 @@
+2025-04-15 21:12:07,734 [INFO] ÒÑ±¸·ÝÔ­Ê¼ÎÄ¼þµ½: xiaomi-aiot-edge-security\src\dashboard\app_standalone.py.bak.1744722727
+2025-04-15 21:12:07,734 [INFO] ÒÑÐÞ¸´²¢±£´æ: xiaomi-aiot-edge-security\src\dashboard\app_standalone.py
+2025-04-15 21:12:07,736 [INFO] ÐÞ¸´ÁË attack_visualizer.py (±¸·ÝÔÚ xiaomi-aiot-edge-security\src\dashboard\attack_visualizer.py.bak.1744722727)
+2025-04-15 21:12:07,792 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7000
+2025-04-15 21:12:07,793 [INFO] [33mPress CTRL+C to quit[0m
+2025-04-15 21:12:07,793 [INFO]  * Restarting with stat
+2025-04-15 21:12:22,634 [INFO] ÒÑ±¸·ÝÔ­Ê¼ÎÄ¼þµ½: xiaomi-aiot-edge-security\src\dashboard\app_standalone.py.bak.1744722742
+2025-04-15 21:12:22,635 [INFO] ÒÑÐÞ¸´²¢±£´æ: xiaomi-aiot-edge-security\src\dashboard\app_standalone.py
+2025-04-15 21:12:22,636 [INFO] ÐÞ¸´ÁË attack_visualizer.py (±¸·ÝÔÚ xiaomi-aiot-edge-security\src\dashboard\attack_visualizer.py.bak.1744722742)
+2025-04-15 21:12:22,644 [WARNING]  * Debugger is active!
+2025-04-15 21:12:22,646 [INFO]  * Debugger PIN: 427-483-642
+2025-04-15 21:12:30,595 [INFO] 127.0.0.1 - - [15/Apr/2025 21:12:30] "GET / HTTP/1.1" 200 -
+2025-04-15 21:12:30,789 [INFO] 127.0.0.1 - - [15/Apr/2025 21:12:30] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-04-15 21:21:11,041 [INFO]  * Detected change in 'D:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard\\app_standalone.py', reloading
+2025-04-15 21:21:11,069 [INFO]  * Restarting with stat

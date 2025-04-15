@@ -1,0 +1,67 @@
+2025-04-15 21:03:35,436 [INFO] diagnostic: Õï¶Ï¹¤¾ßÆô¶¯
+2025-04-15 21:03:35,436 [INFO] diagnostic: µ±Ç°Ä¿Â¼: d:\0pj\test-v1\xiaomi-aiot-edge-security
+2025-04-15 21:03:35,436 [INFO] diagnostic: Ä£°åÂ·¾¶: d:\0pj\test-v1\xiaomi-aiot-edge-security\templates
+2025-04-15 21:03:35,436 [INFO] diagnostic: ¾²Ì¬ÎÄ¼þÂ·¾¶: d:\0pj\test-v1\xiaomi-aiot-edge-security\static
+2025-04-15 21:03:35,462 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://172.27.44.174:8000
+2025-04-15 21:03:35,462 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-15 21:03:35,463 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 21:03:35,595 [INFO] diagnostic: Õï¶Ï¹¤¾ßÆô¶¯
+2025-04-15 21:03:35,595 [INFO] diagnostic: µ±Ç°Ä¿Â¼: d:\0pj\test-v1\xiaomi-aiot-edge-security
+2025-04-15 21:03:35,595 [INFO] diagnostic: Ä£°åÂ·¾¶: d:\0pj\test-v1\xiaomi-aiot-edge-security\templates
+2025-04-15 21:03:35,595 [INFO] diagnostic: ¾²Ì¬ÎÄ¼þÂ·¾¶: d:\0pj\test-v1\xiaomi-aiot-edge-security\static
+2025-04-15 21:03:35,605 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 21:03:35,607 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 21:04:04,899 [INFO] diagnostic: ·ÃÎÊÖ÷Ò³
+2025-04-15 21:04:04,900 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:04] "GET / HTTP/1.1" 200 -
+2025-04-15 21:04:05,071 [WARNING] diagnostic: 404´íÎó: /favicon.ico
+2025-04-15 21:04:05,072 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:05] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-04-15 21:04:09,564 [INFO] diagnostic: ·ÃÎÊÐÞ¸´¶ÀÁ¢Ó¦ÓÃÒ³Ãæ
+2025-04-15 21:04:09,564 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:09] "GET /fix-standalone HTTP/1.1" 200 -
+2025-04-15 21:04:23,006 [INFO] diagnostic: Ð´ÈëÐÞ¸´ºóµÄapp_standalone.py
+2025-04-15 21:04:23,008 [INFO] diagnostic: Ô­ÎÄ¼þÒÑ±¸·Ýµ½: D:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard\app_standalone.py.bak.1744722263
+2025-04-15 21:04:23,009 [INFO] diagnostic: ³É¹¦Ð´ÈëÐÞ¸´ºóµÄ´úÂëµ½: D:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard\app_standalone.py
+2025-04-15 21:04:23,009 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:23] "POST /write-standalone HTTP/1.1" 200 -
+2025-04-15 21:04:23,829 [INFO] werkzeug:  * Detected change in 'd:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard\\app_standalone.py', reloading
+2025-04-15 21:04:23,860 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 21:04:23,992 [INFO] diagnostic: Õï¶Ï¹¤¾ßÆô¶¯
+2025-04-15 21:04:23,992 [INFO] diagnostic: µ±Ç°Ä¿Â¼: d:\0pj\test-v1\xiaomi-aiot-edge-security
+2025-04-15 21:04:23,993 [INFO] diagnostic: Ä£°åÂ·¾¶: d:\0pj\test-v1\xiaomi-aiot-edge-security\templates
+2025-04-15 21:04:23,993 [INFO] diagnostic: ¾²Ì¬ÎÄ¼þÂ·¾¶: d:\0pj\test-v1\xiaomi-aiot-edge-security\static
+2025-04-15 21:04:24,004 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 21:04:24,005 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 21:04:25,472 [INFO] diagnostic: ·ÃÎÊÖ÷Ò³
+2025-04-15 21:04:25,472 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:25] "GET / HTTP/1.1" 200 -
+2025-04-15 21:04:29,009 [INFO] diagnostic: ·ÃÎÊÏµÍ³ÐÅÏ¢Ò³Ãæ
+2025-04-15 21:04:29,092 [DEBUG] matplotlib: matplotlib data path: D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\matplotlib\mpl-data
+2025-04-15 21:04:29,099 [DEBUG] matplotlib: CONFIGDIR=C:\Users\PC\.matplotlib
+2025-04-15 21:04:29,100 [DEBUG] matplotlib: interactive is False
+2025-04-15 21:04:29,100 [DEBUG] matplotlib: platform is win32
+2025-04-15 21:04:29,231 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:29] "GET /system-info HTTP/1.1" 200 -
+2025-04-15 21:04:33,154 [INFO] diagnostic: ·ÃÎÊÎÄ¼þ¼ì²éÒ³Ãæ
+2025-04-15 21:04:33,155 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:33] "GET /file-check HTTP/1.1" 200 -
+2025-04-15 21:04:37,347 [INFO] diagnostic: ¹ÊÒâ´¥·¢500´íÎó
+2025-04-15 21:04:37,351 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:37] "[35m[1mGET /force-error HTTP/1.1[0m" 500 -
+2025-04-15 21:04:37,458 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:37] "GET /force-error?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2025-04-15 21:04:37,462 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:37] "GET /force-error?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2025-04-15 21:04:37,480 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:37] "GET /force-error?__debugger__=yes&cmd=resource&f=console.png&s=pYzVcsBN868NbX4rvpKa HTTP/1.1" 200 -
+2025-04-15 21:04:37,511 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:37] "GET /force-error?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2025-04-15 21:04:45,129 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:45] "GET /minimal HTTP/1.1" 200 -
+2025-04-15 21:04:47,275 [INFO] diagnostic: ·ÃÎÊÖ÷Ò³
+2025-04-15 21:04:47,275 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:47] "GET / HTTP/1.1" 200 -
+2025-04-15 21:04:48,447 [INFO] diagnostic: ·ÃÎÊÐÞ¸´¿ÉÊÓ»¯Ò³Ãæ
+2025-04-15 21:04:48,448 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:48] "GET /fix-visualization HTTP/1.1" 200 -
+2025-04-15 21:04:50,469 [INFO] diagnostic: Ð´ÈëÐÞ¸´ºóµÄ¿ÉÊÓ»¯Ä£¿é´úÂë
+2025-04-15 21:04:50,471 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:50] "POST /write-visualization HTTP/1.1" 200 -
+2025-04-15 21:04:51,310 [INFO] werkzeug:  * Detected change in 'd:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard\\visualization.py', reloading
+2025-04-15 21:04:51,389 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 21:04:51,512 [INFO] diagnostic: Õï¶Ï¹¤¾ßÆô¶¯
+2025-04-15 21:04:51,513 [INFO] diagnostic: µ±Ç°Ä¿Â¼: d:\0pj\test-v1\xiaomi-aiot-edge-security
+2025-04-15 21:04:51,513 [INFO] diagnostic: Ä£°åÂ·¾¶: d:\0pj\test-v1\xiaomi-aiot-edge-security\templates
+2025-04-15 21:04:51,513 [INFO] diagnostic: ¾²Ì¬ÎÄ¼þÂ·¾¶: d:\0pj\test-v1\xiaomi-aiot-edge-security\static
+2025-04-15 21:04:51,523 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 21:04:51,524 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 21:04:52,981 [INFO] diagnostic: ·ÃÎÊÖ÷Ò³
+2025-04-15 21:04:52,982 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:04:52] "GET / HTTP/1.1" 200 -

@@ -1,1 +1,21 @@
 2025-04-15 13:54:06,758 [INFO] dashboard_runner: Starting dashboard application on 0.0.0.0:5000
+2025-04-15 21:21:13,261 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 21:21:13,276 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.27.44.174:5000
+2025-04-15 21:21:13,277 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-15 21:21:13,277 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 21:21:13,464 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 21:21:13,472 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 21:21:13,474 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 21:21:50,281 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 21:21:50,299 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.27.44.174:5000
+2025-04-15 21:21:50,299 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-15 21:21:50,300 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 21:21:50,510 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 21:21:50,519 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 21:21:50,521 [INFO] werkzeug:  * Debugger PIN: 427-483-642

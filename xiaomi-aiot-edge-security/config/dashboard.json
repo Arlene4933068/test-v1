@@ -1,0 +1,11 @@
+{
+    "web_port": 5000,
+    "log_dir": "data/attack_logs",
+    "capture_dir": "data/packet_capture",
+    "attack_log_retention_days": 30,
+    "packet_capture_limit": 100,
+    "refresh_interval": 5,
+    "enable_packet_capture": true,
+    "interfaces": ["eth0"],
+    "api_key": "your_secret_api_key"
+  }

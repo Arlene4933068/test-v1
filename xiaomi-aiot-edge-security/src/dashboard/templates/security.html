@@ -3,621 +3,1017 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>安全监控 - 小米AIoT边缘安全控制面板</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>安全事件监控 - 小米AIoT边缘安全防护研究平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
     <style>
-        :root {
-            --primary: #ff6700;
-            --secondary: #2d3748;
-            --background: #f8f9fa;
-            --card-bg: #ffffff;
-            --text: #333333;
-            --border: #e2e8f0;
-            --danger: #f56565;
-            --warning: #ed8936;
-            --success: #48bb78;
-            --info: #4299e1;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-        }
-        
-        body {
-            background-color: var(--background);
-            color: var(--text);
-            line-height: 1.6;
-        }
-        
-        .container {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        .sidebar {
-            width: 250px;
-            background-color: var(--secondary);
-            color: white;
-            padding: 1rem 0;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            padding: 0 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .logo i {
-            margin-right: 0.8rem;
-            font-size: 1.5rem;
-        }
-        
-        .logo h2 {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        
-        .nav-menu {
-            list-style: none;
-        }
-        
-        .nav-item {
-            margin-bottom: 0.5rem;
-        }
-        
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 0.8rem 1.5rem;
-            color: #cbd5e0;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        
-        .nav-link:hover, .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left: 3px solid var(--primary);
-        }
-        
-        .nav-link i {
-            margin-right: 0.8rem;
-            font-size: 1.1rem;
-        }
-        
-        .main-content {
-            flex: 1;
-            margin-left: 250px;
-            padding: 2rem;
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-        
-        .header h1 {
-            font-size: 1.8rem;
-            color: var(--secondary);
-        }
-        
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .btn {
-            padding: 0.5rem 1rem;
+        .attack-event {
+            margin-bottom: 10px;
+            padding: 10px;
             border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
-        
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #e85a00;
-        }
-        
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--secondary);
-            color: var(--secondary);
-        }
-        
-        .btn-outline:hover {
-            background-color: var(--secondary);
-            color: white;
-        }
-        
-        .security-overview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .security-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            padding: 1.5rem;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .security-card:hover {
-            transform: translateY(-5px);
+        .attack-event:hover {
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-        
-        .security-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
+        .severity-critical {
+            border-left: 5px solid #dc3545;
+            background-color: rgba(220, 53, 69, 0.1);
         }
-        
-        .security-card-header h3 {
-            font-size: 1.1rem;
-            color: var(--secondary);
-        }
-        
-        .security-card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-        
-        .icon-danger {
-            background-color: var(--danger);
-        }
-        
-        .icon-warning {
-            background-color: var(--warning);
-        }
-        
-        .icon-success {
-            background-color: var(--success);
-        }
-        
-        .icon-info {
-            background-color: var(--info);
-        }
-        
-        .security-card-value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        .security-card-label {
-            color: #718096;
-            font-size: 0.9rem;
-        }
-        
-        .security-alerts {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-        
-        .security-alerts-header {
-            background-color: var(--secondary);
-            color: white;
-            padding: 1rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .security-alerts-body {
-            padding: 0 1.5rem;
-        }
-        
-        .alert-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .alert-table th, .alert-table td {
-            padding: 1rem 0;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .alert-table th {
-            color: #718096;
-            font-weight: 600;
-        }
-        
-        .alert-severity {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
         .severity-high {
-            background-color: #fed7d7;
-            color: #c53030;
+            border-left: 5px solid #fd7e14;
+            background-color: rgba(253, 126, 20, 0.1);
         }
-        
         .severity-medium {
-            background-color: #feebc8;
-            color: #c05621;
+            border-left: 5px solid #ffc107;
+            background-color: rgba(255, 193, 7, 0.1);
         }
-        
         .severity-low {
-            background-color: #c6f6d5;
-            color: #2f855a;
+            border-left: 5px solid #17a2b8;
+            background-color: rgba(23, 162, 184, 0.1);
         }
-        
-        .alert-actions button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #718096;
-            margin-right: 0.5rem;
-            transition: color 0.3s;
+        .event-handled {
+            opacity: 0.6;
         }
-        
-        .alert-actions button:hover {
-            color: var(--primary);
-        }
-        
-        .security-maps {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
-        }
-        
-        .security-map, .security-stats {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .security-map-header, .security-stats-header {
-            padding: 1rem 1.5rem;
-            background-color: var(--secondary);
-            color: white;
-        }
-        
-        .security-map-body {
-            padding: 1.5rem;
-            height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #e2e8f0;
+        .chart-container {
             position: relative;
+            height: 300px;
+            margin-bottom: 20px;
         }
-        
-        .map-placeholder {
-            text-align: center;
-            color: #718096;
-        }
-        
-        .map-placeholder i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        
-        .map-attack-point {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: var(--danger);
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% {
-                transform: scale(0.8);
-                box-shadow: 0 0 0 0 rgba(245, 101, 101, 0.7);
-            }
-            
-            70% {
-                transform: scale(1);
-                box-shadow: 0 0 0 10px rgba(245, 101, 101, 0);
-            }
-            
-            100% {
-                transform: scale(0.8);
-                box-shadow: 0 0 0 0 rgba(245, 101, 101, 0);
-            }
-        }
-        
-        .security-stats-body {
-            padding: 1.5rem;
-        }
-        
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .stat-label {
-            color: #4a5568;
-        }
-        
-        .stat-value {
-            font-weight: 600;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .security-maps {
-                grid-template-columns: 1fr;
-            }
+        .filter-bar {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <aside class="sidebar">
-            <div class="logo">
-                <i class="fas fa-shield-alt"></i>
-                <h2>小米AIoT边缘安全</h2>
-            </div>
-            <ul class="nav-menu">
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">小米AIoT边缘安全防护研究平台</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a href="/" class="nav-link">
-                        <i class="fas fa-home"></i>
-                        <span>首页</span>
-                    </a>
+                    <a class="nav-link" href="/">首页</a>
                 </li>
                 <li class="nav-item">
-                    <a href="/devices.html" class="nav-link">
-                        <i class="fas fa-microchip"></i>
-                        <span>设备管理</span>
-                    </a>
+                    <a class="nav-link" href="/devices">设备管理</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/security">安全监控</a>
                 </li>
                 <li class="nav-item">
-                    <a href="/security.html" class="nav-link active">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>安全监控</span>
-                    </a>
+                    <a class="nav-link" href="/network">网络分析</a>
                 </li>
                 <li class="nav-item">
-                    <a href="/analytics.html" class="nav-link">
-                        <i class="fas fa-chart-line"></i>
-                        <span>数据分析</span>
-                    </a>
+                    <a class="nav-link" href="/reports">报告</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-cog"></i>
-                        <span>系统设置</span>
-                    </a>
+                    <a class="nav-link" href="/settings">设置</a>
                 </li>
             </ul>
-        </aside>
-        
-        <main class="main-content">
-            <div class="header">
-                <h1>安全监控</h1>
-                <div class="header-actions">
-                    <button class="btn btn-outline">
-                        <i class="fas fa-download"></i> 导出报告
-                    </button>
-                    <button class="btn btn-primary">
-                        <i class="fas fa-shield-alt"></i> 安全扫描
-                    </button>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">退出</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">安全事件统计</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">时间范围</span>
+                                    </div>
+                                    <input type="text" id="daterange" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select id="groupBy" class="form-control">
+                                    <option value="day">按天统计</option>
+                                    <option value="hour">按小时统计</option>
+                                    <option value="type">按类型统计</option>
+                                    <option value="device">按设备统计</option>
+                                    <option value="severity">按严重性统计</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button id="refreshStats" class="btn btn-primary btn-block">刷新统计</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="attackChart"></canvas>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">严重</h5>
+                                        <h3 id="criticalCount" class="mb-0">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-dark">
+                                    <div class="card-body">
+                                        <h5 class="card-title">高危</h5>
+                                        <h3 id="highCount" class="mb-0">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">中危</h5>
+                                        <h3 id="mediumCount" class="mb-0">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">低危</h5>
+                                        <h3 id="lowCount" class="mb-0">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">安全事件列表</h5>
+                        <div>
+                            <button id="exportEvents" class="btn btn-sm btn-outline-secondary">导出</button>
+                            <button id="refreshEvents" class="btn btn-sm btn-primary ml-2">刷新</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="filter-bar">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <select id="deviceFilter" class="form-control form-control-sm">
+                                        <option value="">所有设备</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select id="attackTypeFilter" class="form-control form-control-sm">
+                                        <option value="">所有攻击类型</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select id="severityFilter" class="form-control form-control-sm">
+                                        <option value="">所有严重性</option>
+                                        <option value="critical">严重</option>
+                                        <option value="high">高危</option>
+                                        <option value="medium">中危</option>
+                                        <option value="low">低危</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select id="handledFilter" class="form-control form-control-sm">
+                                        <option value="">处理状态</option>
+                                        <option value="false">未处理</option>
+                                        <option value="true">已处理</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="eventsList" class="mt-3">
+                            <!-- 事件列表将在这里动态渲染 -->
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">加载中...</span>
+                                </div>
+                                <p class="mt-2">正在加载安全事件...</p>
+                            </div>
+                        </div>
+                        <nav>
+                            <ul class="pagination justify-content-center" id="eventsPagination">
+                                <!-- 分页控件将在这里动态渲染 -->
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
             </div>
-            
-            <div class="security-overview">
-                <div class="security-card">
-                    <div class="security-card-header">
-                        <h3>安全警报</h3>
-                        <div class="security-card-icon icon-danger">
-                            <i class="fas fa-exclamation-triangle"></i>
+
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">实时安全监控</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="realtimeEvents" class="mb-3" style="max-height: 300px; overflow-y: auto;">
+                            <div class="text-center py-3">
+                                <p>正在连接实时事件流...</p>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button id="toggleRealtimeBtn" class="btn btn-sm btn-outline-primary">暂停实时更新</button>
+                            <button id="clearRealtimeBtn" class="btn btn-sm btn-outline-secondary ml-2">清除</button>
                         </div>
                     </div>
-                    <div class="security-card-value">3</div>
-                    <div class="security-card-label">今日警报</div>
                 </div>
-                
-                <div class="security-card">
-                    <div class="security-card-header">
-                        <h3>漏洞</h3>
-                        <div class="security-card-icon icon-warning">
-                            <i class="fas fa-bug"></i>
-                        </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">攻击类型分布</h5>
                     </div>
-                    <div class="security-card-value">7</div>
-                    <div class="security-card-label">需要修复</div>
-                </div>
-                
-                <div class="security-card">
-                    <div class="security-card-header">
-                        <h3>受保护设备</h3>
-                        <div class="security-card-icon icon-success">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-                    <div class="security-card-value">20</div>
-                    <div class="security-card-label">24台设备中</div>
-                </div>
-                
-                <div class="security-card">
-                    <div class="security-card-header">
-                        <h3>安全评分</h3>
-                        <div class="security-card-icon icon-info">
-                            <i class="fas fa-chart-pie"></i>
-                        </div>
-                    </div>
-                    <div class="security-card-value">85%</div>
-                    <div class="security-card-label">良好</div>
-                </div>
-            </div>
-            
-            <div class="security-alerts">
-                <div class="security-alerts-header">
-                    <h2>最新安全警报</h2>
-                </div>
-                <div class="security-alerts-body">
-                    <table class="alert-table">
-                        <thead>
-                            <tr>
-                                <th>时间</th>
-                                <th>设备</th>
-                                <th>事件</th>
-                                <th>严重程度</th>
-                                <th>状态</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>今天 14:32</td>
-                                <td>客厅摄像头</td>
-                                <td>异常登录尝试</td>
-                                <td><span class="alert-severity severity-high">高</span></td>
-                                <td>未处理</td>
-                                <td class="alert-actions">
-                                    <button><i class="fas fa-eye"></i></button>
-                                    <button><i class="fas fa-check"></i></button>
-                                    <button><i class="fas fa-ban"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>今天 12:15</td>
-                                <td>智能门锁</td>
-                                <td>固件漏洞</td>
-                                <td><span class="alert-severity severity-medium">中</span></td>
-                                <td>正在处理</td>
-                                <td class="alert-actions">
-                                    <button><i class="fas fa-eye"></i></button>
-                                    <button><i class="fas fa-check"></i></button>
-                                    <button><i class="fas fa-ban"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>今天 09:47</td>
-                                <td>网关设备</td>
-                                <td>未授权访问</td>
-                                <td><span class="alert-severity severity-high">高</span></td>
-                                <td>已阻止</td>
-                                <td class="alert-actions">
-                                    <button><i class="fas fa-eye"></i></button>
-                                    <button><i class="fas fa-check"></i></button>
-                                    <button><i class="fas fa-ban"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>昨天 22:30</td>
-                                <td>厨房传感器</td>
-                                <td>异常流量</td>
-                                <td><span class="alert-severity severity-low">低</span></td>
-                                <td>已解决</td>
-                                <td class="alert-actions">
-                                    <button><i class="fas fa-eye"></i></button>
-                                    <button><i class="fas fa-check"></i></button>
-                                    <button><i class="fas fa-ban"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div class="security-maps">
-                <div class="security-map">
-                    <div class="security-map-header">
-                        <h2>攻击源地图</h2>
-                    </div>
-                    <div class="security-map-body">
-                        <div class="map-placeholder">
-                            <i class="fas fa-map-marked-alt"></i>
-                            <p>全球攻击源可视化</p>
-                        </div>
-                        <!-- 模拟攻击点 -->
-                        <div class="map-attack-point" style="top: 30%; left: 20%;"></div>
-                        <div class="map-attack-point" style="top: 40%; left: 60%;"></div>
-                        <div class="map-attack-point" style="top: 60%; left: 80%;"></div>
+                    <div class="card-body">
+                        <canvas id="attackTypePieChart"></canvas>
                     </div>
                 </div>
-                
-                <div class="security-stats">
-                    <div class="security-stats-header">
-                        <h2>安全统计</h2>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">事件详情</h5>
                     </div>
-                    <div class="security-stats-body">
-                        <div class="stat-item">
-                            <div class="stat-label">阻止的攻击</div>
-                            <div class="stat-value">193</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">最常见的攻击类型</div>
-                            <div class="stat-value">暴力破解</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">固件更新待处理</div>
-                            <div class="stat-value">5</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">异常连接</div>
-                            <div class="stat-value">2</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">上次安全扫描</div>
-                            <div class="stat-value">今天 08:00</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">24小时内的警报</div>
-                            <div class="stat-value">7</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">本周警报趋势</div>
-                            <div class="stat-value">↓ 12%</div>
+                    <div class="card-body">
+                        <div id="eventDetails">
+                            <div class="text-center py-5">
+                                <p>请从左侧列表选择一个事件查看详情</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
+
+    <!-- 事件处理模态框 -->
+    <div class="modal fade" id="eventHandleModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">处理安全事件</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>您确定要将此事件标记为已处理吗？</p>
+                    <div class="form-group">
+                        <label for="handleNotes">处理备注（可选）：</label>
+                        <textarea id="handleNotes" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" id="confirmHandleBtn" class="btn btn-primary">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导出选项模态框 -->
+    <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">导出安全事件</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>导出格式</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="exportFormat" id="formatCSV" value="csv" checked>
+                            <label class="form-check-label" for="formatCSV">CSV</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="exportFormat" id="formatJSON" value="json">
+                            <label class="form-check-label" for="formatJSON">JSON</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="exportFormat" id="formatPDF" value="pdf">
+                            <label class="form-check-label" for="formatPDF">PDF</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="exportTimeRange">时间范围</label>
+                        <select id="exportTimeRange" class="form-control">
+                            <option value="current">当前筛选结果</option>
+                            <option value="today">今天</option>
+                            <option value="week">本周</option>
+                            <option value="month">本月</option>
+                            <option value="custom">自定义...</option>
+                        </select>
+                    </div>
+                    <div id="customExportDateRange" class="form-group d-none">
+                        <label>自定义时间范围</label>
+                        <input type="text" id="exportDateRangePicker" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" id="confirmExportBtn" class="btn btn-primary">导出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script>
+        // 页面加载完成后执行
+        $(document).ready(function() {
+            // 初始化时间范围选择器
+            $('#daterange').daterangepicker({
+                startDate: moment().subtract(7, 'days'),
+                endDate: moment(),
+                ranges: {
+                    '今天': [moment().startOf('day'), moment()],
+                    '昨天': [moment().subtract(1, 'days').startOf('day'), moment().subtract(1, 'days').endOf('day')],
+                    '最近7天': [moment().subtract(6, 'days').startOf('day'), moment()],
+                    '最近30天': [moment().subtract(29, 'days').startOf('day'), moment()],
+                    '本月': [moment().startOf('month'), moment()],
+                    '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    applyLabel: '确认',
+                    cancelLabel: '取消',
+                    customRangeLabel: '自定义',
+                    daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                    monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+                }
+            });
+
+            // 导出日期选择器
+            $('#exportDateRangePicker').daterangepicker({
+                startDate: moment().subtract(7, 'days'),
+                endDate: moment(),
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    applyLabel: '确认',
+                    cancelLabel: '取消',
+                    daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                    monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+                }
+            });
+
+            // 当选择自定义时间范围时显示日期选择器
+            $('#exportTimeRange').change(function() {
+                if ($(this).val() === 'custom') {
+                    $('#customExportDateRange').removeClass('d-none');
+                } else {
+                    $('#customExportDateRange').addClass('d-none');
+                }
+            });
+
+            // 全局变量
+            let attackChart = null;
+            let attackTypePieChart = null;
+            let currentEvents = [];
+            let realtimeEnabled = true;
+            let currentPage = 1;
+            let eventsPerPage = 10;
+            let currentEventId = null;
+            let eventTypeOptions = [];
+            let deviceOptions = [];
+
+            // 初始化图表
+            initCharts();
+
+            // 加载数据
+            loadSecurityStatistics();
+            loadSecurityEvents();
+
+            // 初始化过滤器
+            initFilters();
+
+            // 刷新按钮事件
+            $('#refreshStats').click(loadSecurityStatistics);
+            $('#refreshEvents').click(() => loadSecurityEvents(currentPage));
+
+            // 实时更新按钮事件
+            $('#toggleRealtimeBtn').click(toggleRealtime);
+            $('#clearRealtimeBtn').click(clearRealtimeEvents);
+
+            // 导出按钮事件
+            $('#exportEvents').click(() => $('#exportModal').modal('show'));
+            $('#confirmExportBtn').click(exportEvents);
+
+            // 模拟WebSocket连接（实际应用中应替换为真实的WebSocket）
+            simulateRealtimeEvents();
+
+            // 初始化图表
+            function initCharts() {
+                // 攻击趋势图表
+                const ctx = document.getElementById('attackChart').getContext('2d');
+                attackChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: '安全事件',
+                            data: [],
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // 攻击类型饼图
+                const pieCtx = document.getElementById('attackTypePieChart').getContext('2d');
+                attackTypePieChart = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(153, 102, 255, 0.7)',
+                                'rgba(255, 159, 64, 0.7)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // 加载安全统计
+            function loadSecurityStatistics() {
+                const startTime = moment($('#daterange').data('daterangepicker').startDate).unix();
+                const endTime = moment($('#daterange').data('daterangepicker').endDate).unix();
+                const groupBy = $('#groupBy').val();
+
+                $.ajax({
+                    url: '/api/security/statistics',
+                    type: 'GET',
+                    data: {
+                        group_by: groupBy,
+                        start_time: startTime,
+                        end_time: endTime
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            updateStatisticsCharts(response);
+                        } else {
+                            console.error('加载统计数据失败:', response.error);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('API请求失败:', error);
+                    }
+                });
+            }
+
+            // 更新统计图表
+            function updateStatisticsCharts(data) {
+                // 更新趋势图
+                const chartData = data.data || [];
+                const labels = [];
+                const values = [];
+
+                // 按组类型处理数据
+                if (data.group_by === 'day' || data.group_by === 'hour') {
+                    chartData.forEach(item => {
+                        labels.push(item.period);
+                        values.push(item.count);
+                    });
+                } else {
+                    chartData.forEach(item => {
+                        labels.push(item.group_value);
+                        values.push(item.count);
+                    });
+                }
+
+                // 更新趋势图
+                attackChart.data.labels = labels;
+                attackChart.data.datasets[0].data = values;
+                attackChart.update();
+
+                // 更新饼图（如果是按类型分组）
+                if (data.group_by === 'type') {
+                    attackTypePieChart.data.labels = labels;
+                    attackTypePieChart.data.datasets[0].data = values;
+                    attackTypePieChart.update();
+                }
+
+                // 更新安全级别计数器
+                // 假设我们从另一个API获取这个信息，或者计算severity字段
+                updateSeverityCounts();
+            }
+
+            // 更新安全级别计数
+            function updateSeverityCounts() {
+                // 实际应用中应从API获取或从现有数据中计算
+                // 这里使用模拟数据作为示例
+                $.ajax({
+                    url: '/api/security/statistics',
+                    type: 'GET',
+                    data: {
+                        group_by: 'severity'
+                    },
+                    success: function(response) {
+                        if (response.success && response.data) {
+                            const counts = {
+                                critical: 0,
+                                high: 0,
+                                medium: 0,
+                                low: 0
+                            };
+                            
+                            response.data.forEach(item => {
+                                if (counts[item.group_value] !== undefined) {
+                                    counts[item.group_value] = item.count;
+                                }
+                            });
+                            
+                            $('#criticalCount').text(counts.critical);
+                            $('#highCount').text(counts.high);
+                            $('#mediumCount').text(counts.medium);
+                            $('#lowCount').text(counts.low);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('获取严重性统计失败:', error);
+                    }
+                });
+            }
+
+            // 加载安全事件列表
+            function loadSecurityEvents(page = 1) {
+                currentPage = page;
+                const limit = eventsPerPage;
+                const offset = (page - 1) * limit;
+                
+                // 获取过滤器值
+                const deviceId = $('#deviceFilter').val();
+                const attackType = $('#attackTypeFilter').val();
+                const severity = $('#severityFilter').val();
+                const handled = $('#handledFilter').val();
+                
+                $('#eventsList').html(`
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">加载中...</span>
+                        </div>
+                        <p class="mt-2">正在加载安全事件...</p>
+                    </div>
+                `);
+                
+                $.ajax({
+                    url: '/api/security/events',
+                    type: 'GET',
+                    data: {
+                        limit: limit,
+                        offset: offset,
+                        device_id: deviceId,
+                        attack_type: attackType,
+                        severity: severity,
+                        handled: handled
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            currentEvents = response.events;
+                            renderEventsList(response.events);
+                            updatePagination(response.total, page, limit);
+                        } else {
+                            $('#eventsList').html(`<div class="alert alert-danger">加载失败: ${response.error}</div>`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#eventsList').html(`<div class="alert alert-danger">请求失败: ${error}</div>`);
+                        console.error('API请求失败:', error);
+                    }
+                });
+            }
+
+            // 渲染事件列表
+            function renderEventsList(events) {
+                if (events.length === 0) {
+                    $('#eventsList').html('<div class="text-center py-3">没有找到符合条件的安全事件</div>');
+                    return;
+                }
+                
+                let html = '';
+                events.forEach(event => {
+                    const timestamp = moment.unix(event.timestamp).format('YYYY-MM-DD HH:mm:ss');
+                    const handledClass = event.handled ? 'event-handled' : '';
+                    const handledBadge = event.handled ? 
+                        '<span class="badge badge-success ml-2">已处理</span>' : 
+                        '<span class="badge badge-warning ml-2">未处理</span>';
+                    
+                    html += `
+                        <div class="attack-event severity-${event.severity} ${handledClass}" data-id="${event.id}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-1">
+                                    ${event.attack_type} ${handledBadge}
+                                </h5>
+                                <small>${timestamp}</small>
+                            </div>
+                            <p class="mb-1">${event.description}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small>设备: ${event.device_id}</small>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary view-details-btn" data-id="${event.id}">查看详情</button>
+                                    ${!event.handled ? `<button class="btn btn-sm btn-success ml-2 handle-event-btn" data-id="${event.id}">标记为已处理</button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                $('#eventsList').html(html);
+                
+                // 添加事件处理
+                $('.view-details-btn').click(function() {
+                    const eventId = $(this).data('id');
+                    showEventDetails(eventId);
+                });
+                
+                $('.handle-event-btn').click(function() {
+                    const eventId = $(this).data('id');
+                    $('#eventHandleModal').modal('show');
+                    currentEventId = eventId;
+                });
+            }
+
+            // 显示事件详情
+            function showEventDetails(eventId) {
+                const event = currentEvents.find(e => e.id === eventId);
+                if (!event) return;
+                
+                const timestamp = moment.unix(event.timestamp).format('YYYY-MM-DD HH:mm:ss');
+                
+                let rawDataHtml = '';
+                if (event.raw_data) {
+                    try {
+                        const rawData = typeof event.raw_data === 'string' ? JSON.parse(event.raw_data) : event.raw_data;
+                        rawDataHtml = `<pre class="mt-3 bg-light p-2" style="max-height: 200px; overflow-y: auto;"><code>${JSON.stringify(rawData, null, 2)}</code></pre>`;
+                    } catch (e) {
+                        rawDataHtml = `<pre class="mt-3 bg-light p-2">${event.raw_data}</pre>`;
+                    }
+                }
+                
+                const html = `
+                    <div class="p-2 attack-event severity-${event.severity}">
+                        <h5 class="mb-3">${event.attack_type}</h5>
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td width="30%"><strong>时间:</strong></td>
+                                <td>${timestamp}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>设备ID:</strong></td>
+                                <td>${event.device_id}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>严重性:</strong></td>
+                                <td><span class="badge badge-${getSeverityClass(event.severity)}">${getSeverityLabel(event.severity)}</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>源IP:</strong></td>
+                                <td>${event.source_ip || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>目标IP:</strong></td>
+                                <td>${event.destination_ip || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>状态:</strong></td>
+                                <td>${event.handled ? '<span class="badge badge-success">已处理</span>' : '<span class="badge badge-warning">未处理</span>'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>描述:</strong></td>
+                                <td>${event.description}</td>
+                            </tr>
+                        </table>
+                        ${rawDataHtml}
+                        ${!event.handled ? `
+                            <div class="text-right mt-3">
+                                <button class="btn btn-success handle-event-btn" data-id="${event.id}">标记为已处理</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                $('#eventDetails').html(html);
+                $('.handle-event-btn').click(function() {
+                    const eventId = $(this).data('id');
+                    $('#eventHandleModal').modal('show');
+                    currentEventId = eventId;
+                });
+            }
+
+            // 获取严重性对应的CSS类
+            function getSeverityClass(severity) {
+                switch (severity) {
+                    case 'critical': return 'danger';
+                    case 'high': return 'warning';
+                    case 'medium': return 'info';
+                    case 'low': return 'primary';
+                    default: return 'secondary';
+                }
+            }
+
+            // 获取严重性标签文本
+            function getSeverityLabel(severity) {
+                switch (severity) {
+                    case 'critical': return '严重';
+                    case 'high': return '高危';
+                    case 'medium': return '中危';
+                    case 'low': return '低危';
+                    default: return severity;
+                }
+            }
+
+            // 更新分页控件
+            function updatePagination(total, currentPage, limit) {
+                const totalPages = Math.ceil(total / limit);
+                let html = '';
+                
+                // 上一页按钮
+                html += `
+                    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="上一页">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                `;
+                
+                // 页码按钮
+                const startPage = Math.max(1, currentPage - 2);
+                const endPage = Math.min(totalPages, startPage + 4);
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    html += `
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `;
+                }
+                
+                // 下一页按钮
+                html += `
+                    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="下一页">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                `;
+                
+                $('#eventsPagination').html(html);
+                
+                // 添加页码点击事件
+                $('.page-link').click(function(e) {
+                    e.preventDefault();
+                    const page = $(this).data('page');
+                    if (page && !$(this).parent().hasClass('disabled')) {
+                        loadSecurityEvents(page);
+                    }
+                });
+            }
+
+            // 初始化过滤器
+            function initFilters() {
+                // 获取所有设备和攻击类型选项
+                $.ajax({
+                    url: '/api/security/events',
+                    type: 'GET',
+                    data: { limit: 1000 },
+                    success: function(response) {
+                        if (response.success) {
+                            const events = response.events;
+                            const devices = new Set();
+                            const attackTypes = new Set();
+                            
+                            events.forEach(event => {
+                                devices.add(event.device_id);
+                                attackTypes.add(event.attack_type);
+                            });
+                            
+                            // 填充设备过滤器
+                            let deviceHtml = '<option value="">所有设备</option>';
+                            devices.forEach(device => {
+                                deviceHtml += `<option value="${device}">${device}</option>`;
+                            });
+                            $('#deviceFilter').html(deviceHtml);
+                            
+                            // 填充攻击类型过滤器
+                            let attackTypeHtml = '<option value="">所有攻击类型</option>';
+                            attackTypes.forEach(type => {
+                                attackTypeHtml += `<option value="${type}">${type}</option>`;
+                            });
+                            $('#attackTypeFilter').html(attackTypeHtml);
+                            
+                            // 保存选项以供将来使用
+                            deviceOptions = Array.from(devices);
+                            eventTypeOptions = Array.from(attackTypes);
+                        }
+                    }
+                });
+                
+                // 添加过滤器变更事件
+                $('#deviceFilter, #attackTypeFilter, #severityFilter, #handledFilter').change(function() {
+                    loadSecurityEvents(1);
+                });
+            }
+
+            // 处理事件
+            $('#confirmHandleBtn').click(function() {
+                if (!currentEventId) return;
+                
+                const notes = $('#handleNotes').val();
+                
+                $.ajax({
+                    url: `/api/security/events/${currentEventId}`,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        handled: true,
+                        notes: notes
+                    }),
+                    success: function(response) {
+                        if (response.success) {
+                            $('#eventHandleModal').modal('hide');
+                            $('#handleNotes').val('');
+                            
+                            // 重新加载数据
+                            loadSecurityEvents(currentPage);
+                            const event = currentEvents.find(e => e.id === currentEventId);
+                            if (event) {
+                                showEventDetails(currentEventId);
+                            }
+                        } else {
+                            alert(`操作失败: ${response.error}`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert(`请求失败: ${error}`);
+                    }
+                });
+            });
+
+            // 模拟WebSocket连接（实际应用中应替换为真实的WebSocket）
+            function simulateRealtimeEvents() {
+                if (!realtimeEnabled) return;
+                
+                // 模拟接收安全事件
+                setTimeout(function() {
+                    const mockEvent = generateMockSecurityEvent();
+                    addRealtimeEvent(mockEvent);
+                    simulateRealtimeEvents();
+                }, Math.random() * 5000 + 2000); // 2-7秒随机时间间隔
+            }
+
+            // 生成模拟安全事件
+            function generateMockSecurityEvent() {
+                const eventTypes = [
+                    'DDoS攻击', '中间人攻击', '凭证攻击', '异常连接', 
+                    '固件攻击', '协议漏洞', '数据窃取', '端口扫描'
+                ];
+                const severities = ['critical', 'high', 'medium', 'low'];
+                const devices = deviceOptions.length > 0 ? 
+                    deviceOptions : ['gateway-001', 'router-001', 'camera-001', 'speaker-001'];
+                
+                const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+                const severity = severities[Math.floor(Math.random() * severities.length)];
+                const deviceId = devices[Math.floor(Math.random() * devices.length)];
+                
+                return {
+                    id: Math.floor(Math.random() * 10000),
+                    timestamp: Math.floor(Date.now() / 1000),
+                    device_id: deviceId,
+                    attack_type: eventType,
+                    severity: severity,
+                    source_ip: `192.168.1.${Math.floor(Math.random() * 255)}`,
+                    description: `检测到${eventType}尝试`,
+                    handled: false
+                };
+            }
+
+            // 添加实时事件
+            function addRealtimeEvent(event) {
+                if (!realtimeEnabled) return;
+                
+                const timestamp = moment.unix(event.timestamp).format('YYYY-MM-DD HH:mm:ss');
+                const eventHtml = `
+                    <div class="attack-event severity-${event.severity} mb-2" data-id="${event.id}">
+                        <small class="float-right">${timestamp}</small>
+                        <h6 class="mb-1">${event.attack_type}</h6>
+                        <p class="mb-0 small">${event.description}</p>
+                        <small>设备: ${event.device_id}</small>
+                    </div>
+                `;
+                
+                // 添加到实时事件列表
+                if ($('#realtimeEvents .attack-event').length >= 10) {
+                    // 移除最旧的事件
+                    $('#realtimeEvents .attack-event:last-child').remove();
+                }
+                
+                // 添加新事件到顶部
+                if ($('#realtimeEvents .text-center').length > 0) {
+                    $('#realtimeEvents').html(eventHtml);
+                } else {
+                    $('#realtimeEvents').prepend(eventHtml);
+                }
+                
+                // 播放通知声音（实际应用中可以添加）
+                // playNotificationSound(event.severity);
+            }
+
+            // 切换实时更新
+            function toggleRealtime() {
+                realtimeEnabled = !realtimeEnabled;
+                $('#toggleRealtimeBtn').text(realtimeEnabled ? '暂停实时更新' : '恢复实时更新');
+                
+                if (realtimeEnabled) {
+                    simulateRealtimeEvents();
+                }
+            }
+
+            // 清除实时事件
+            function clearRealtimeEvents() {
+                $('#realtimeEvents').html('<div class="text-center py-3"><p>等待新的安全事件...</p></div>');
+            }
+
+            // 导出事件
+            function exportEvents() {
+                // 实际应用中应调用后端API处理导出
+                const format = $('input[name="exportFormat"]:checked').val();
+                const timeRange = $('#exportTimeRange').val();
+                
+                let params = {};
+                
+                if (timeRange === 'custom') {
+                    const start = moment($('#exportDateRangePicker').data('daterangepicker').startDate).unix();
+                    const end = moment($('#exportDateRangePicker').data('daterangepicker').endDate).unix();
+                    params.start_time = start;
+                    params.end_time = end;
+                } else if (timeRange === 'today') {
+                    params.start_time = moment().startOf('day').unix();
+                    params.end_time = moment().unix();
+                } else if (timeRange === 'week') {
+                    params.start_time = moment().subtract(7, 'days').unix();
+                    params.end_time = moment().unix();
+                } else if (timeRange === 'month') {
+                    params.start_time = moment().subtract(30, 'days').unix();
+                    params.end_time = moment().unix();
+                } else {
+                    // 使用当前过滤条件
+                    params.device_id = $('#deviceFilter').val();
+                    params.attack_type = $('#attackTypeFilter').val();
+                    params.severity = $('#severityFilter').val();
+                    params.handled = $('#handledFilter').val();
+                }
+                
+                // 构建导出URL
+                const url = `/api/export/events?format=${format}&${$.param(params)}`;
+                
+                // 实际应用中应该使用window.location或创建隐藏表单提交下载请求
+                // 这里仅显示提示信息
+                alert(`将会下载${format.toUpperCase()}格式的报告。在实际应用中，这会触发文件下载。`);
+                
+                $('#exportModal').modal('hide');
+            }
+        });
+    </script>
 </body>
-</html>
+</html>                        

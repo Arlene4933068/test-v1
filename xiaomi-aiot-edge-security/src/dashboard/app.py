@@ -1,622 +1,393 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Dashboard Web应用
+整合设备状态、安全防护、网络分析等可视化功能
+"""
+
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash
+from flask_cors import CORS
 import os
-import json
 import time
+import json
 import logging
-from logging.config import dictConfig
-from flask import Flask, render_template, request, jsonify, send_from_directory
-from datetime import datetime
+from datetime import datetime, timedelta
+from functools import wraps
+import threading
 
-# Configure logging first, before other imports that might use the logger
-def configure_logging():
-    """Configure logging with the 'root' key that was missing"""
-    logging_config = {
-        'version': 1,
-        'formatters': {
-            'standard': {
-                'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-            },
-        },
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'level': 'INFO',
-                'formatter': 'standard',
-                'stream': 'ext://sys.stdout'
-            },
-            'file': {
-                'class': 'logging.FileHandler',
-                'level': 'INFO',
-                'formatter': 'standard',
-                'filename': 'app.log',
-                'mode': 'a',
-            }
-        },
-        'root': {  # This was the missing key
-            'level': 'INFO',
-            'handlers': ['console', 'file']
-        },
-        'loggers': {
-            '': {  # Root logger
-                'level': 'INFO',
-                'handlers': ['console', 'file'],
-                'propagate': True
-            }
-        }
-    }
+# 导入自定义模块
+from .architecture import DashboardConfig, DashboardIntegrationManager
+from .packet_analyzer import PacketAnalyzer
+from .attack_logger import AttackLogger
+
+# 设置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# 配置
+DEFAULT_CONFIG = {
+    "web_port": 5000,
+    "log_dir": "data/attack_logs",
+    "capture_dir": "data/packet_capture",
+    "attack_log_retention_days": 30,
+    "packet_capture_limit": 100,
+    "refresh_interval": 5,
+    "enable_packet_capture": True,
+    "interfaces": ["eth0"],
+    "secret_key": os.urandom(24).hex()
+}
+
+# 加载配置
+def load_config():
+    config_path = os.environ.get('DASHBOARD_CONFIG', 'config/dashboard.json')
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                logger.info(f"已加载配置文件: {config_path}")
+                return {**DEFAULT_CONFIG, **config}  # 合并默认配置
+    except Exception as e:
+        logger.error(f"加载配置失败: {str(e)}")
     
-    dictConfig(logging_config)
+    logger.warning(f"使用默认配置")
+    return DEFAULT_CONFIG
 
-# Configure logging before imports that might use it
-configure_logging()
+config = load_config()
 
-# Now import modules that depend on logging
+# 初始化组件
+dashboard_config = DashboardConfig(
+    refresh_interval=config.get('refresh_interval', 5),
+    max_history_records=config.get('max_history_records', 1000),
+    enable_realtime_monitoring=config.get('enable_realtime_monitoring', True),
+    enable_packet_capture=config.get('enable_packet_capture', True),
+    packet_capture_limit=config.get('packet_capture_limit', 100),
+    attack_log_retention_days=config.get('attack_log_retention_days', 30)
+)
+
+integration_manager = DashboardIntegrationManager(dashboard_config)
+packet_analyzer = PacketAnalyzer(config)
+attack_logger = AttackLogger(config)
+
+# 连接组件
+# 注: 在实际应用中，应该在启动时连接到实际的设备管理器、安全管理器等组件
+# 此处为演示，实际操作时需要修改为实际组件的连接方式
 try:
-    from .device_manager import DeviceManager
-    from .security_config import SecurityConfig
-    from .visualization import Visualization
-    from src.utils.logger import get_logger
-except ImportError as e:
-    logging.warning(f"Import error: {e}. Using mock implementations for development.")
+    from src.device_simulator import DeviceManager
+    from src.security import SecurityManager
+    from src.platform_connector import PlatformConnector
     
-    # Mock implementations for development
-    class DeviceManager:
-        def __init__(self, config=None):
-            self.devices = []
-            
-        def add_device(self, **kwargs):
-            device_id = f"dev-{len(self.devices) + 1}"
-            device = {"id": device_id, **kwargs}
-            self.devices.append(device)
-            return device
-            
-        def remove_device(self, device_id, platform):
-            self.devices = [d for d in self.devices if d["id"] != device_id]
-            return {"removed": device_id}
-            
-        def get_all_device_status(self):
-            return [{"id": d["id"], "status": "online" if i % 3 != 0 else "offline"} 
-                   for i, d in enumerate(self.devices)]
-                   
-        def get_all_devices(self):
-            return self.devices
+    # 加载外部组件实例并连接
+    device_manager = DeviceManager()
+    security_manager = SecurityManager()
+    platform_connector = PlatformConnector()
+    
+    integration_manager.connect_device_manager(device_manager)
+    integration_manager.connect_security_manager(security_manager)
+    integration_manager.connect_platform_connector(platform_connector)
+except ImportError:
+    logger.warning("无法导入外部组件，将使用模拟数据")
+    # 使用模拟数据
+    pass
 
-    class SecurityConfig:
-        def __init__(self, config=None):
-            self.config = {
-                "firewall": {"enabled": True},
-                "intrusion_detection": {"enabled": True},
-                "data_protection": {"enabled": True}
-            }
-            
-        def get_config(self):
-            return self.config
-            
-        def update_config(self, new_config):
-            self.config.update(new_config)
-            return self.config
-            
-        def get_security_status(self):
-            return {"status": "secure", "alerts": 2}
-            
-        def get_security_stats(self):
-            return {
-                "alerts_last_24h": 5,
-                "blocked_attempts": 42,
-                "security_score": 92
-            }
+# 连接数据包分析器
+integration_manager.connect_packet_analyzer(packet_analyzer)
 
-    class Visualization:
-        def get_analytics_data(self, data_type):
-            if data_type == 'performance':
-                return {
-                    "cpu_usage": [30, 45, 32, 50, 35, 38, 42],
-                    "memory_usage": [45, 50, 48, 55, 60, 52, 48],
-                    "labels": ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"]
-                }
-            elif data_type == 'security':
-                return {
-                    "alerts": [5, 3, 8, 2, 4, 7, 3],
-                    "blocked": [12, 8, 15, 10, 14, 9, 11],
-                    "labels": ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"]
-                }
-            else:
-                return {
-                    "performance": {
-                        "cpu_usage": [30, 45, 32, 50, 35, 38, 42],
-                        "memory_usage": [45, 50, 48, 55, 60, 52, 48]
-                    },
-                    "security": {
-                        "alerts": [5, 3, 8, 2, 4, 7, 3],
-                        "blocked": [12, 8, 15, 10, 14, 9, 11]
-                    },
-                    "labels": ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"]
-                }
-                
-        def generate_report(self, report_type):
-            return {
-                "filename": f"{report_type}-report-{int(time.time())}.pdf",
-                "url": f"/reports/{report_type}-report-{int(time.time())}.pdf"
-            }
-            
-        def get_performance_stats(self):
-            return {
-                "cpu_average": 38.2,
-                "memory_average": 51.1,
-                "network_throughput": 256.7,
-                "response_time": 218
-            }
-
-# Initialize Flask app
-app = Flask(__name__, static_url_path='/static', static_folder='static', template_folder='templates')
+# 初始化Flask应用
+app = Flask(__name__, 
+            static_folder='static',
+            template_folder='templates')
+app.secret_key = config.get('secret_key', os.urandom(24).hex())
+CORS(app)
 
 class DashboardApp:
-    """控制面板应用类：提供Web界面管理AIoT边缘安全防护平台"""
+    """Dashboard应用程序类"""
     
-    def __init__(self, config=None):
-        try:
-            self.logger = get_logger("DashboardApp")
-        except Exception as e:
-            # Fallback to standard logging if get_logger fails
-            self.logger = logging.getLogger("DashboardApp")
-            self.logger.warning(f"Failed to get custom logger, using standard logging: {e}")
-            
-        self.config = config
-        self.device_manager = DeviceManager(config)
-        self.security_config = SecurityConfig(config)
-        self.visualization = Visualization()
+    def __init__(self):
+        self.app = app
         
-        self._init_routes()
-        self.logger.info("控制面板应用初始化完成")
-    
-    def _init_routes(self):
-        """初始化路由"""
-        # Original routes
-        app.add_url_rule('/', 'index', self.index)
-        app.add_url_rule('/devices', 'devices', self.devices, methods=['GET'])
-        app.add_url_rule('/devices/add', 'add_device', self.add_device, methods=['POST'])
-        app.add_url_rule('/devices/remove', 'remove_device', self.remove_device, methods=['POST'])
-        app.add_url_rule('/devices/status', 'device_status', self.device_status, methods=['GET'])
-        
-        app.add_url_rule('/security', 'security', self.security, methods=['GET'])
-        app.add_url_rule('/security/config', 'security_config', self.get_security_config, methods=['GET'])
-        app.add_url_rule('/security/config/update', 'update_security_config', self.update_security_config, methods=['POST'])
-        app.add_url_rule('/security/status', 'security_status', self.security_status, methods=['GET'])
-        
-        app.add_url_rule('/analytics', 'analytics', self.analytics, methods=['GET'])
-        app.add_url_rule('/analytics/data', 'analytics_data', self.analytics_data, methods=['GET'])
-        app.add_url_rule('/analytics/generate_report', 'generate_report', self.generate_report, methods=['POST'])
-        
-        app.add_url_rule('/reports/<path:filename>', 'get_report', self.get_report)
-        
-        # API endpoints
-        app.add_url_rule('/api/devices', 'api_devices', self.api_devices, methods=['GET'])
-        app.add_url_rule('/api/security/stats', 'api_security_stats', self.api_security_stats, methods=['GET'])
-        app.add_url_rule('/api/performance/stats', 'api_performance_stats', self.api_performance_stats, methods=['GET'])
-        
-        # Add new API endpoints for analytics.html to avoid Not Found errors
-        app.add_url_rule('/api/analytics/performance', 'api_performance_data', self.api_performance_data, methods=['GET'])
-        app.add_url_rule('/api/analytics/security', 'api_security_data', self.api_security_data, methods=['GET'])
-        app.add_url_rule('/api/analytics/bandwidth', 'api_bandwidth_data', self.api_bandwidth_data, methods=['GET'])
-        app.add_url_rule('/api/analytics/reliability', 'api_reliability_data', self.api_reliability_data, methods=['GET'])
-        
-        # Add a catch-all route for other static files
-        app.add_url_rule('/settings', 'settings', self.settings)
-        
-        # Error handler for 404
-        app.register_error_handler(404, self.page_not_found)
-        # Add this line after the 404 error handler registration
-        app.register_error_handler(500, self.internal_server_error)
-    
-    def page_not_found(self, e):
-        """404错误处理"""
-        self.logger.warning(f"页面未找到: {request.path}")
-        return render_template('404.html'), 404
-
-    def internal_server_error(self, e):
-        """500错误处理"""
-        self.logger.error(f"服务器内部错误: {str(e)}")
-        return render_template('500.html'), 500
-    
-    def index(self):
-        """首页视图"""
-        current_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-        current_user = "Arlene4933068"  # This would normally come from your authentication system
-        return render_template('index.html', current_time=current_time, current_user=current_user)
-    
-    def devices(self):
-        """设备管理页面"""
-        return render_template('devices.html')
-    
-    def settings(self):
-        """系统设置页面"""
-        return render_template('settings.html')
-    
-    def add_device(self):
-        """添加设备API"""
-        data = request.json
-        try:
-            result = self.device_manager.add_device(
-                device_type=data.get('device_type'),
-                name=data.get('name'),
-                platform=data.get('platform'),
-                properties=data.get('properties', {})
-            )
-            return jsonify({"success": True, "message": "设备添加成功", "data": result})
-        except Exception as e:
-            self.logger.error(f"添加设备失败: {str(e)}")
-            return jsonify({"success": False, "message": f"添加设备失败: {str(e)}"})
-    
-    def remove_device(self):
-        """移除设备API"""
-        data = request.json
-        try:
-            result = self.device_manager.remove_device(
-                device_id=data.get('device_id'),
-                platform=data.get('platform')
-            )
-            return jsonify({"success": True, "message": "设备移除成功", "data": result})
-        except Exception as e:
-            self.logger.error(f"移除设备失败: {str(e)}")
-            return jsonify({"success": False, "message": f"移除设备失败: {str(e)}"})
-    
-    def device_status(self):
-        """获取设备状态API"""
-        try:
-            status = self.device_manager.get_all_device_status()
-            return jsonify({"success": True, "data": status})
-        except Exception as e:
-            self.logger.error(f"获取设备状态失败: {str(e)}")
-            return jsonify({"success": False, "message": f"获取设备状态失败: {str(e)}"})
-    
-    def security(self):
-        """安全管理页面"""
-        return render_template('security.html')
-    
-    def get_security_config(self):
-        """获取安全配置API"""
-        try:
-            config = self.security_config.get_config()
-            return jsonify({"success": True, "data": config})
-        except Exception as e:
-            self.logger.error(f"获取安全配置失败: {str(e)}")
-            return jsonify({"success": False, "message": f"获取安全配置失败: {str(e)}"})
-    
-    def update_security_config(self):
-        """更新安全配置API"""
-        data = request.json
-        try:
-            result = self.security_config.update_config(data)
-            return jsonify({"success": True, "message": "安全配置更新成功", "data": result})
-        except Exception as e:
-            self.logger.error(f"更新安全配置失败: {str(e)}")
-            return jsonify({"success": False, "message": f"更新安全配置失败: {str(e)}"})
-    
-    def security_status(self):
-        """获取安全状态API"""
-        try:
-            status = self.security_config.get_security_status()
-            return jsonify({"success": True, "data": status})
-        except Exception as e:
-            self.logger.error(f"获取安全状态失败: {str(e)}")
-            return jsonify({"success": False, "message": f"获取安全状态失败: {str(e)}"})
-    
-    def analytics(self):
-        """数据分析页面"""
-        return render_template('analytics.html')
-    
-    def analytics_data(self):
-        """获取分析数据API"""
-        data_type = request.args.get('type', 'all')
-        try:
-            data = self.visualization.get_analytics_data(data_type)
-            return jsonify({"success": True, "data": data})
-        except Exception as e:
-            self.logger.error(f"获取分析数据失败: {str(e)}")
-            return jsonify({"success": False, "message": f"获取分析数据失败: {str(e)}"})
-    
-    def generate_report(self):
-        """生成报告API"""
-        data = request.json
-        try:
-            report_type = data.get('report_type', 'comprehensive')
-            result = self.visualization.generate_report(report_type)
-            return jsonify({"success": True, "message": "报告生成成功", "data": result})
-        except Exception as e:
-            self.logger.error(f"生成报告失败: {str(e)}")
-            return jsonify({"success": False, "message": f"生成报告失败: {str(e)}"})
-    
-    def get_report(self, filename):
-        """获取报告文件"""
-        reports_dir = os.path.join(os.getcwd(), 'reports')
-        # Create reports directory if it doesn't exist
-        os.makedirs(reports_dir, exist_ok=True)
-        
-        # If the file doesn't exist, create a dummy PDF
-        report_path = os.path.join(reports_dir, filename)
-        if not os.path.exists(report_path):
-            self.logger.warning(f"报告文件不存在, 创建空报告: {filename}")
-            with open(report_path, 'w') as f:
-                f.write("This is a placeholder report file.")
-        
-        return send_from_directory(reports_dir, filename)
-    
-    def api_devices(self):
-        """设备列表API"""
-        try:
-            devices = self.device_manager.get_all_devices()
-            return jsonify({"success": True, "data": devices})
-        except Exception as e:
-            self.logger.error(f"获取设备列表失败: {str(e)}")
-            return jsonify({"success": False, "message": f"获取设备列表失败: {str(e)}"})
-    
-    def api_security_stats(self):
-        """安全统计数据API"""
-        try:
-            stats = self.security_config.get_security_stats()
-            return jsonify({"success": True, "data": stats})
-        except Exception as e:
-            self.logger.error(f"获取安全统计数据失败: {str(e)}")
-            return jsonify({"success": False, "message": f"获取安全统计数据失败: {str(e)}"})
-    
-    def api_performance_stats(self):
-        """性能统计数据API"""
-        try:
-            stats = self.visualization.get_performance_stats()
-            return jsonify({"success": True, "data": stats})
-        except Exception as e:
-            self.logger.error(f"获取性能统计数据失败: {str(e)}")
-            return jsonify({"success": False, "message": f"获取性能统计数据失败: {str(e)}"})
-    
-    # New API endpoints for analytics.html
-    def api_performance_data(self):
-        """获取性能分析数据API"""
-        try:
-            # Generate mock data for performance chart
-            labels = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00']
-            cpu_data = [25, 28, 32, 45, 60, 58, 42, 35]
-            memory_data = [40, 42, 45, 52, 55, 58, 50, 45]
-            latency_data = [15, 18, 20, 25, 32, 28, 22, 18]
-            
-            data = {
-                "labels": labels,
-                "datasets": [
-                    {
-                        "label": "CPU使用率 (%)",
-                        "data": cpu_data,
-                        "borderColor": "#ff6700"
-                    },
-                    {
-                        "label": "内存使用率 (%)",
-                        "data": memory_data,
-                        "borderColor": "#1890ff"
-                    },
-                    {
-                        "label": "延迟 (ms)",
-                        "data": latency_data,
-                        "borderColor": "#52c41a"
-                    }
-                ],
-                "table_data": [
-                    {"device": "主网关", "cpu": 32.5, "memory": 45.2, "latency": 18, "status": "normal"},
-                    {"device": "前门摄像头", "cpu": 62.1, "memory": 58.3, "latency": 42, "status": "warning"},
-                    {"device": "客厅传感器", "cpu": 15.3, "memory": 22.7, "latency": 12, "status": "normal"},
-                    {"device": "电源管理单元", "cpu": 28.9, "memory": 35.6, "latency": 24, "status": "normal"},
-                    {"device": "后院摄像头", "cpu": 78.2, "memory": 73.4, "latency": 67, "status": "alert"}
-                ]
-            }
-            return jsonify({"success": True, "data": data})
-        except Exception as e:
-            self.logger.error(f"获取性能分析数据失败: {str(e)}")
-            return jsonify({"success": False, "message": f"获取性能分析数据失败: {str(e)}"})
-    
-    def api_security_data(self):
-        """获取安全分析数据API"""
-        try:
-            # Generate mock data for security chart
-            labels = ['4-8', '4-9', '4-10', '4-11', '4-12', '4-13', '4-14']
-            high_data = [2, 3, 1, 0, 4, 1, 2]
-            medium_data = [5, 4, 6, 3, 5, 4, 3]
-            low_data = [8, 7, 10, 6, 9, 7, 5]
-            
-            data = {
-                "labels": labels,
-                "datasets": [
-                    {
-                        "label": "高风险",
-                        "data": high_data,
-                        "backgroundColor": "rgba(245, 34, 45, 0.8)"
-                    },
-                    {
-                        "label": "中风险",
-                        "data": medium_data,
-                        "backgroundColor": "rgba(250, 173, 20, 0.8)"
-                    },
-                    {
-                        "label": "低风险",
-                        "data": low_data,
-                        "backgroundColor": "rgba(82, 196, 26, 0.8)"
-                    }
-                ],
-                "table_data": [
-                    {"time": "2025-04-14 08:23", "device": "主网关", "event": "未授权访问尝试", "risk": "high", "status": "alert"},
-                    {"time": "2025-04-14 05:47", "device": "前门摄像头", "event": "异常数据传输", "risk": "medium", "status": "info"},
-                    {"time": "2025-04-13 22:15", "device": "电源管理单元", "event": "固件漏洞", "risk": "high", "status": "info"},
-                    {"time": "2025-04-13 16:32", "device": "后院摄像头", "event": "弱密码", "risk": "medium", "status": "warning"},
-                    {"time": "2025-04-13 10:08", "device": "客厅传感器", "event": "异常通信", "risk": "low", "status": "info"}
-                ]
-            }
-            return jsonify({"success": True, "data": data})
-        except Exception as e:
-            self.logger.error(f"获取安全分析数据失败: {str(e)}")
-            return jsonify({"success": False, "message": f"获取安全分析数据失败: {str(e)}"})
-    
-    def api_bandwidth_data(self):
-        """获取带宽分析数据API"""
-        try:
-            # Generate mock data for bandwidth chart
-            labels = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00']
-            upload_data = [25, 28, 20, 45, 80, 65, 42, 35]
-            download_data = [40, 45, 35, 60, 95, 85, 55, 45]
-            
-            data = {
-                "labels": labels,
-                "datasets": [
-                    {
-                        "label": "上传 (Mbps)",
-                        "data": upload_data,
-                        "borderColor": "#1890ff"
-                    },
-                    {
-                        "label": "下载 (Mbps)",
-                        "data": download_data,
-                        "borderColor": "#ff6700"
-                    }
-                ],
-                "table_data": [
-                    {"device": "主网关", "upload": 54.2, "download": 78.5, "total": 36.7, "status": "normal"},
-                    {"device": "前门摄像头", "upload": 12.3, "download": 2.1, "total": 8.4, "status": "normal"},
-                    {"device": "后院摄像头", "upload": 18.7, "download": 1.9, "total": 15.2, "status": "warning"},
-                    {"device": "客厅传感器", "upload": 0.8, "download": 0.2, "total": 0.4, "status": "normal"},
-                    {"device": "电源管理单元", "upload": 1.2, "download": 0.5, "total": 0.6, "status": "normal"}
-                ]
-            }
-            return jsonify({"success": True, "data": data})
-        except Exception as e:
-            self.logger.error(f"获取带宽分析数据失败: {str(e)}")
-            return jsonify({"success": False, "message": f"获取带宽分析数据失败: {str(e)}"})
-    
-    def api_reliability_data(self):
-        """获取可靠性分析数据API"""
-        try:
-            # Generate mock data for reliability chart
-            devices = ['主网关', '前门摄像头', '后院摄像头', '客厅传感器', '电源管理单元', '智能照明控制器']
-            uptime_data = [99.98, 98.76, 92.45, 99.92, 99.85, 94.32]
-            
-            # Colors based on uptime value
-            background_colors = []
-            for value in uptime_data:
-                if value > 99.5:
-                    background_colors.append('rgba(82, 196, 26, 0.8)')  # 优秀 - 绿色
-                elif value > 98:
-                    background_colors.append('rgba(82, 196, 26, 0.6)')   # 良好 - 浅绿色
-                elif value > 95:
-                    background_colors.append('rgba(250, 173, 20, 0.8)')  # 中等 - 黄色
-                else:
-                    background_colors.append('rgba(245, 34, 45, 0.8)')   # 差 - 红色
-            
-            data = {
-                "labels": devices,
-                "datasets": [
-                    {
-                        "label": "正常运行时间 (%)",
-                        "data": uptime_data,
-                        "backgroundColor": background_colors,
-                        "borderColor": background_colors
-                    }
-                ],
-                "table_data": [
-                    {"device": "主网关", "uptime": 99.98, "mtbf": 45.2, "failures": 1, "rating": "优秀"},
-                    {"device": "前门摄像头", "uptime": 98.76, "mtbf": 28.3, "failures": 3, "rating": "良好"},
-                    {"device": "客厅传感器", "uptime": 99.92, "mtbf": 38.5, "failures": 2, "rating": "优秀"},
-                    {"device": "电源管理单元", "uptime": 99.85, "mtbf": 42.1, "failures": 1, "rating": "优秀"},
-                    {"device": "后院摄像头", "uptime": 92.45, "mtbf": 12.7, "failures": 8, "rating": "需改进"}
-                ]
-            }
-            return jsonify({"success": True, "data": data})
-        except Exception as e:
-            self.logger.error(f"获取可靠性分析数据失败: {str(e)}")
-            return jsonify({"success": False, "message": f"获取可靠性分析数据失败: {str(e)}"})
-    
     def run(self, host='0.0.0.0', port=5000, debug=False):
-        """启动应用"""
-        self.logger.info(f"控制面板应用启动，监听地址: {host}:{port}")
-        app.run(host=host, port=port, debug=debug, threaded=True)
+        """运行Dashboard应用"""
+        self.app.run(host=host, port=port, debug=debug)
 
+# 身份验证装饰器
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            flash('请先登录', 'warning')
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
 
-# Create the 404.html template if it doesn't exist
-def ensure_404_template():
-    templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
-    os.makedirs(templates_dir, exist_ok=True)
+# 登录页面
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        # 简单的身份验证，实际应用中应使用更安全的方法
+        if username == 'admin' and password == 'admin':
+            session['user'] = username
+            next_page = request.args.get('next', url_for('index'))
+            return redirect(next_page)
+        else:
+            error = '用户名或密码错误'
     
-    file_404 = os.path.join(templates_dir, '404.html')
-    if not os.path.exists(file_404):
-        with open(file_404, 'w', encoding='utf-8') as f:
-            f.write('''<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>页面未找到 - 小米AIoT边缘安全控制面板</title>
-    <style>
-        :root {
-            --primary: #ff6700;
-            --secondary: #2c2c2c;
-        }
-        body {
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background-color: #fafafa;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .error-container {
-            text-align: center;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            max-width: 500px;
-        }
-        h1 {
-            color: var(--primary);
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
-        p {
-            margin-bottom: 20px;
-            font-size: 16px;
-            line-height: 1.6;
-        }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: var(--primary);
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-        .btn:hover {
-            background-color: #ff8533;
-        }
-    </style>
-</head>
-<body>
-    <div class="error-container">
-        <h1>404 - 页面未找到</h1>
-        <p>抱歉，您请求的页面不存在。可能是URL输入错误或该页面已被移动。</p>
-        <a href="/" class="btn">返回首页</a>
-    </div>
-</body>
-</html>''')
+    return render_template('login.html', error=error)
 
+# 登出
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    flash('您已成功退出', 'info')
+    return redirect(url_for('login'))
 
-# Handle configuration and startup
+# 主页
+@app.route('/')
+@login_required
+def index():
+    return render_template('dashboard.html')
+
+# 设备页面
+@app.route('/devices')
+@login_required
+def devices():
+    return render_template('devices.html')
+
+# 安全事件页面
+@app.route('/security')
+@login_required
+def security():
+    return render_template('security.html')
+
+# 网络分析页面
+@app.route('/network')
+@login_required
+def network():
+    return render_template('network.html')
+
+# 报告页面
+@app.route('/reports')
+@login_required
+def reports():
+    return render_template('reports.html')
+
+# 设置页面
+@app.route('/settings')
+@login_required
+def settings():
+    return render_template('settings.html', config=config)
+
+# API路由 - 获取设备状态
+@app.route('/api/devices')
+@login_required
+def api_devices():
+    try:
+        devices = integration_manager.get_device_status()
+        return jsonify({"success": True, "devices": devices})
+    except Exception as e:
+        logger.error(f"获取设备状态失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+# API路由 - 获取安全事件
+@app.route('/api/security/events')
+@login_required
+def api_security_events():
+    try:
+        limit = int(request.args.get('limit', 50))
+        offset = int(request.args.get('offset', 0))
+        device_id = request.args.get('device_id')
+        attack_type = request.args.get('attack_type')
+        severity = request.args.get('severity')
+        handled = request.args.get('handled')
+        
+        # 构建过滤器
+        filters = {}
+        if device_id:
+            filters['device_id'] = device_id
+        if attack_type:
+            filters['attack_type'] = attack_type
+        if severity:
+            filters['severity'] = severity
+        if handled is not None:
+            filters['handled'] = handled == 'true'
+            
+        # 获取时间范围
+        start_time = request.args.get('start_time')
+        end_time = request.args.get('end_time')
+        
+        if start_time:
+            start_time = int(start_time)
+        if end_time:
+            end_time = int(end_time)
+        
+        events = attack_logger.get_attack_events(
+            filters=filters,
+            start_time=start_time,
+            end_time=end_time,
+            limit=limit,
+            offset=offset
+        )
+        
+        return jsonify({"success": True, "events": events})
+    except Exception as e:
+        logger.error(f"获取安全事件失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+# API路由 - 获取安全统计信息
+@app.route('/api/security/statistics')
+@login_required
+def api_security_statistics():
+    try:
+        group_by = request.args.get('group_by', 'day')
+        start_time = request.args.get('start_time')
+        end_time = request.args.get('end_time')
+        
+        if start_time:
+            start_time = int(start_time)
+        if end_time:
+            end_time = int(end_time)
+        
+        statistics = attack_logger.get_attack_statistics(
+            group_by=group_by,
+            start_time=start_time,
+            end_time=end_time
+        )
+        
+        return jsonify({"success": True, **statistics})
+    except Exception as e:
+        logger.error(f"获取安全统计信息失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+# API路由 - 处理攻击事件
+@app.route('/api/security/events/<int:event_id>', methods=['PUT'])
+@login_required
+def api_update_event(event_id):
+    try:
+        data = request.get_json()
+        handled = data.get('handled', True)
+        
+        success = attack_logger.mark_event_handled(event_id, handled)
+        
+        return jsonify({"success": success})
+    except Exception as e:
+        logger.error(f"更新事件状态失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+# API路由 - 获取网络分析结果
+@app.route('/api/network/analysis')
+@login_required
+def api_network_analysis():
+    try:
+        device_id = request.args.get('device_id')
+        analysis = packet_analyzer.get_analysis_results(device_id)
+        
+        return jsonify({"success": True, "analysis": analysis})
+    except Exception as e:
+        logger.error(f"获取网络分析结果失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+# API路由 - 控制数据包捕获
+@app.route('/api/network/capture', methods=['POST'])
+@login_required
+def api_network_capture():
+    try:
+        data = request.get_json()
+        action = data.get('action')
+        device_id = data.get('device_id')
+        
+        if action == 'start':
+            success = packet_analyzer.start_capture(device_id)
+            return jsonify({"success": success, "action": "started"})
+        elif action == 'stop':
+            success = packet_analyzer.stop_capture()
+            return jsonify({"success": success, "action": "stopped"})
+        else:
+            return jsonify({"success": False, "error": "无效的操作"})
+    except Exception as e:
+        logger.error(f"控制数据包捕获失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+# API路由 - 记录攻击事件
+@app.route('/api/security/report', methods=['POST'])
+def api_report_attack():
+    try:
+        data = request.get_json()
+        
+        # 验证API密钥 (简单版本，实际使用应更安全)
+        api_key = request.headers.get('X-API-Key')
+        if not api_key or api_key != config.get('api_key', 'default_key'):
+            return jsonify({"success": False, "error": "无效的API密钥"}), 403
+        
+        event_id = attack_logger.log_attack_event(data)
+        
+        if event_id > 0:
+            return jsonify({"success": True, "event_id": event_id})
+        else:
+            return jsonify({"success": False, "error": "记录攻击事件失败"})
+    except Exception as e:
+        logger.error(f"报告攻击失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+# API路由 - 记录错误
+@app.route('/api/error/report', methods=['POST'])
+def api_report_error():
+    try:
+        data = request.get_json()
+        
+        # 验证API密钥
+        api_key = request.headers.get('X-API-Key')
+        if not api_key or api_key != config.get('api_key', 'default_key'):
+            return jsonify({"success": False, "error": "无效的API密钥"}), 403
+        
+        error_id = attack_logger.log_error(data)
+        
+        if error_id > 0:
+            return jsonify({"success": True, "error_id": error_id})
+        else:
+            return jsonify({"success": False, "error": "记录错误信息失败"})
+    except Exception as e:
+        logger.error(f"报告错误失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+# API路由 - 获取平台状态
+@app.route('/api/status')
+@login_required
+def api_status():
+    try:
+        metrics = integration_manager.get_platform_metrics()
+        return jsonify({"success": True, "metrics": metrics})
+    except Exception as e:
+        logger.error(f"获取平台状态失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+# 定时任务 - 清理过期日志
+def scheduled_cleanup():
+    while True:
+        try:
+            # 每天执行一次清理
+            attack_logger.cleanup_old_logs()
+            time.sleep(24 * 60 * 60)  # 24小时
+        except Exception as e:
+            logger.error(f"定时清理任务失败: {str(e)}")
+            time.sleep(60 * 60)  # 发生错误时1小时后重试
+
+# 启动定时任务
+cleanup_thread = threading.Thread(target=scheduled_cleanup, daemon=True)
+cleanup_thread.start()
+
+# 主函数
 def main():
-    # Ensure 404 template exists
-    ensure_404_template()
+    port = config.get('web_port', 5000)
+    debug = config.get('debug', False)
     
-    # Create the application instance
-    dashboard = DashboardApp()
-    
-    # Run the application
-    dashboard.run(debug=True)
-
+    logger.info(f"启动Dashboard应用，监听端口: {port}")
+    app.run(host='0.0.0.0', port=port, debug=debug)
 
 if __name__ == "__main__":
     main()

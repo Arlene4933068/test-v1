@@ -1,0 +1,47 @@
+/* 基本样式 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
+  }
+  
+  /* 卡片样式 */
+  .card {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: none;
+    margin-bottom: 20px;
+  }
+  
+  .card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+  }
+  
+  /* 网格和列表视图切换 */
+  .grid-view .device-card {
+    height: 100%;
+  }
+  
+  .list-view .device-card {
+    margin-bottom: 10px;
+  }
+  
+  .list-view {
+    flex-direction: column;
+  }
+  
+  /* 设备状态指示器 */
+  .status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+  }
+  
+  .status-online {
+    background-color: #28a745;
+  }
+  
+  .status-offline {
+    background-color: #6c757d;
+  }

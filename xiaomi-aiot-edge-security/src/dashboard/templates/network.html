@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网络分析 - 小米AIoT边缘安全防护研究平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <style>
+        .card {
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin-bottom: 20px;
+        }
+        .packet-card {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .packet-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .packet-tcp {
+            border-left: 5px solid #007bff;
+        }
+        .packet-udp {
+            border-left: 5px solid #28a745;
+        }
+        .packet-icmp {
+            border-left: 5px solid #fd7e14;
+        }
+        .packet-other {
+            border-left: 5px solid #6c757d;
+        }
+        .packet-suspicious {
+            background-color: rgba(255, 193, 7, 0.1);
+        }
+        .device-selector {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .port-activity {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .capture-controls {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">小米AIoT边缘安全防护研究平台</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/devices">设备管理</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/security">安全监控</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/network">网络分析</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reports">报告</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/settings">设置</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">退出</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">设备选择</h5>
+                    </div>
+                    <div class="card-body device-selector">
+                        <div id="deviceList">
+                            <div class="text-center py-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">加载中...</span>
+                                </div>
+                                <p class="mt-2">加载设备列表...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">端口活动</h5>
+                    </div>
+                    <div class="card-body port-activity">
+                        <div id="portActivity">
+                            <div class="text-center py-3">
+                                <p>请选择设备查看端口活动</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">捕获控制</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="capture-controls">
+                            <div class="form-group">
+                                <label>抓包模式</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="captureMode" id="modeDevice" value="device" checked>
+                                    <label class="form-check-label" for="modeDevice">特定设备</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="captureMode" id="modeAll" value="all">
+                                    <label class="form-check-label" for="modeAll">所有设备</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="captureLimit">最大捕获量</label>
+                                <select id="captureLimit" class="form-control">
+                                    <option value="50">50个数据包</option>
+                                    <option value="100" selected>100个数据包</option>
+                                    <option value="200">200个数据包</option>
+                                    <option value="500">500个数据包</option>
+                                </select>
+                            </div>
+                            <div id="captureActions" class="text-center">
+                                <button id="startCaptureBtn" class="btn btn-success">开始捕获</button>
+                                <button id="stopCaptureBtn" class="btn btn-danger" style="display:none;">停止捕获</button>
+                            </div>
+                        </div>
+                        <div class="capture-status text-center">
+                            <div id="captureStatus" class="text-muted">捕获已就绪</div>
+                            <div id="captureProgress" class="progress mt-2" style="display:none;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">网络流量分析</h5>
+                        <div>
+                            <button id="exportPcapBtn" class="btn btn-sm btn-outline-secondary">导出PCAP</button>
+                            <button id="refreshAnalysisBtn" class="btn btn-sm btn-primary ml-2">刷新分析</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <canvas id="protocolChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <canvas id="trafficChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">时间模式分析</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-container">
+                                            <canvas id="timePatternChart"></canvas>
+                                        </div>
+                                        <div id="burstInfo" class="mt-3">
+                                            <p>等待数据包捕获完成...</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">检测到的异常</h5>
+                                        <span id="anomalyCount" class="badge badge-warning">0</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="anomalyList">
+                                            <p class="text-center">等待分析完成...</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">数据包捕获</h5>
+                                        <div>
+                                            <select id="packetFilter" class="form-control form-control-sm">
+                                                <option value="all">所有数据包</option>
+                                                <option value="tcp">仅TCP</option>
+                                                <option value="udp">仅UDP</option>
+                                                <option value="suspicious">可疑数据包</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="packetList" style="max-height: 400px; overflow-y: auto;">
+                                            <p class="text-center">等待捕获数据包...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 数据包详情模态框 -->
+    <div class="modal fade" id="packetDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">数据包详情</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="packetDetail">
+                        <!-- 数据包详情将在这里动态渲染 -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 全局变量
+            let protocolChart = null;
+            let trafficChart = null;
+            let timePatternChart = null;
+            let currentDeviceId = null;
+            let isCapturing = false;
+            let allPackets = [];
+            let captureInterval = null;
+
+            // 初始化图表
+            initCharts();
+            
+            // 加载设备列表
+            loadDevices();
+            
+            // 按钮事件绑定
+            $('#startCaptureBtn').click(startCapture);
+            $('#stopCaptureBtn').click(stopCapture);
+            $('#refreshAnalysisBtn').click(refreshAnalysis);
+            $('#exportPcapBtn').click(exportPcap);
+            $('#packetFilter').change(filterPackets);
+            
+            // 初始化图表
+            function initCharts() {
+                // 协议分布图
+                const protocolCtx = document.getElementById('protocolChart').getContext('2d');
+                protocolChart = new Chart(protocolCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['TCP', 'UDP', 'ICMP', '其他'],
+                        datasets: [{
+                            data: [0, 0, 0, 0],
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(255, 159, 64, 0.7)',
+                                'rgba(201, 203, 207, 0.7)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '协议分布'
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                
+                // 流量图表
+                const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+                trafficChart = new Chart(trafficCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['端口活动'],
+                        datasets: []
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '端口活动'
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '数据包数量'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // 时间模式图表
+                const timeCtx = document.getElementById('timePatternChart').getContext('2d');
+                timePatternChart = new Chart(timeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: '数据包间隔',
+                            data: [],
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '数据包时间间隔'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '间隔 (毫秒)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '数据包序号'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 加载设备列表
+            function loadDevices() {
+                $.ajax({
+                    url: '/api/devices',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            renderDeviceList(response.devices);
+                        } else {
+                            $('#deviceList').html(`<div class="alert alert-danger">加载失败: ${response.error}</div>`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#deviceList').html(`<div class="alert alert-danger">请求失败: ${error}</div>`);
+                    }
+                });
+            }
+            
+            // 渲染设备列表
+            function renderDeviceList(devices) {
+                if (!devices || devices.length === 0) {
+                    $('#deviceList').html('<p class="text-center">没有可用设备</p>');
+                    return;
+                }
+                
+                let html = '<div class="list-group">';
+                devices.forEach(device => {
+                    const statusBadge = device.status === 'online' ? 
+                        '<span class="badge badge-success">在线</span>' : 
+                        '<span class="badge badge-secondary">离线</span>';
+                    
+                    html += `
+                        <a href="#" class="list-group-item list-group-item-action device-item" data-id="${device.id}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">${device.name}</h6>
+                                ${statusBadge}
+                            </div>
+                            <p class="mb-1 small">类型: ${device.type}</p>
+                            <small>${device.id}</small>
+                        </a>
+                    `;
+                });
+                html += '</div>';
+                
+                $('#deviceList').html(html);
+                
+                // 添加设备选择事件
+                $('.device-item').click(function(e) {
+                    e.preventDefault();
+                    $('.device-item').removeClass('active');
+                    $(this).addClass('active');
+                    currentDeviceId = $(this).data('id');
+                    
+                    // 加载设备的网络分析
+                    loadDeviceAnalysis(currentDeviceId);
+                });
+            }
+            
+            // 加载设备分析数据
+            function loadDeviceAnalysis(deviceId) {
+                $('#portActivity').html(`
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">加载中...</span>
+                        </div>
+                        <p class="mt-2">加载端口活动...</p>
+                    </div>
+                `);
+                
+                $.ajax({
+                    url: '/api/network/analysis',
+                    type: 'GET',
+                    data: { device_id: deviceId },
+                    success: function(response) {
+                        if (response.success) {
+                            updateAnalysisUI(response.analysis[deviceId]);
+                        } else {
+                            resetAnalysisUI();
+                            $('#portActivity').html(`<p class="text-center">暂无数据</p>`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        resetAnalysisUI();
+                        $('#portActivity').html(`<div class="alert alert-danger">请求失败: ${error}</div>`);
+                    }
+                });
+            }
+            
+            // 更新分析UI
+            function updateAnalysisUI(data) {
+                if (!data) {
+                    resetAnalysisUI();
+                    return;
+                }
+                
+                // 更新协议分布图
+                if (data.protocol_stats) {
+                    protocolChart.data.datasets[0].data = [
+                        data.protocol_stats.TCP || 0,
+                        data.protocol_stats.UDP || 0,
+                        data.protocol_stats.ICMP || 0,
+                        data.protocol_stats.Other || 0
+                    ];
+                    protocolChart.update();
+                }
+                
+                // 更新流量图表
+                if (data.traffic_stats && data.traffic_stats.top_ports) {
+                    const topPorts = data.traffic_stats.top_ports;
+                    const labels = Object.keys(topPorts);
+                    const values = Object.values(topPorts);
+                    
+                    // 生成颜色
+                    const colors = labels.map((port, index) => {
+                        const hue = (index * 137) % 360; // 黄金角分布获得不同颜色
+                        return `hsla(${hue}, 70%, 60%, 0.7)`;
+                    });
+                    
+                    trafficChart.data.labels = labels;
+                    trafficChart.data.datasets = [{
+                        label: '数据包数',
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: colors.map(c => c.replace('0.7', '1')),
+                        borderWidth: 1
+                    }];
+                    trafficChart.update();
+                    
+                    // 更新端口活动列表
+                    let portHtml = '<ul class="list-group list-group-flush">';
+                    labels.forEach((port, index) => {
+                        portHtml += `
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                ${port}
+                                <span class="badge badge-primary badge-pill">${values[index]}</span>
+                            </li>
+                        `;
+                    });
+                    portHtml += '</ul>';
+                    
+                    $('#portActivity').html(portHtml);
+                } else {
+                    $('#portActivity').html('<p class="text-center">暂无端口活动数据</p>');
+                }
+                
+                // 更新时间模式图表
+                if (data.time_pattern && data.time_pattern.avg_interval) {
+                    // 这部分数据需要后端实际实现
+                    // 模拟一些数据用于演示
+                    const intervals = Array(20).fill(0).map(() => 
+                        data.time_pattern.avg_interval + (Math.random() - 0.5) * data.time_pattern.avg_interval * 0.5
+                    );
+                    
+                    const labels = Array(intervals.length).fill(0).map((_, i) => i + 1);
+                    
+                    timePatternChart.data.labels = labels;
+                    timePatternChart.data.datasets[0].data = intervals;
+                    timePatternChart.update();
+                    
+                    // 显示突发信息
+                    if (data.time_pattern.bursts && data.time_pattern.bursts.length > 0) {
+                        let burstHtml = `
+                            <div class="alert alert-info">
+                                <h6>检测到 ${data.time_pattern.burst_count} 次流量突发</h6>
+                                <p>平均数据包间隔: ${data.time_pattern.avg_interval.toFixed(2)}ms</p>
+                                <ul>
+                        `;
+                        
+                        data.time_pattern.bursts.forEach((burst, index) => {
+                            const startTime = new Date(burst.start * 1000).toLocaleTimeString();
+                            const duration = burst.duration.toFixed(2);
+                            
+                            burstHtml += `
+                                <li>突发 #${index+1}: ${startTime}, 持续 ${duration}秒, ${burst.packet_count} 个数据包</li>
+                            `;
+                        });
+                        
+                        burstHtml += '</ul></div>';
+                        $('#burstInfo').html(burstHtml);
+                    } else {
+                        $('#burstInfo').html('<p>未检测到流量突发</p>');
+                    }
+                } else {
+                    // 重置时间模式图表
+                    timePatternChart.data.labels = [];
+                    timePatternChart.data.datasets[0].data = [];
+                    timePatternChart.update();
+                    $('#burstInfo').html('<p>暂无时间模式数据</p>');
+                }
+                
+                // 更新异常列表
+                if (data.anomalies && data.anomalies.length > 0) {
+                    $('#anomalyCount').text(data.anomalies.length);
+                    
+                    let anomalyHtml = '<div class="list-group">';
+                    data.anomalies.forEach(anomaly => {
+                        const severityClass = getSeverityClass(anomaly.severity);
+                        
+                        anomalyHtml += `
+                            <div class="list-group-item list-group-item-${severityClass}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">${anomaly.type}</h6>
+                                    <small>数据包 #${anomaly.packet_index + 1}</small>
+                                </div>
+                                <p class="mb-1">${anomaly.description}</p>
+                            </div>
+                        `;
+                    });
+                    anomalyHtml += '</div>';
+                    
+                    $('#anomalyList').html(anomalyHtml);
+                } else {
+                    $('#anomalyCount').text('0');
+                    $('#anomalyList').html('<p class="text-center">未检测到异常</p>');
+                }
+                
+                // 如果有数据包数据，更新数据包列表
+                if (data.packet_buffer) {
+                    allPackets = data.packet_buffer;
+                    filterPackets();
+                } else {
+                    $('#packetList').html('<p class="text-center">暂无数据包</p>');
+                }
+            }
+            
+            // 重置分析UI
+            function resetAnalysisUI() {
+                // 重置所有图表
+                protocolChart.data.datasets[0].data = [0, 0, 0, 0];
+                protocolChart.update();
+                
+                trafficChart.data.labels = [];
+                trafficChart.data.datasets = [];
+                trafficChart.update();
+                
+                timePatternChart.data.labels = [];
+                timePatternChart.data.datasets[0].data = [];
+                timePatternChart.update();
+                
+                // 重置其他UI元素
+                $('#portActivity').html('<p class="text-center">暂无端口活动数据</p>');
+                $('#burstInfo').html('<p>暂无时间模式数据</p>');
+                $('#anomalyCount').text('0');
+                $('#anomalyList').html('<p class="text-center">未检测到异常</p>');
+                $('#packetList').html('<p class="text-center">暂无数据包</p>');
+                
+                // 清除数据包缓存
+                allPackets = [];
+            }
+            
+            // 开始捕获数据包
+            function startCapture() {
+                if (isCapturing) return;
+                
+                const captureMode = $('input[name="captureMode"]:checked').val();
+                
+                if (captureMode === 'device' && !currentDeviceId) {
+                    alert('请先选择一个设备');
+                    return;
+                }
+                
+                const deviceId = captureMode === 'device' ? currentDeviceId : null;
+                const limit = $('#captureLimit').val();
+                
+                // 更新UI状态
+                isCapturing = true;
+                $('#startCaptureBtn').hide();
+                $('#stopCaptureBtn').show();
+                $('#captureStatus').text('正在捕获数据包...');
+                $('#captureProgress').show();
+                updateCaptureProgress(0);
+                
+                // 发送API请求开始捕获
+                $.ajax({
+                    url: '/api/network/capture',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        action: 'start',
+                        device_id: deviceId,
+                        limit: limit
+                    }),
+                    success: function(response) {
+                        if (response.success) {
+                            // 设置进度更新定时器
+                            captureInterval = setInterval(() => {
+                                // 模拟进度更新
+                                simulateCaptureProgress();
+                            }, 500);
+                        } else {
+                            stopCapture();
+                            alert(`捕获失败: ${response.error}`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        stopCapture();
+                        alert(`请求失败: ${error}`);
+                    }
+                });
+            }
+            
+            // 停止捕获数据包
+            function stopCapture() {
+                if (!isCapturing) return;
+                
+                // 清除定时器
+                if (captureInterval) {
+                    clearInterval(captureInterval);
+                    captureInterval = null;
+                }
+                
+                // 发送API请求停止捕获
+                $.ajax({
+                    url: '/api/network/capture',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        action: 'stop'
+                    }),
+                    success: function(response) {
+                        // 无论是否成功，都更新UI
+                        finishCapture();
+                        
+                        if (response.success) {
+                            // 更新分析结果
+                            refreshAnalysis();
+                        } else {
+                            alert(`停止捕获失败: ${response.error}`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        finishCapture();
+                        alert(`请求失败: ${error}`);
+                    }
+                });
+            }
+            
+            // 完成捕获（更新UI）
+            function finishCapture() {
+                isCapturing = false;
+                $('#stopCaptureBtn').hide();
+                $('#startCaptureBtn').show();
+                $('#captureStatus').text('捕获已完成');
+                updateCaptureProgress(100);
+                
+                // 3秒后隐藏进度条
+                setTimeout(() => {
+                    $('#captureProgress').hide();
+                    $('#captureStatus').text('捕获已就绪');
+                }, 3000);
+            }
+            
+            // 更新捕获进度
+            function updateCaptureProgress(percent) {
+                $('#captureProgress .progress-bar').css('width', `${percent}%`);
+            }
+            
+            // 模拟捕获进度（实际应用中应该从后端获取真实进度）
+            let captureProgressValue = 0;
+            function simulateCaptureProgress() {
+                if (captureProgressValue >= 100) {
+                    stopCapture();
+                    return;
+                }
+                
+                // 模拟非线性进度
+                if (captureProgressValue < 70) {
+                    captureProgressValue += Math.random() * 5 + 1;
+                } else {
+                    captureProgressValue += Math.random() * 2 + 0.5;
+                }
+                
+                if (captureProgressValue > 100) captureProgressValue = 100;
+                
+                updateCaptureProgress(captureProgressValue);
+            }
+            
+            // 刷新分析
+            function refreshAnalysis() {
+                // 重置进度
+                captureProgressValue = 0;
+                
+                if (!currentDeviceId) {
+                    return;
+                }
+                
+                loadDeviceAnalysis(currentDeviceId);
+            }
+            
+            // 导出PCAP文件
+            function exportPcap() {
+                if (!currentDeviceId) {
+                    alert('请先选择一个设备');
+                    return;
+                }
+                
+                // 实际应用中应该调用后端API下载PCAP文件
+                alert('将开始下载PCAP文件。在实际应用中，这会触发文件下载。');
+            }
+            
+            // 过滤数据包
+            function filterPackets() {
+                const filter = $('#packetFilter').val();
+                
+                if (!allPackets || allPackets.length === 0) {
+                    $('#packetList').html('<p class="text-center">暂无数据包</p>');
+                    return;
+                }
+                
+                // 应用过滤
+                let filteredPackets = [...allPackets];
+                if (filter === 'tcp') {
+                    filteredPackets = filteredPackets.filter(p => p.protocol === 'TCP');
+                } else if (filter === 'udp') {
+                    filteredPackets = filteredPackets.filter(p => p.protocol === 'UDP');
+                } else if (filter === 'suspicious') {
+                    filteredPackets = filteredPackets.filter(p => p.suspicious);
+                }
+                
+                renderPacketList(filteredPackets);
+            }
+            
+            // 渲染数据包列表
+            function renderPacketList(packets) {
+                if (packets.length === 0) {
+                    $('#packetList').html('<p class="text-center">没有匹配的数据包</p>');
+                    return;
+                }
+                
+                let html = '';
+                packets.forEach((packet, index) => {
+                    const packetClass = getPacketClass(packet);
+                    const suspiciousClass = packet.suspicious ? 'packet-suspicious' : '';
+                    
+                    html += `
+                        <div class="packet-card ${packetClass} ${suspiciousClass}" data-index="${index}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-1">#${index+1} ${packet.protocol} 数据包</h6>
+                                <small>${formatTime(packet.timestamp)}</small>
+                            </div>
+                            <p class="mb-1 small">
+                                ${packet.source_ip}:${packet.source_port} → 
+                                ${packet.dest_ip}:${packet.dest_port} 
+                                <span class="badge badge-light">${formatBytes(packet.length)}</span>
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small>${packet.suspicious ? '<span class="badge badge-warning">可疑</span>' : ''}</small>
+                                <button class="btn btn-sm btn-outline-primary view-packet-btn" data-index="${index}">查看详情</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                $('#packetList').html(html);
+                
+                // 添加数据包详情查看事件
+                $('.view-packet-btn').click(function() {
+                    const index = $(this).data('index');
+                    showPacketDetail(packets[index]);
+                });
+            }
+            
+            // 获取数据包CSS类
+            function getPacketClass(packet) {
+                if (packet.protocol === 'TCP') return 'packet-tcp';
+                if (packet.protocol === 'UDP') return 'packet-udp';
+                if (packet.protocol === 'ICMP') return 'packet-icmp';
+                return 'packet-other';
+            }
+            
+            // 显示数据包详情
+            function showPacketDetail(packet) {
+                // 格式化数据包信息
+                let detailHtml = `
+                    <div class="card mb-3 ${getPacketClass(packet)}">
+                        <div class="card-body">
+                            <h5 class="card-title">${packet.protocol} 数据包</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                ${formatTime(packet.timestamp)}
+                                ${packet.suspicious ? '<span class="badge badge-warning ml-2">可疑</span>' : ''}
+                            </h6>
+                        </div>
+                    </div>
+                    
+                    <h6>基本信息</h6>
+                    <table class="table table-sm">
+                        <tr>
+                            <td width="30%">源地址</td>
+                            <td>${packet.source_ip}:${packet.source_port}</td>
+                        </tr>
+                        <tr>
+                            <td>目标地址</td>
+                            <td>${packet.dest_ip}:${packet.dest_port}</td>
+                        </tr>
+                        <tr>
+                            <td>数据包大小</td>
+                            <td>${formatBytes(packet.length)}</td>
+                        </tr>
+                        <tr>
+                            <td>协议</td>
+                            <td>${packet.protocol}</td>
+                        </tr>
+                    </table>
+                `;
+                
+                // 添加协议特定信息
+                if (packet.protocol === 'TCP') {
+                    detailHtml += `
+                        <h6>TCP信息</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td width="30%">序列号</td>
+                                <td>${packet.tcp_info?.seq || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td>确认号</td>
+                                <td>${packet.tcp_info?.ack || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td>标志</td>
+                                <td>${formatTCPFlags(packet.tcp_info?.flags)}</td>
+                            </tr>
+                            <tr>
+                                <td>窗口大小</td>
+                                <td>${packet.tcp_info?.window || 'N/A'}</td>
+                            </tr>
+                        </table>
+                    `;
+                } else if (packet.protocol === 'UDP') {
+                    detailHtml += `
+                        <h6>UDP信息</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td width="30%">长度</td>
+                                <td>${packet.udp_info?.length || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td>校验和</td>
+                                <td>${packet.udp_info?.checksum || 'N/A'}</td>
+                            </tr>
+                        </table>
+                    `;
+                }
+                
+                // 添加有效载荷信息（如果有）
+                if (packet.payload) {
+                    detailHtml += `
+                        <h6>有效载荷</h6>
+                        <div class="payload-data bg-light p-2 mb-3" style="max-height: 200px; overflow-y: auto; font-family: monospace;">
+                            ${formatPayload(packet.payload)}
+                        </div>
+                    `;
+                }
+                
+                // 添加安全分析信息（如果是可疑数据包）
+                if (packet.suspicious) {
+                    detailHtml += `
+                        <div class="alert alert-warning">
+                            <h6>安全分析</h6>
+                            <p>${packet.suspicious_reason || '此数据包被标记为可疑'}</p>
+                        </div>
+                    `;
+                }
+                
+                $('#packetDetail').html(detailHtml);
+                $('#packetDetailModal').modal('show');
+            }
+            
+            // 格式化TCP标志
+            function formatTCPFlags(flags) {
+                if (!flags) return 'N/A';
+                
+                const flagMap = {
+                    'SYN': '同步',
+                    'ACK': '确认',
+                    'FIN': '结束',
+                    'RST': '重置',
+                    'PSH': '推送',
+                    'URG': '紧急'
+                };
+                
+                let html = '';
+                for (const flag in flagMap) {
+                    if (flags.includes(flag)) {
+                        html += `<span class="badge badge-info mr-1" title="${flagMap[flag]}">${flag}</span>`;
+                    }
+                }
+                
+                return html || 'None';
+            }
+            
+            // 格式化有效载荷
+            function formatPayload(payload) {
+                if (!payload) return 'No payload';
+                
+                // 尝试显示为文本
+                try {
+                    // 过滤非打印字符
+                    const filteredPayload = payload.replace(/[^\x20-\x7E]/g, '.');
+                    return filteredPayload || 'Binary data';
+                } catch (e) {
+                    return 'Binary data';
+                }
+            }
+            
+            // 格式化字节大小
+            function formatBytes(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                if (!bytes) return 'N/A';
+                
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // 格式化时间
+            function formatTime(timestamp) {
+                if (!timestamp) return 'N/A';
+                
+                const date = new Date(timestamp * 1000);
+                return date.toLocaleTimeString() + '.' + String(date.getMilliseconds()).padStart(3, '0');
+            }
+            
+            // 获取严重性对应的CSS类
+            function getSeverityClass(severity) {
+                switch (severity) {
+                    case 'critical': return 'danger';
+                    case 'high': return 'warning';
+                    case 'medium': return 'info';
+                    case 'low': return 'primary';
+                    default: return 'secondary';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

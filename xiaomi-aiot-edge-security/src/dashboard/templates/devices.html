@@ -3,589 +3,713 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>设备管理 - 小米AIoT边缘安全控制面板</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>设备管理 - 小米AIoT边缘安全防护研究平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
     <style>
-        :root {
-            --primary: #ff6700;
-            --secondary: #2d3748;
-            --background: #f8f9fa;
-            --card-bg: #ffffff;
-            --text: #333333;
-            --border: #e2e8f0;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-        }
-        
-        body {
-            background-color: var(--background);
-            color: var(--text);
-            line-height: 1.6;
-        }
-        
-        .container {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        .sidebar {
-            width: 250px;
-            background-color: var(--secondary);
-            color: white;
-            padding: 1rem 0;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            padding: 0 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .logo img {
-            width: 32px;
-            margin-right: 0.8rem;
-        }
-        
-        .logo h2 {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        
-        .nav-menu {
-            list-style: none;
-        }
-        
-        .nav-item {
-            margin-bottom: 0.5rem;
-        }
-        
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 0.8rem 1.5rem;
-            color: #cbd5e0;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        
-        .nav-link:hover, .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left: 3px solid var(--primary);
-        }
-        
-        .nav-link i {
-            margin-right: 0.8rem;
-            font-size: 1.1rem;
-        }
-        
-        .main-content {
-            flex: 1;
-            margin-left: 250px;
-            padding: 2rem;
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-        
-        .header h1 {
-            font-size: 1.8rem;
-            color: var(--secondary);
-        }
-        
-        .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #e85a00;
-        }
-        
-        .search-bar {
-            display: flex;
-            margin-bottom: 1.5rem;
-        }
-        
-        .search-input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 4px 0 0 4px;
-            font-size: 1rem;
-        }
-        
-        .search-btn {
-            padding: 0.75rem 1rem;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 0 4px 4px 0;
-            cursor: pointer;
-        }
-        
-        .device-filters {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            background-color: white;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .filter-btn.active {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-        
-        .device-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        
         .device-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s;
+            margin-bottom: 20px;
         }
-        
         .device-card:hover {
-            transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-        
-        .device-header {
-            position: relative;
-            height: 150px;
-            background-color: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .device-header i {
-            font-size: 3rem;
-            color: var(--secondary);
-        }
-        
         .device-status {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+            top: 10px;
+            right: 10px;
         }
-        
-        .online {
-            background-color: #48bb78;
-            box-shadow: 0 0 5px #48bb78;
-        }
-        
-        .offline {
-            background-color: #f56565;
-            box-shadow: 0 0 5px #f56565;
-        }
-        
-        .device-body {
-            padding: 1.5rem;
-        }
-        
-        .device-name {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        
-        .device-type {
-            color: #718096;
-            margin-bottom: 1rem;
-        }
-        
-        .device-info {
-            display: flex;
-            margin-bottom: 0.5rem;
-            align-items: center;
-        }
-        
-        .device-info i {
-            margin-right: 0.5rem;
-            color: var(--primary);
-            width: 18px;
-        }
-        
-        .device-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 1.5rem;
-        }
-        
-        .action-btn {
-            padding: 0.5rem;
-            background-color: #edf2f7;
-            border-radius: 4px;
-            color: #4a5568;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .action-btn:hover {
-            background-color: #e2e8f0;
-            color: var(--primary);
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .device-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .device-filters {
-                overflow-x: auto;
-                padding-bottom: 0.5rem;
-            }
-            
-            .filter-btn {
-                flex-shrink: 0;
-            }
+        .device-metrics {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <aside class="sidebar">
-            <div class="logo">
-                <i class="fas fa-shield-alt"></i>
-                <h2>小米AIoT边缘安全</h2>
-            </div>
-            <ul class="nav-menu">
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">小米AIoT边缘安全防护研究平台</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a href="/" class="nav-link">
-                        <i class="fas fa-home"></i>
-                        <span>首页</span>
-                    </a>
+                    <a class="nav-link" href="/">首页</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/devices">设备管理</a>
                 </li>
                 <li class="nav-item">
-                    <a href="/devices.html" class="nav-link active">
-                        <i class="fas fa-microchip"></i>
-                        <span>设备管理</span>
-                    </a>
+                    <a class="nav-link" href="/security">安全监控</a>
                 </li>
                 <li class="nav-item">
-                    <a href="/security.html" class="nav-link">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>安全监控</span>
-                    </a>
+                    <a class="nav-link" href="/network">网络分析</a>
                 </li>
                 <li class="nav-item">
-                    <a href="/analytics.html" class="nav-link">
-                        <i class="fas fa-chart-line"></i>
-                        <span>数据分析</span>
-                    </a>
+                    <a class="nav-link" href="/reports">报告</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-cog"></i>
-                        <span>系统设置</span>
-                    </a>
+                    <a class="nav-link" href="/settings">设置</a>
                 </li>
             </ul>
-        </aside>
-        
-        <main class="main-content">
-            <div class="header">
-                <h1>设备管理</h1>
-                <button class="btn btn-primary">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">退出</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h2>设备管理</h2>
+                <p class="text-muted">管理并监控边缘设备</p>
+            </div>
+            <div class="col-md-6 text-right">
+                <button id="refreshDevicesBtn" class="btn btn-outline-primary mr-2">
+                    <i class="fas fa-sync"></i> 刷新
+                </button>
+                <button id="addDeviceBtn" class="btn btn-primary">
                     <i class="fas fa-plus"></i> 添加设备
                 </button>
             </div>
-            
-            <div class="search-bar">
-                <input type="text" class="search-input" placeholder="搜索设备名称、IP地址...">
-                <button class="search-btn">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-            
-            <div class="device-filters">
-                <button class="filter-btn active">全部设备 (24)</button>
-                <button class="filter-btn">摄像头 (8)</button>
-                <button class="filter-btn">传感器 (10)</button>
-                <button class="filter-btn">智能家居 (6)</button>
-                <button class="filter-btn">在线 (20)</button>
-                <button class="filter-btn">离线 (4)</button>
-            </div>
-            
-            <div class="device-grid">
-                <!-- 设备卡片 1 -->
-                <div class="device-card">
-                    <div class="device-header">
-                        <i class="fas fa-video"></i>
-                        <div class="device-status online"></div>
-                    </div>
-                    <div class="device-body">
-                        <h3 class="device-name">客厅摄像头</h3>
-                        <div class="device-type">智能摄像头</div>
-                        <div class="device-info">
-                            <i class="fas fa-network-wired"></i>
-                            <span>192.168.1.101</span>
-                        </div>
-                        <div class="device-info">
-                            <i class="fas fa-clock"></i>
-                            <span>最后活动: 刚刚</span>
-                        </div>
-                        <div class="device-actions">
-                            <button class="action-btn">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-power-off"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 设备卡片 2 -->
-                <div class="device-card">
-                    <div class="device-header">
-                        <i class="fas fa-lock"></i>
-                        <div class="device-status online"></div>
-                    </div>
-                    <div class="device-body">
-                        <h3 class="device-name">智能门锁</h3>
-                        <div class="device-type">安全设备</div>
-                        <div class="device-info">
-                            <i class="fas fa-network-wired"></i>
-                            <span>192.168.1.102</span>
-                        </div>
-                        <div class="device-info">
-                            <i class="fas fa-clock"></i>
-                            <span>最后活动: 5分钟前</span>
-                        </div>
-                        <div class="device-actions">
-                            <button class="action-btn">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-power-off"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 设备卡片 3 -->
-                <div class="device-card">
-                    <div class="device-header">
-                        <i class="fas fa-thermometer-half"></i>
-                        <div class="device-status offline"></div>
-                    </div>
-                    <div class="device-body">
-                        <h3 class="device-name">厨房传感器</h3>
-                        <div class="device-type">环境监测</div>
-                        <div class="device-info">
-                            <i class="fas fa-network-wired"></i>
-                            <span>192.168.1.103</span>
-                        </div>
-                        <div class="device-info">
-                            <i class="fas fa-clock"></i>
-                            <span>最后活动: 1小时前</span>
-                        </div>
-                        <div class="device-actions">
-                            <button class="action-btn">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-power-off"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 设备卡片 4 -->
-                <div class="device-card">
-                    <div class="device-header">
-                        <i class="fas fa-lightbulb"></i>
-                        <div class="device-status online"></div>
-                    </div>
-                    <div class="device-body">
-<h3 class="device-name">智能灯泡</h3>
-                        <div class="device-type">智能家居</div>
-                        <div class="device-info">
-                            <i class="fas fa-network-wired"></i>
-                            <span>192.168.1.104</span>
-                        </div>
-                        <div class="device-info">
-                            <i class="fas fa-clock"></i>
-                            <span>最后活动: 10分钟前</span>
-                        </div>
-                        <div class="device-actions">
-                            <button class="action-btn">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-power-off"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 设备卡片 5 -->
-                <div class="device-card">
-                    <div class="device-header">
-                        <i class="fas fa-video"></i>
-                        <div class="device-status online"></div>
-                    </div>
-                    <div class="device-body">
-                        <h3 class="device-name">卧室摄像头</h3>
-                        <div class="device-type">智能摄像头</div>
-                        <div class="device-info">
-                            <i class="fas fa-network-wired"></i>
-                            <span>192.168.1.105</span>
-                        </div>
-                        <div class="device-info">
-                            <i class="fas fa-clock"></i>
-                            <span>最后活动: 3分钟前</span>
-                        </div>
-                        <div class="device-actions">
-                            <button class="action-btn">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-power-off"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 设备卡片 6 -->
-                <div class="device-card">
-                    <div class="device-header">
-                        <i class="fas fa-thermometer-half"></i>
-                        <div class="device-status online"></div>
-                    </div>
-                    <div class="device-body">
-                        <h3 class="device-name">温湿度传感器</h3>
-                        <div class="device-type">环境监测</div>
-                        <div class="device-info">
-                            <i class="fas fa-network-wired"></i>
-                            <span>192.168.1.106</span>
-                        </div>
-                        <div class="device-info">
-                            <i class="fas fa-clock"></i>
-                            <span>最后活动: 7分钟前</span>
-                        </div>
-                        <div class="device-actions">
-                            <button class="action-btn">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-power-off"></i>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-trash"></i>
-                            </button>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">过滤</span>
+                                    </div>
+                                    <input type="text" id="deviceFilter" class="form-control" placeholder="按名称或ID过滤...">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="btn-group btn-group-toggle float-right" data-toggle="buttons">
+                                    <label class="btn btn-outline-secondary active">
+                                        <input type="radio" name="viewOptions" id="gridView" checked> 网格视图
+                                    </label>
+                                    <label class="btn btn-outline-secondary">
+                                        <input type="radio" name="viewOptions" id="listView"> 列表视图
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
+
+        <div id="devicesGrid" class="row">
+            <!-- 设备列表将在这里动态渲染 -->
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">加载中...</span>
+                </div>
+                <p class="mt-2">正在加载设备...</p>
+            </div>
+        </div>
     </div>
 
+    <!-- 设备详情模态框 -->
+    <div class="modal fade" id="deviceDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deviceDetailTitle">设备详情</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="deviceDetailContent">
+                    <!-- 设备详情内容 -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <div id="deviceActionButtons">
+                        <!-- 设备操作按钮 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加设备模态框 -->
+    <div class="modal fade" id="addDeviceModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">添加设备</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addDeviceForm">
+                        <div class="form-group">
+                            <label for="deviceType">设备类型</label>
+                            <select class="form-control" id="deviceType" required>
+                                <option value="">请选择...</option>
+                                <option value="gateway">网关</option>
+                                <option value="router">路由器</option>
+                                <option value="speaker">小爱音箱</option>
+                                <option value="camera">摄像头</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="deviceName">设备名称</label>
+                            <input type="text" class="form-control" id="deviceName" required placeholder="例如: 客厅网关">
+                        </div>
+                        <div class="form-group">
+                            <label for="devicePlatform">连接平台</label>
+                            <select class="form-control" id="devicePlatform" required>
+                                <option value="">请选择...</option>
+                                <option value="edgex">EdgeX Foundry</option>
+                                <option value="thingsboard">ThingsBoard Edge</option>
+                                <option value="none">不连接平台</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="deviceLocation">位置</label>
+                            <input type="text" class="form-control" id="deviceLocation" placeholder="例如: 客厅">
+                        </div>
+                        <div class="form-group">
+                            <label for="deviceModel">型号</label>
+                            <input type="text" class="form-control" id="deviceModel" placeholder="例如: xiaomi-gateway-v3">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" id="confirmAddDeviceBtn" class="btn btn-primary">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
     <script>
-        // 简单的交互功能
-        document.addEventListener('DOMContentLoaded', function() {
-            const filterButtons = document.querySelectorAll('.filter-btn');
+        $(document).ready(function() {
+            // 加载设备列表
+            loadDevices();
             
-            filterButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // 移除所有按钮的活跃状态
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    // 添加当前按钮的活跃状态
-                    this.classList.add('active');
-                    
-                    // 这里可以添加实际的筛选逻辑
+            // 按钮事件
+            $('#refreshDevicesBtn').click(loadDevices);
+            $('#addDeviceBtn').click(() => $('#addDeviceModal').modal('show'));
+            $('#confirmAddDeviceBtn').click(addDevice);
+            
+            // 视图切换
+            $('input[name="viewOptions"]').change(function() {
+                const isGridView = $('#gridView').is(':checked');
+                if (isGridView) {
+                    $('#devicesGrid').removeClass('list-view').addClass('grid-view');
+                } else {
+                    $('#devicesGrid').removeClass('grid-view').addClass('list-view');
+                }
+            });
+            
+            // 设备过滤
+            $('#deviceFilter').on('keyup', function() {
+                const filterText = $(this).val().toLowerCase();
+                $('.device-card').each(function() {
+                    const deviceName = $(this).data('name').toLowerCase();
+                    const deviceId = $(this).data('id').toLowerCase();
+                    if (deviceName.includes(filterText) || deviceId.includes(filterText)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
                 });
             });
+            
+            // 加载设备列表
+            function loadDevices() {
+                $('#devicesGrid').html(`
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">加载中...</span>
+                        </div>
+                        <p class="mt-2">正在加载设备...</p>
+                    </div>
+                `);
+                
+                $.ajax({
+                    url: '/api/devices',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            renderDevices(response.devices);
+                        } else {
+                            $('#devicesGrid').html(`<div class="col-12"><div class="alert alert-danger">加载失败: ${response.error}</div></div>`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#devicesGrid').html(`<div class="col-12"><div class="alert alert-danger">请求失败: ${error}</div></div>`);
+                    }
+                });
+            }
+            
+            // 渲染设备
+            function renderDevices(devices) {
+                if (!devices || devices.length === 0) {
+                    $('#devicesGrid').html('<div class="col-12 text-center py-5"><p>没有找到设备。点击"添加设备"按钮创建一个新设备。</p></div>');
+                    return;
+                }
+                
+                let html = '';
+                devices.forEach(device => {
+                    const statusClass = device.status === 'online' ? 'success' : 'secondary';
+                    const statusText = device.status === 'online' ? '在线' : '离线';
+                    
+                    html += `
+                        <div class="col-xl-3 col-lg-4 col-md-6">
+                            <div class="card device-card" data-id="${device.id}" data-name="${device.name}">
+                                <div class="card-body">
+                                    <span class="badge badge-${statusClass} device-status">${statusText}</span>
+                                    <h5 class="card-title">${device.name}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">${getDeviceTypeLabel(device.type)}</h6>
+                                    <p class="card-text small">ID: ${device.id}</p>
+                                    <div class="device-metrics">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="text-center">
+                                                    <h6>CPU</h6>
+                                                    <div class="progress">
+                                                        <div class="progress-bar" role="progressbar" style="width: ${device.metrics?.cpu || 0}%;" 
+                                                            aria-valuenow="${device.metrics?.cpu || 0}" aria-valuemin="0" aria-valuemax="100">
+                                                            ${device.metrics?.cpu || 0}%
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="text-center">
+                                                    <h6>内存</h6>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-info" role="progressbar" style="width: ${device.metrics?.memory || 0}%;" 
+                                                            aria-valuenow="${device.metrics?.memory || 0}" aria-valuemin="0" aria-valuemax="100">
+                                                            ${device.metrics?.memory || 0}%
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0">
+                                    <button class="btn btn-sm btn-outline-primary view-device-btn" data-id="${device.id}">查看详情</button>
+                                    <div class="btn-group float-right">
+                                        <button class="btn btn-sm btn-outline-success start-device-btn" data-id="${device.id}" ${device.status === 'online' ? 'disabled' : ''}>启动</button>
+                                        <button class="btn btn-sm btn-outline-danger stop-device-btn" data-id="${device.id}" ${device.status !== 'online' ? 'disabled' : ''}>停止</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                $('#devicesGrid').html(html);
+                
+                // 设备事件
+                $('.view-device-btn').click(function() {
+                    const deviceId = $(this).data('id');
+                    showDeviceDetail(deviceId);
+                });
+                
+                $('.start-device-btn').click(function() {
+                    const deviceId = $(this).data('id');
+                    controlDevice(deviceId, 'start');
+                });
+                
+                $('.stop-device-btn').click(function() {
+                    const deviceId = $(this).data('id');
+                    controlDevice(deviceId, 'stop');
+                });
+            }
+            
+            // 显示设备详情
+            function showDeviceDetail(deviceId) {
+                $('#deviceDetailTitle').text('加载中...');
+                $('#deviceDetailContent').html(`
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">加载中...</span>
+                        </div>
+                        <p class="mt-2">正在加载设备详情...</p>
+                    </div>
+                `);
+                $('#deviceActionButtons').html('');
+                $('#deviceDetailModal').modal('show');
+                
+                // 获取设备详情
+                $.ajax({
+                    url: `/api/devices/${deviceId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            renderDeviceDetail(response.device);
+                        } else {
+                            $('#deviceDetailContent').html(`<div class="alert alert-danger">加载失败: ${response.error}</div>`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#deviceDetailContent').html(`<div class="alert alert-danger">请求失败: ${error}</div>`);
+                    }
+                });
+            }
+            
+            // 渲染设备详情
+            function renderDeviceDetail(device) {
+                $('#deviceDetailTitle').text(device.name);
+                
+                const statusClass = device.status === 'online' ? 'success' : 'secondary';
+                const statusText = device.status === 'online' ? '在线' : '离线';
+                const platformName = getPlatformName(device.platform);
+                
+                let html = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td width="30%"><strong>ID:</strong></td>
+                                    <td>${device.id}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>类型:</strong></td>
+                                    <td>${getDeviceTypeLabel(device.type)}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>状态:</strong></td>
+                                    <td><span class="badge badge-${statusClass}">${statusText}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>平台:</strong></td>
+                                    <td>${platformName}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>位置:</strong></td>
+                                    <td>${device.location || 'N/A'}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>型号:</strong></td>
+                                    <td>${device.model || 'N/A'}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">设备指标</div>
+                                <div class="card-body">
+                                    <h6>CPU使用率</h6>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar" role="progressbar" style="width: ${device.metrics?.cpu || 0}%;" 
+                                            aria-valuenow="${device.metrics?.cpu || 0}" aria-valuemin="0" aria-valuemax="100">
+                                            ${device.metrics?.cpu || 0}%
+                                        </div>
+                                    </div>
+                                    <h6>内存使用率</h6>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: ${device.metrics?.memory || 0}%;" 
+                                            aria-valuenow="${device.metrics?.memory || 0}" aria-valuemin="0" aria-valuemax="100">
+                                            ${device.metrics?.memory || 0}%
+                                        </div>
+                                    </div>
+                                    <h6>磁盘使用率</h6>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: ${device.metrics?.disk || 0}%;" 
+                                            aria-valuenow="${device.metrics?.disk || 0}" aria-valuemin="0" aria-valuemax="100">
+                                            ${device.metrics?.disk || 0}%
+                                        </div>
+                                    </div>
+                                    <h6>温度</h6>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: ${(device.metrics?.temperature || 0) / 100 * 100}%;" 
+                                            aria-valuenow="${device.metrics?.temperature || 0}" aria-valuemin="0" aria-valuemax="100">
+                                            ${device.metrics?.temperature || 0}°C
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // 添加连接的设备列表（如果有）
+                if (device.connected_devices && device.connected_devices.length > 0) {
+                    html += `
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5>连接的设备</h5>
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>名称</th>
+                                            <th>类型</th>
+                                            <th>状态</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                    `;
+                    
+                    device.connected_devices.forEach(connectedDevice => {
+                        const connStatusClass = connectedDevice.status === 'online' ? 'success' : 'secondary';
+                        const connStatusText = connectedDevice.status === 'online' ? '在线' : '离线';
+                        
+                        html += `
+                            <tr>
+                                <td>${connectedDevice.id}</td>
+                                <td>${connectedDevice.name}</td>
+                                <td>${getDeviceTypeLabel(connectedDevice.type)}</td>
+                                <td><span class="badge badge-${connStatusClass}">${connStatusText}</span></td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // 添加图表
+                html += `
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>历史数据</h5>
+                            <div style="height: 300px;">
+                                <canvas id="deviceHistoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                $('#deviceDetailContent').html(html);
+                
+                // 添加操作按钮
+                const actionButtons = `
+                    <button class="btn btn-outline-success start-device-btn" data-id="${device.id}" ${device.status === 'online' ? 'disabled' : ''}>启动</button>
+                    <button class="btn btn-outline-warning restart-device-btn" data-id="${device.id}" ${device.status !== 'online' ? 'disabled' : ''}>重启</button>
+                    <button class="btn btn-outline-danger stop-device-btn" data-id="${device.id}" ${device.status !== 'online' ? 'disabled' : ''}>停止</button>
+                    <button class="btn btn-danger delete-device-btn" data-id="${device.id}">删除</button>
+                `;
+                
+                $('#deviceActionButtons').html(actionButtons);
+                
+                // 添加按钮事件
+                $('.start-device-btn').click(function() {
+                    const deviceId = $(this).data('id');
+                    controlDevice(deviceId, 'start');
+                });
+                
+                $('.restart-device-btn').click(function() {
+                    const deviceId = $(this).data('id');
+                    controlDevice(deviceId, 'restart');
+                });
+                
+                $('.stop-device-btn').click(function() {
+                    const deviceId = $(this).data('id');
+                    controlDevice(deviceId, 'stop');
+                });
+                
+                $('.delete-device-btn').click(function() {
+                    const deviceId = $(this).data('id');
+                    if (confirm(`确定要删除设备 ${device.name}（${deviceId}）吗？`)) {
+                        deleteDevice(deviceId);
+                    }
+                });
+                
+                // 渲染历史数据图表
+                renderHistoryChart(device);
+            }
+            
+            // 渲染历史数据图表
+            function renderHistoryChart(device) {
+                // 模拟历史数据（实际应从后端获取）
+                const labels = [];
+                const cpuData = [];
+                const memoryData = [];
+                
+                // 生成过去24小时，每小时一个数据点
+                const now = new Date();
+                for (let i = 23; i >= 0; i--) {
+                    const time = new Date(now);
+                    time.setHours(now.getHours() - i);
+                    labels.push(time.getHours() + ':00');
+                    
+                    // 模拟数据，实际应获取真实数据
+                    cpuData.push(Math.floor(Math.random() * 40) + 10); // 10-50%
+                    memoryData.push(Math.floor(Math.random() * 30) + 30); // 30-60%
+                }
+                
+                const ctx = document.getElementById('deviceHistoryChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'CPU使用率',
+                                data: cpuData,
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1,
+                                tension: 0.4
+                            },
+                            {
+                                label: '内存使用率',
+                                data: memoryData,
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1,
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 控制设备（启动/停止/重启）
+            function controlDevice(deviceId, action) {
+                $.ajax({
+                    url: `/api/devices/${deviceId}/control`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        action: action
+                    }),
+                    success: function(response) {
+                        if (response.success) {
+                            alert(`设备已成功${getActionText(action)}`);
+                            // 重新加载设备列表和当前设备详情
+                            loadDevices();
+                            if ($('#deviceDetailModal').is(':visible')) {
+                                showDeviceDetail(deviceId);
+                            }
+                        } else {
+                            alert(`操作失败: ${response.error}`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert(`请求失败: ${error}`);
+                    }
+                });
+            }
+            
+            // 获取操作文本
+            function getActionText(action) {
+                switch(action) {
+                    case 'start': return '启动';
+                    case 'stop': return '停止';
+                    case 'restart': return '重启';
+                    default: return action;
+                }
+            }
+            
+            // 删除设备
+            function deleteDevice(deviceId) {
+                $.ajax({
+                    url: `/api/devices/${deviceId}`,
+                    type: 'DELETE',
+                    success: function(response) {
+                        if (response.success) {
+                            alert('设备已成功删除');
+                            $('#deviceDetailModal').modal('hide');
+                            loadDevices();
+                        } else {
+                            alert(`删除失败: ${response.error}`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert(`请求失败: ${error}`);
+                    }
+                });
+            }
+            
+            // 添加设备
+            function addDevice() {
+                const deviceType = $('#deviceType').val();
+                const deviceName = $('#deviceName').val();
+                const devicePlatform = $('#devicePlatform').val();
+                const deviceLocation = $('#deviceLocation').val();
+                const deviceModel = $('#deviceModel').val();
+                
+                if (!deviceType || !deviceName || !devicePlatform) {
+                    alert('请填写必填字段');
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/api/devices',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        type: deviceType,
+                        name: deviceName,
+                        platform: devicePlatform,
+                        location: deviceLocation,
+                        model: deviceModel
+                    }),
+                    success: function(response) {
+                        if (response.success) {
+                            alert('设备已成功添加');
+                            $('#addDeviceModal').modal('hide');
+                            $('#addDeviceForm')[0].reset();
+                            loadDevices();
+                        } else {
+                            alert(`添加失败: ${response.error}`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert(`请求失败: ${error}`);
+                    }
+                });
+            }
+            
+            // 获取设备类型标签
+            function getDeviceTypeLabel(type) {
+                switch(type) {
+                    case 'gateway': return '网关';
+                    case 'router': return '路由器';
+                    case 'speaker': return '小爱音箱';
+                    case 'camera': return '摄像头';
+                    default: return type;
+                }
+            }
+            
+            // 获取平台名称
+            function getPlatformName(platform) {
+                switch(platform) {
+                    case 'edgex': return 'EdgeX Foundry';
+                    case 'thingsboard': return 'ThingsBoard Edge';
+                    case 'none': return '不连接平台';
+                    default: return platform || 'N/A';
+                }
+            }
         });
     </script>
 </body>

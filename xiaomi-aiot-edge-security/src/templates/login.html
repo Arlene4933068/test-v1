@@ -133,7 +133,7 @@
         </div>
         <div class="footer-text">
             <p>小米AIoT边缘安全防护研究平台 &copy; 2025</p>
-            <p>当前时间: <span id="current-time">2025-04-15 13:58:46</span></p>
+            <p>当前时间: <span id="current-time">{{ current_time }}</span></p>
             <p>推荐使用Chrome、Firefox或Edge浏览器访问</p>
         </div>
     </div>
@@ -158,28 +158,6 @@
         // 每秒更新一次时间
         setInterval(updateTime, 1000);
         updateTime();
-        
-        // 表单验证
-        document.querySelector('form').addEventListener('submit', function(event) {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (!username || !password) {
-                event.preventDefault();
-                alert('请输入用户名和密码');
-            }
-        });
-        
-        // 检测平台连接状态
-        function checkPlatformStatus() {
-            // 这里应该是AJAX请求检查平台状态，但为演示用简单模拟
-            console.log('检查平台连接状态...');
-        }
-        
-        // 页面加载完成后执行
-        $(document).ready(function() {
-            checkPlatformStatus();
-        });
     </script>
 </body>
 </html>

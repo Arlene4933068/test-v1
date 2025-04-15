@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThingsBoard集成 - 小米AIoT边缘安全防护研究平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsoneditor@9.5.6/dist/jsoneditor.min.css">
+    <style>
+        body { padding-top: 20px; }
+        .card { margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-online { background-color: #28a745; }
+        .status-offline { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+        .tb-logo {
+            max-height: 40px;
+            margin-right: 10px;
+        }
+        .connection-card {
+            transition: all 0.3s;
+        }
+        .connection-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .json-editor {
+            height: 400px;
+        }
+        .device-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .action-btn {
+            margin-right: 5px;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+        .terminal {
+            background-color: #212529;
+            color: #f8f9fa;
+            font-family: monospace;
+            padding: 15px;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+        }
+        .terminal p {
+            margin-bottom: 5px;
+        }
+        .terminal .input {
+            color: #28a745;
+        }
+        .terminal .error {
+            color: #dc3545;
+        }
+        .terminal .warning {
+            color: #ffc107;
+        }
+        .terminal .timestamp {
+            color: #6c757d;
+            font-size: 0.8em;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <a class="navbar-brand" href="/">
+                        <img src="https://thingsboard.io/images/thingsboard_logo.svg" alt="ThingsBoard Logo" class="tb-logo">
+                        ThingsBoard Edge 集成
+                    </a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/">首页</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/devices">设备管理</a>
+                            </li>
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/thingsboard">ThingsBoard集成</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/edgex">EdgeX集成</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 连接状态 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">连接状态</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="status-indicator status-online" id="tb-status-indicator"></span>
+                                <span id="tb-status-text">已连接</span>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" id="refresh-connection">
+                                <i class="fas fa-sync"></i> 刷新连接
+                            </button>
+                        </div>
+                        <hr>
+                        <div class="mb-2">
+                            <strong>主机:</strong> <span id="tb-host">localhost</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>端口:</strong> <span id="tb-port">8080</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>最后同步:</strong> <span id="tb-last-sync">2025-04-15 13:30:25</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>设备数量:</strong> <span id="tb-device-count">5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">快速操作</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <button class="btn btn-primary btn-block" id="sync-devices">
+                                    <i class="fas fa-sync"></i> 同步设备
+                                </button>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <button class="btn btn-info btn-block" id="open-tb-dashboard">
+                                    <i class="fas fa-external-link-alt"></i> ThingsBoard控制台
+                                </button>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <button class="btn btn-success btn-block" id="add-tb-device">
+                                    <i class="fas fa-plus"></i> 添加设备
+                                </button>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <button class="btn btn-warning btn-block" id="test-connection">
+                                    <i class="fas fa-heartbeat"></i> 测试连接
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <ul class="nav nav-tabs" id="tbTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="devices-tab" data-toggle="tab" href="#devices" role="tab">
+                    <i class="fas fa-microchip"></i> 设备管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="config-tab" data-toggle="tab" href="#config" role="tab">
+                    <i class="fas fa-cogs"></i> 配置
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="telemetry-tab" data-toggle="tab" href="#telemetry" role="tab">
+                    <i class="fas fa-chart-line"></i> 遥测数据
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="logs-tab" data-toggle="tab" href="#logs" role="tab">
+                    <i class="fas fa-file-alt"></i> 日志
+                </a>
+            </li>
+        </ul>
+        
+        <div class="tab-content">
+            <!-- 设备管理选项卡 -->
+            <div class="tab-pane fade show active" id="devices" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">ThingsBoard设备</h5>
+                            <div class="input-group" style="max-width: 300px;">
+                                <input type="text" class="form-control form-control-sm" placeholder="搜索设备..." id="device-search">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="device-list">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>状态</th>
+                                        <th>名称</th>
+                                        <th>类型</th>
+                                        <th>ID</th>
+                                        <th>最后活动</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tb-device-list">
+                                    <!-- 设备列表将动态加载 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 配置选项卡 -->
+            <div class="tab-pane fade" id="config" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">连接配置</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="tb-connection-form">
+                                    <div class="form-group">
+                                        <label for="config-host">主机</label>
+                                        <input type="text" class="form-control" id="config-host" value="localhost" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="config-port">HTTP端口</label>
+                                        <input type="number" class="form-control" id="config-port" value="8080" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="config-mqtt-port">MQTT端口</label>
+                                        <input type="number" class="form-control" id="config-mqtt-port" value="1883">
+                                    </div>
+                                    <hr>
+                                    <div class="form-group">
+                                        <label for="config-username">用户名</label>
+                                        <input type="text" class="form-control" id="config-username" value="admin@thingsboard.org" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="config-password">密码</label>
+                                        <input type="password" class="form-control" id="config-password" value="******">
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="config-mqtt-enabled" checked>
+                                            <label class="custom-control-label" for="config-mqtt-enabled">启用MQTT连接</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="config-auto-sync" checked>
+                                            <label class="custom-control-label" for="config-auto-sync">自动同步设备</label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">保存配置</button>
+                                    <button type="button" class="btn btn-secondary" id="test-config">测试配置</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">高级配置</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="json-config">JSON配置</label>
+                                    <div id="json-config" class="json-editor"></div>
+                                </div>
+                                <button class="btn btn-primary" id="save-json-config">保存JSON配置</button>
+                                <button class="btn btn-secondary" id="reset-json-config">重置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 遥测数据选项卡 -->
+            <div class="tab-pane fade" id="telemetry" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">选择设备</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="telemetry-device">设备</label>
+                                    <select class="form-control" id="telemetry-device">
+                                        <option value="">-- 选择设备 --</option>
+                                        <!-- 设备选项将动态加载 -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="telemetry-period">时间段</label>
+                                    <select class="form-control" id="telemetry-period">
+                                        <option value="hour">最近1小时</option>
+                                        <option value="day" selected>最近1天</option>
+                                        <option value="week">最近1周</option>
+                                        <option value="month">最近1月</option>
+                                        <option value="custom">自定义...</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" id="load-telemetry">加载数据</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">遥测图表</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="telemetry-chart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">原始数据</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-sm" id="telemetry-table">
+                                        <thead>
+                                            <tr>
+                                                <th>时间戳</th>
+                                                <th>属性</th>
+                                                <th>值</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- 数据将动态加载 -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 日志选项卡 -->
+            <div class="tab-pane fade" id="logs" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">连接日志</h5>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary" id="clear-logs">
+                                    <i class="fas fa-trash"></i> 清空
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary" id="refresh-logs">
+                                    <i class="fas fa-sync"></i> 刷新
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="terminal" id="log-terminal">
+                            <p><span class="timestamp">2025-04-15 13:30:25</span> 启动ThingsBoard连接器...</p>
+                            <p><span class="timestamp">2025-04-15 13:30:26</span> 尝试连接到ThingsBoard: http://localhost:8080/api/auth/login</p>
+                            <p><span class="timestamp">2025-04-15 13:30:27</span> <span class="input">成功连接到ThingsBoard Edge实例</span></p>
+                            <p><span class="timestamp">2025-04-15 13:30:28</span> 加载设备列表...</p>
+                            <p><span class="timestamp">2025-04-15 13:30:29</span> 成功加载5个设备</p>
+                            <p><span class="timestamp">2025-04-15 13:45:10</span> <span class="warning">设备 speaker_001 离线</span></p>
+                            <p><span class="timestamp">2025-04-15 13:46:25</span> <span class="input">设备 speaker_001 恢复在线</span></p>
+                            <p><span class="timestamp">2025-04-15 13:58:45</span> 当前系统状态: 正常运行中</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加设备模态框 -->
+    <div class="modal fade" id="addDeviceModal" tabindex="-1" role="dialog" aria-labelledby="addDeviceModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addDeviceModalLabel">添加ThingsBoard设备</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-device-form">
+                        <div class="form-group">
+                            <label for="add-device-name">设备名称</label>
+                            <input type="text" class="form-control" id="add-device-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-device-type">设备类型</label>
+                            <input type="text" class="form-control" id="add-device-type" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-device-label">标签（可选）</label>
+                            <input type="text" class="form-control" id="add-device-label">
+                        </div>
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="add-device-credentials" checked>
+                                <label class="custom-control-label" for="add-device-credentials">自动生成访问凭证</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="save-device-btn">添加设备</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设备凭证模态框 -->
+    <div class="modal fade" id="deviceCredentialsModal" tabindex="-1" role="dialog" aria-labelledby="deviceCredentialsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deviceCredentialsModalLabel">设备凭证</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 请保存此凭证信息，它只会显示一次！
+                    </div>
+                    <div class="form-group">
+                        <label for="credential-id">凭证ID</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="credential-id" readonly>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary copy-btn" data-target="credential-id" type="button">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="credential-type">凭证类型</label>
+                        <input type="text" class="form-control" id="credential-type" readonly>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="download-credentials">下载凭证</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.5.6/dist/jsoneditor.min.js"></script>
+    <script>
+        // 定义模拟设备数据
+        const devices = [
+            {id: 'speaker_001', name: '小爱音箱', type: 'speaker', status: 'online', lastActive: '2分钟前'},
+            {id: 'camera_001', name: '门口摄像头', type: 'camera', status: 'online', lastActive: '1分钟前'},
+            {id: 'gateway_001', name: '家庭网关', type: 'gateway', status: 'online', lastActive: '刚刚'},
+            {id: 'sensor_001', name: '温湿度传感器', type: 'sensor', status: 'offline', lastActive: '1小时前'},
+            {id: 'router_001', name: '客厅路由器', type: 'router', status: 'online', lastActive: '3分钟前'}
+        ];
+
+        // 模拟遥测数据
+        const telemetryData = {
+            'speaker_001': [
+                {timestamp: '2025-04-15 12:00:00', property: 'temperature', value: 35.2},
+                {timestamp: '2025-04-15 12:10:00', property: 'temperature', value: 36.1},
+                {timestamp: '2025-04-15 12:20:00', property: 'temperature', value: 36.5},
+                {timestamp: '2025-04-15 12:30:00', property: 'temperature', value: 37.2},
+                {timestamp: '2025-04-15 12:40:00', property: 'temperature', value: 36.8},
+                {timestamp: '2025-04-15 12:50:00', property: 'temperature', value: 36.4}
+            ]
+        };
+
+        // JSON编辑器实例
+        let jsonEditor;
+
+        // Chart实例
+        let telemetryChart;
+
+        // 初始化JSON编辑器
+        function initJsonEditor() {
+            const container = document.getElementById('json-config');
+            const options = {
+                mode: 'tree',
+                mainMenuBar: false
+            };
+            
+            jsonEditor = new JSONEditor(container, options);
+            
+            // 设置初始内容
+            const initialJson = {
+                "host": "localhost",
+                "port": 8080,
+                "mqtt_port": 1883,
+                "auth": {
+                    "username": "admin@thingsboard.org",
+                    "password": "******"
+                },
+                "settings": {
+                    "mqtt_enabled": true,
+                    "auto_sync": true,
+                    "sync_interval_minutes": 15,
+                    "retry_on_failure": true,
+                    "max_retries": 3
+                }
+            };
+            
+            jsonEditor.set(initialJson);
+        }
+
+        // 加载设备列表
+        function loadDevices() {
+            const deviceList = $('#tb-device-list');
+            deviceList.empty();
+            
+            devices.forEach(device => {
+                const statusClass = device.status === 'online' ? 'status-online' : 'status-offline';
+                const statusText = device.status === 'online' ? '在线' : '离线';
+                
+                deviceList.append(`
+                    <tr>
+                        <td><span class="status-indicator ${statusClass}"></span>${statusText}</td>
+                        <td>${device.name}</td>
+                        <td>${device.type}</td>
+                        <td>${device.id}</td>
+                        <td>${device.lastActive}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary action-btn view-device" data-id="${device.id}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary action-btn get-credentials" data-id="${device.id}">
+                                <i class="fas fa-key"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger action-btn delete-device" data-id="${device.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+                
+                // 添加到遥测设备下拉框
+                $('#telemetry-device').append(`<option value="${device.id}">${device.name} (${device.type})</option>`);
+            });
+            
+            // 更新设备计数
+            $('#tb-device-count').text(devices.length);
+            
+            // 绑定事件处理函数
+            $('.view-device').click(function() {
+                const deviceId = $(this).data('id');
+                alert(`查看设备: ${deviceId}`);
+            });
+            
+            $('.get-credentials').click(function() {
+                const deviceId = $(this).data('id');
+                showDeviceCredentials(deviceId);
+            });
+            
+            $('.delete-device').click(function() {
+                const deviceId = $(this).data('id');
+                if (confirm(`确定要删除设备 ${deviceId} 吗？`)) {
+                    alert(`设备 ${deviceId} 已删除`);
+                    // 实际应用中这里应该有AJAX调用
+                }
+            });
+        }
+
+        // 显示设备凭证
+        function showDeviceCredentials(deviceId) {
+            // 设置凭证信息
+            $('#credential-id').val(`tb_token_${deviceId}`);
+            $('#credential-type').val('ACCESS_TOKEN');
+            
+            // 显示模态框
+            $('#deviceCredentialsModal').modal('show');
+        }
+
+        // 初始化遥测图表
+        function initTelemetryChart() {
+            const ctx = document.getElementById('telemetry-chart').getContext('2d');
+            telemetryChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '温度 (°C)',
+                        data: [],
+                        backgroundColor: 'rgba(25, 118, 210, 0.2)',
+                        borderColor: 'rgba(25, 118, 210, 1)',
+                        borderWidth: 2,
+                        tension: 0.2,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: '设备遥测数据'
+                        }
+                    }
+                }
+            });
+        }
+
+        // 加载遥测数据
+        function loadTelemetryData(deviceId, period) {
+            // 模拟数据加载
+            if (telemetryData[deviceId]) {
+                const data = telemetryData[deviceId];
+                
+                // 更新图表
+                telemetryChart.data.labels = data.map(d => d.timestamp);
+                telemetryChart.data.datasets[0].data = data.map(d => d.value);
+                telemetryChart.update();
+                
+                // 更新表格
+                const tableBody = $('#telemetry-table tbody');
+                tableBody.empty();
+                
+                data.forEach(d => {
+                    tableBody.append(`
+                        <tr>
+                            <td>${d.timestamp}</td>
+                            <td>${d.property}</td>
+                            <td>${d.value}</td>
+                        </tr>
+                    `);
+                });
+            } else {
+                alert('该设备没有遥测数据');
+                
+                // 清空图表和表格
+                telemetryChart.data.labels = [];
+                telemetryChart.data.datasets[0].data = [];
+                telemetryChart.update();
+                
+                $('#telemetry-table tbody').empty();
+            }
+        }
+
+        // 添加日志
+        function addLog(message, type = '') {
+            const now = new Date();
+            const timestamp = now.toISOString().replace('T', ' ').substr(0, 19);
+            
+            let logClass = '';
+            if (type === 'success') logClass = 'input';
+            else if (type === 'error') logClass = 'error';
+            else if (type === 'warning') logClass = 'warning';
+            
+            const logEntry = `<p><span class="timestamp">${timestamp}</span> <span class="${logClass}">${message}</span></p>`;
+            
+            const terminal = $('#log-terminal');
+            terminal.append(logEntry);
+            terminal.scrollTop(terminal[0].scrollHeight);
+        }
+
+        // 文档就绪事件
+        $(document).ready(function() {
+            // 初始化JSON编辑器
+            initJsonEditor();
+            
+            // 初始化遥测图表
+            initTelemetryChart();
+            
+            // 加载设备列表
+            loadDevices();
+            
+            // 绑定事件处理函数
+            $('#refresh-connection').click(function() {
+                addLog('刷新连接状态...', 'success');
+                setTimeout(() => {
+                    addLog('连接状态: 已连接', 'success');
+                }, 500);
+            });
+            
+            $('#open-tb-dashboard').click(function() {
+                const host = $('#tb-host').text();
+                const port = $('#tb-port').text();
+                window.open(`http://${host}:${port}`, '_blank');
+            });
+            
+            $('#add-tb-device').click(function() {
+                $('#addDeviceModal').modal('show');
+            });
+            
+            $('#test-connection').click(function() {
+                addLog('测试连接...', 'success');
+                setTimeout(() => {
+                    addLog('连接成功! JWT令牌已获取', 'success');
+                }, 1000);
+            });
+            
+            // 添加设备表单提交
+            $('#save-device-btn').click(function() {
+                const name = $('#add-device-name').val();
+                const type = $('#add-device-type').val();
+                const label = $('#add-device-label').val();
+                
+                if (!name || !type) {
+                    alert('请填写必填字段');
+                    return;
+                }
+                
+                // 添加到本地数组
+                const newDevice = {
+                    id: `${type}_${Date.now()}`.toLowerCase(),
+                    name: name,
+                    type: type,
+                    status: 'online',
+                    lastActive: '刚刚'
+                };
+                
+                devices.push(newDevice);
+                
+                // 重新加载设备列表
+                loadDevices();
+                
+                // 添加日志
+                addLog(`添加新设备: ${name} (${type})`, 'success');
+                
+                // 关闭模态框
+                $('#addDeviceModal').modal('hide');
+                
+                // 显示凭证
+                setTimeout(() => {
+                    showDeviceCredentials(newDevice.id);
+                }, 500);
+            });
+            
+            // 加载遥测数据
+            $('#load-telemetry').click(function() {
+                const deviceId = $('#telemetry-device').val();
+                const period = $('#telemetry-period').val();
+                
+                if (!deviceId) {
+                    alert('请选择设备');
+                    return;
+                }
+                
+                loadTelemetryData(deviceId, period);
+                
+                // 添加日志
+                addLog(`加载设备 ${deviceId} 的遥测数据...`, 'success');
+            });
+            
+            // 保存连接配置
+            $('#tb-connection-form').submit(function(e) {
+                e.preventDefault();
+                
+                const host = $('#config-host').val();
+                const port = $('#config-port').val();
+                const mqttPort = $('#config-mqtt-port').val();
+                const username = $('#config-username').val();
+                
+                // 更新顶部连接信息
+                $('#tb-host').text(host);
+                $('#tb-port').text(port);
+                
+                // 添加日志
+                addLog('保存ThingsBoard连接配置', 'success');
+                
+                alert('配置已保存');
+            });
+            
+            // 测试配置
+            $('#test-config').click(function() {
+                addLog('测试配置...', 'success');
+                setTimeout(() => {
+                    addLog('配置有效，连接成功', 'success');
+                }, 1000);
+            });
+            
+            // 保存JSON配置
+            $('#save-json-config').click(function() {
+                try {
+                    const json = jsonEditor.get();
+                    
+                    // 更新表单
+                    $('#config-host').val(json.host);
+                    $('#config-port').val(json.port);
+                    $('#config-mqtt-port').val(json.mqtt_port);
+                    $('#config-username').val(json.auth.username);
+                    
+                    // 添加日志
+                    addLog('保存JSON配置', 'success');
+                    
+                    alert('JSON配置已保存');
+                } catch (e) {
+                    alert('JSON格式错误: ' + e.message);
+                }
+            });
+            
+            // 重置JSON配置
+            $('#reset-json-config').click(function() {
+                if (confirm('确定要重置配置吗？')) {
+                    initJsonEditor();
+                }
+            });
+            
+            // 复制按钮
+            $('.copy-btn').click(function() {
+                const targetId = $(this).data('target');
+                const el = document.getElementById(targetId);
+                el.select();
+                document.execCommand('copy');
+                alert(`已复制到剪贴板: ${el.value}`);
+            });
+            
+            // 清空日志
+            $('#clear-logs').click(function() {
+                if (confirm('确定要清空日志吗？')) {
+                    $('#log-terminal').empty();
+                }
+            });
+            
+            // 刷新日志
+            $('#refresh-logs').click(function() {
+                addLog('手动刷新日志', 'success');
+            });
+            
+            // 下载凭证
+            $('#download-credentials').click(function() {
+                const id = $('#credential-id').val();
+                const type = $('#credential-type').val();
+                
+                const data = {
+                    id: id,
+                    type: type,
+                    generated: new Date().toISOString()
+                };
+                
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `credentials_${id}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        });
+    </script>
+</body>
+</html>

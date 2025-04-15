@@ -19,3 +19,940 @@
 2025-04-15 21:21:50,510 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
 2025-04-15 21:21:50,519 [WARNING] werkzeug:  * Debugger is active!
 2025-04-15 21:21:50,521 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 21:24:10,944 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 21:24:10,961 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.27.44.174:5000
+2025-04-15 21:24:10,962 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-15 21:24:10,962 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 21:24:11,163 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 21:24:11,172 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 21:24:11,173 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 21:24:11,180 [WARNING] dashboard: 404¥ÌŒÛ: /login
+2025-04-15 21:24:11,182 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:24:11] "[33mGET /login?next=http://localhost:5000/ HTTP/1.1[0m" 404 -
+2025-04-15 21:24:17,904 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:24:17,907 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:24:17] "GET / HTTP/1.1" 200 -
+2025-04-15 21:24:20,326 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 21:24:20,327 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:24:20] "[33mGET /devices HTTP/1.1[0m" 404 -
+2025-04-15 21:24:21,824 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:24:21,824 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:24:21] "GET / HTTP/1.1" 200 -
+2025-04-15 21:24:45,555 [WARNING] dashboard: 404¥ÌŒÛ: /analytics
+2025-04-15 21:24:45,556 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:24:45] "[33mGET /analytics HTTP/1.1[0m" 404 -
+2025-04-15 21:24:47,069 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:24:47,070 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:24:47] "GET / HTTP/1.1" 200 -
+2025-04-15 21:25:07,109 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:25:07,110 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:07] "GET /?ide_webview_request_time=1744723506796 HTTP/1.1" 200 -
+2025-04-15 21:25:15,979 [WARNING] dashboard: 404¥ÌŒÛ: /security
+2025-04-15 21:25:15,979 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:15] "[33mGET /security?ide_webview_request_time=1744723515977 HTTP/1.1[0m" 404 -
+2025-04-15 21:25:17,307 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:25:17,308 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:17] "GET /?ide_webview_request_time=1744723516993 HTTP/1.1" 200 -
+2025-04-15 21:25:19,128 [WARNING] dashboard: 404¥ÌŒÛ: /security
+2025-04-15 21:25:19,128 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:19] "[33mGET /security?ide_webview_request_time=1744723519126 HTTP/1.1[0m" 404 -
+2025-04-15 21:25:20,732 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:25:20,732 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:20] "GET /?ide_webview_request_time=1744723520415 HTTP/1.1" 200 -
+2025-04-15 21:25:22,804 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 21:25:22,804 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:22] "[33mGET /devices?ide_webview_request_time=1744723522803 HTTP/1.1[0m" 404 -
+2025-04-15 21:25:24,089 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 21:25:24,089 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:24] "[33mGET /devices?ide_webview_request_time=1744723522803 HTTP/1.1[0m" 404 -
+2025-04-15 21:25:28,923 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:25:28,923 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:28] "GET /?ide_webview_request_time=1744723528920 HTTP/1.1" 200 -
+2025-04-15 21:25:31,673 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 21:25:31,674 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:31] "[33mGET /devices?ide_webview_request_time=1744723531369 HTTP/1.1[0m" 404 -
+2025-04-15 21:25:32,549 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:25:32,549 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:32] "GET /?ide_webview_request_time=1744723532547 HTTP/1.1" 200 -
+2025-04-15 21:25:33,451 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 21:25:33,451 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:33] "[33mGET /devices?ide_webview_request_time=1744723533140 HTTP/1.1[0m" 404 -
+2025-04-15 21:25:34,341 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:25:34,342 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:34] "GET /?ide_webview_request_time=1744723534340 HTTP/1.1" 200 -
+2025-04-15 21:25:35,929 [WARNING] dashboard: 404¥ÌŒÛ: /analytics
+2025-04-15 21:25:35,929 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:35] "[33mGET /analytics?ide_webview_request_time=1744723535623 HTTP/1.1[0m" 404 -
+2025-04-15 21:25:38,745 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:25:38,746 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:38] "GET /?ide_webview_request_time=1744723538744 HTTP/1.1" 200 -
+2025-04-15 21:25:49,869 [WARNING] dashboard: 404¥ÌŒÛ: /security
+2025-04-15 21:25:49,870 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:49] "[33mGET /security?ide_webview_request_time=1744723549558 HTTP/1.1[0m" 404 -
+2025-04-15 21:25:51,040 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:25:51,040 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:25:51] "GET /?ide_webview_request_time=1744723551038 HTTP/1.1" 200 -
+2025-04-15 21:40:33,616 [WARNING] dashboard: 404¥ÌŒÛ: /security
+2025-04-15 21:40:33,617 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:40:33] "[33mGET /security?ide_webview_request_time=1744724433303 HTTP/1.1[0m" 404 -
+2025-04-15 21:40:34,686 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:40:34,686 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:40:34] "GET /?ide_webview_request_time=1744724434685 HTTP/1.1" 200 -
+2025-04-15 21:40:35,603 [WARNING] dashboard: 404¥ÌŒÛ: /security
+2025-04-15 21:40:35,603 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:40:35] "[33mGET /security?ide_webview_request_time=1744724435293 HTTP/1.1[0m" 404 -
+2025-04-15 21:40:36,788 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:40:36,789 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:40:36] "GET /?ide_webview_request_time=1744724436787 HTTP/1.1" 200 -
+2025-04-15 21:40:37,723 [WARNING] dashboard: 404¥ÌŒÛ: /analytics
+2025-04-15 21:40:37,723 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:40:37] "[33mGET /analytics?ide_webview_request_time=1744724437420 HTTP/1.1[0m" 404 -
+2025-04-15 21:40:38,967 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:40:38,968 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:40:38] "GET /?ide_webview_request_time=1744724438966 HTTP/1.1" 200 -
+2025-04-15 21:40:40,077 [WARNING] dashboard: 404¥ÌŒÛ: /settings
+2025-04-15 21:40:40,077 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:40:40] "[33mGET /settings?ide_webview_request_time=1744724439764 HTTP/1.1[0m" 404 -
+2025-04-15 21:40:41,920 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:40:41,921 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:40:41] "GET /?ide_webview_request_time=1744724441919 HTTP/1.1" 200 -
+2025-04-15 21:40:43,980 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 21:40:43,980 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:40:43] "[33mGET /devices?ide_webview_request_time=1744724443665 HTTP/1.1[0m" 404 -
+2025-04-15 21:40:44,865 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:40:44,865 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:40:44] "GET /?ide_webview_request_time=1744724444863 HTTP/1.1" 200 -
+2025-04-15 21:55:09,196 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 21:55:09,197 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 21:55:09] "GET /?ide_webview_request_time=1744724444863 HTTP/1.1" 200 -
+2025-04-15 22:06:36,700 [WARNING] dashboard: 404¥ÌŒÛ: /login
+2025-04-15 22:06:36,700 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:06:36] "[33mGET /login?next=http://localhost:5000/ HTTP/1.1[0m" 404 -
+2025-04-15 22:06:38,609 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:06:38,609 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:06:38] "GET / HTTP/1.1" 200 -
+2025-04-15 22:06:43,086 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 22:06:43,087 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:06:43] "[33mGET /devices HTTP/1.1[0m" 404 -
+2025-04-15 22:06:44,917 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:06:44,918 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:06:44] "GET / HTTP/1.1" 200 -
+2025-04-15 22:06:47,584 [WARNING] dashboard: 404¥ÌŒÛ: /security
+2025-04-15 22:06:47,585 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:06:47] "[33mGET /security HTTP/1.1[0m" 404 -
+2025-04-15 22:06:48,796 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:06:48,796 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:06:48] "GET / HTTP/1.1" 200 -
+2025-04-15 22:06:52,311 [WARNING] dashboard: 404¥ÌŒÛ: /security
+2025-04-15 22:06:52,312 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:06:52] "[33mGET /security HTTP/1.1[0m" 404 -
+2025-04-15 22:06:53,545 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:06:53,545 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:06:53] "GET / HTTP/1.1" 200 -
+2025-04-15 22:07:01,221 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:07:01,221 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:07:01] "GET /?ide_webview_request_time=1744724444863 HTTP/1.1" 200 -
+2025-04-15 22:07:03,410 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 22:07:03,410 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:07:03] "[33mGET /devices?ide_webview_request_time=1744726023409 HTTP/1.1[0m" 404 -
+2025-04-15 22:07:04,523 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:07:04,523 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:07:04] "GET /?ide_webview_request_time=1744726024219 HTTP/1.1" 200 -
+2025-04-15 22:07:14,499 [WARNING] dashboard: 404¥ÌŒÛ: /analytics
+2025-04-15 22:07:14,500 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:07:14] "[33mGET /analytics?ide_webview_request_time=1744726034497 HTTP/1.1[0m" 404 -
+2025-04-15 22:07:16,495 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:07:16,496 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:07:16] "GET /?ide_webview_request_time=1744726036190 HTTP/1.1" 200 -
+2025-04-15 22:09:03,686 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:09:03,687 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:03] "GET / HTTP/1.1" 200 -
+2025-04-15 22:09:04,273 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:09:04,274 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:04] "GET / HTTP/1.1" 200 -
+2025-04-15 22:09:41,428 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 22:09:41,443 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.27.44.174:5000
+2025-04-15 22:09:41,443 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-15 22:09:41,444 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 22:09:41,627 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 22:09:41,636 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 22:09:41,638 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 22:09:45,606 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:09:45,606 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:45] "GET / HTTP/1.1" 200 -
+2025-04-15 22:09:46,098 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:09:46,098 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:46] "GET / HTTP/1.1" 200 -
+2025-04-15 22:09:46,405 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:09:46,405 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:46] "GET / HTTP/1.1" 200 -
+2025-04-15 22:09:46,578 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:09:46,578 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:46] "GET / HTTP/1.1" 200 -
+2025-04-15 22:09:46,883 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:09:46,883 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:46] "GET / HTTP/1.1" 200 -
+2025-04-15 22:09:47,111 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:09:47,111 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:47] "GET / HTTP/1.1" 200 -
+2025-04-15 22:09:47,968 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 22:09:47,969 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:47] "[33mGET /devices HTTP/1.1[0m" 404 -
+2025-04-15 22:09:52,600 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:09:52,600 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:52] "GET /?ide_webview_request_time=1744726036190 HTTP/1.1" 200 -
+2025-04-15 22:09:53,943 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 22:09:53,944 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:53] "[33mGET /devices?ide_webview_request_time=1744726193941 HTTP/1.1[0m" 404 -
+2025-04-15 22:09:55,272 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:09:55,273 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:55] "GET /?ide_webview_request_time=1744726194965 HTTP/1.1" 200 -
+2025-04-15 22:09:58,470 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 22:09:58,470 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:58] "[33mGET /devices?ide_webview_request_time=1744726198469 HTTP/1.1[0m" 404 -
+2025-04-15 22:09:59,827 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:09:59,827 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:09:59] "GET /?ide_webview_request_time=1744726199513 HTTP/1.1" 200 -
+2025-04-15 22:41:04,200 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 22:41:04,202 [INFO] dashboard: ¥¥Ω®¡ÀCSSŒƒº˛: d:\0pj\test-v1\xiaomi-aiot-edge-security\src\static\css\dashboard.css
+2025-04-15 22:45:24,642 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 22:50:02,665 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 22:50:02,670 [INFO] dashboard: ¥¥Ω®¡Àµ«¬º“≥√Êƒ£∞Â: d:\0pj\test-v1\xiaomi-aiot-edge-security\src\templates\login.html
+2025-04-15 22:50:02,671 [INFO] dashboard: ¥¥Ω®¡À404¥ÌŒÛƒ£∞Â: d:\0pj\test-v1\xiaomi-aiot-edge-security\src\templates\404.html
+2025-04-15 22:50:02,671 [INFO] dashboard: ¥¥Ω®¡À500¥ÌŒÛƒ£∞Â: d:\0pj\test-v1\xiaomi-aiot-edge-security\src\templates\500.html
+2025-04-15 22:50:02,696 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.27.44.174:5000
+2025-04-15 22:50:02,697 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-15 22:50:02,698 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 22:50:02,905 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 22:50:02,919 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 22:50:02,920 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 22:50:09,240 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:50:09,240 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:50:09] "GET /?ide_webview_request_time=1744726199513 HTTP/1.1" 200 -
+2025-04-15 22:50:11,357 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 22:50:11,358 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:50:11] "[33mGET /devices?ide_webview_request_time=1744728611355 HTTP/1.1[0m" 404 -
+2025-04-15 22:50:12,939 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:50:12,939 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:50:12] "GET /?ide_webview_request_time=1744728612629 HTTP/1.1" 200 -
+2025-04-15 22:50:31,444 [WARNING] dashboard: 404¥ÌŒÛ: /analytics
+2025-04-15 22:50:31,445 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:50:31] "[33mGET /analytics?ide_webview_request_time=1744728631443 HTTP/1.1[0m" 404 -
+2025-04-15 22:50:32,554 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:50:32,555 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:50:32] "GET /?ide_webview_request_time=1744728632240 HTTP/1.1" 200 -
+2025-04-15 22:50:35,764 [WARNING] dashboard: 404¥ÌŒÛ: /analytics
+2025-04-15 22:50:35,764 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:50:35] "[33mGET /analytics?ide_webview_request_time=1744728635762 HTTP/1.1[0m" 404 -
+2025-04-15 22:50:36,973 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:50:36,973 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:50:36] "GET /?ide_webview_request_time=1744728636667 HTTP/1.1" 200 -
+2025-04-15 22:50:41,230 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:50:41,230 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:50:41] "GET / HTTP/1.1" 200 -
+2025-04-15 22:50:44,241 [WARNING] dashboard: 404¥ÌŒÛ: /devices
+2025-04-15 22:50:44,241 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:50:44] "[33mGET /devices HTTP/1.1[0m" 404 -
+2025-04-15 22:50:45,262 [INFO] dashboard: ∑√Œ  ◊“≥
+2025-04-15 22:50:45,262 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:50:45] "GET / HTTP/1.1" 200 -
+2025-04-15 22:51:12,352 [INFO] werkzeug:  * Detected change in 'd:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard_app.py', reloading
+2025-04-15 22:51:12,392 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 22:51:12,579 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 22:51:12,589 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 22:51:12,590 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 22:52:06,715 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 22:52:06,732 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.27.44.174:5000
+2025-04-15 22:52:06,732 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-15 22:52:06,733 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 22:52:06,921 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 22:52:06,931 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 22:52:06,932 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 22:52:10,742 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:52:10] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 22:52:10,768 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:52:10] "GET /login?next=http://localhost:5000/ HTTP/1.1" 200 -
+2025-04-15 22:52:28,626 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:52:28] "[32mPOST /login?next=http://localhost:5000/ HTTP/1.1[0m" 302 -
+2025-04-15 22:52:28,927 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 22:52:28,927 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 22:52:28,929 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 22:52:28,929 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:52:28] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 22:52:29,240 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:52:29] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 22:52:35,397 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 22:52:35,398 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 22:52:35,399 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 22:52:35,400 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:52:35] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 22:52:35,712 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:52:35] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 22:52:37,959 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 22:52:37,959 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 22:52:37,960 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 22:52:37,961 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:52:37] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 22:52:38,073 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 22:52:38] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:02:31,708 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:02:31,709 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:02:31,709 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:02:31,710 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:02:31] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:02:31,803 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:02:31] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:02:32,971 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:02:32,971 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:02:32,972 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:02:32,972 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:02:32] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:02:33,277 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:02:33] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:02:34,169 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:02:34,169 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:02:34,170 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:02:34,170 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:02:34] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:02:34,264 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:02:34] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:02:34,709 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:02:34,717 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:02:34,718 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:02:34,718 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:02:34] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:02:35,016 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:02:35] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:02:35,582 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:02:35,582 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:02:35,583 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:02:35,583 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:02:35] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:02:35,673 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:02:35] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:07:26,336 [INFO] werkzeug:  * Detected change in 'd:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard_app.py', reloading
+2025-04-15 23:07:26,375 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 23:07:26,567 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:07:26,577 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 23:07:26,578 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 23:08:01,386 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:08:01,403 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.27.44.174:5000
+2025-04-15 23:08:01,403 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-15 23:08:01,404 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 23:08:01,598 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:08:01,608 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 23:08:01,609 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 23:08:04,225 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:08:04] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:08:04,233 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:08:04] "GET /login?next=http://localhost:5000/ HTTP/1.1" 200 -
+2025-04-15 23:08:06,918 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:08:06] "[32mPOST /login?next=http://localhost:5000/ HTTP/1.1[0m" 302 -
+2025-04-15 23:08:07,220 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:08:07,221 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:08:07,222 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:08:07,222 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:08:07] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:08:07,545 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:08:07] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:08:12,566 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:08:12,566 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:08:12,568 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:08:12,568 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:08:12] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:08:12,865 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:08:12] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:10:16,411 [INFO] werkzeug:  * Detected change in 'd:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard_app.py', reloading
+2025-04-15 23:10:16,450 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 23:10:16,644 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:10:16,655 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 23:10:16,657 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 23:10:21,135 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:21] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:10:28,990 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:10:29,010 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.27.44.174:5000
+2025-04-15 23:10:29,010 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-15 23:10:29,011 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 23:10:29,224 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:10:29,235 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 23:10:29,236 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 23:10:31,341 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:31] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:10:31,662 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:31] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:10:31,963 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:31] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:10:45,358 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:45] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:10:45,664 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:45] "GET /login?next=http://localhost:5000/ HTTP/1.1" 200 -
+2025-04-15 23:10:48,725 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:48] "[32mPOST /login?next=http://localhost:5000/ HTTP/1.1[0m" 302 -
+2025-04-15 23:10:48,731 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:10:48,731 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:10:48,733 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:10:48,733 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:48] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:10:48,971 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:48] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:10:52,049 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:10:52,049 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:10:52,050 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:10:52,050 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:52] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:10:52,158 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:52] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:10:53,121 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:10:53,121 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:10:53,122 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:10:53,122 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:53] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:10:53,432 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:10:53,432 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:10:53,433 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:10:53,433 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:53] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:10:53,692 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:10:53] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:11:13,464 [INFO] werkzeug:  * Detected change in 'd:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard_app.py', reloading
+2025-04-15 23:11:13,511 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 23:11:13,720 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:11:13,730 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 23:11:13,732 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 23:11:16,756 [INFO] werkzeug:  * Detected change in 'd:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard_app.py', reloading
+2025-04-15 23:11:16,796 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 23:11:16,993 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:11:17,003 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 23:11:17,005 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 23:11:35,432 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:11:35,450 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.27.44.174:5000
+2025-04-15 23:11:35,450 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-15 23:11:35,451 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 23:11:35,681 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:11:35,692 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 23:11:35,694 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 23:11:38,854 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:11:38] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:11:38,862 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:11:38] "GET /login?next=http://localhost:5000/ HTTP/1.1" 200 -
+2025-04-15 23:11:41,607 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:11:41] "[32mPOST /login?next=http://localhost:5000/ HTTP/1.1[0m" 302 -
+2025-04-15 23:11:41,915 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:11:41,916 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:11:41,917 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:11:41,917 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:11:41] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:11:42,226 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:11:42] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:11:46,250 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:11:46,250 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:11:46,251 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:11:46,251 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:11:46] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:11:46,561 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:11:46] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:13:13,203 [INFO] werkzeug:  * Detected change in 'd:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard_app.py', reloading
+2025-04-15 23:13:13,238 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 23:13:13,421 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:13:13,431 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 23:13:13,432 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 23:13:57,480 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:13:57] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:14:08,640 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:14:08] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:14:08,653 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:14:08] "GET /login?next=http://localhost:5000/ HTTP/1.1" 200 -
+2025-04-15 23:14:11,118 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:14:11] "[32mPOST /login?next=http://localhost:5000/ HTTP/1.1[0m" 302 -
+2025-04-15 23:14:11,129 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:14:11,129 [ERROR] dashboard: “«±Ì≈Ã“≥√Ê‰÷»æ¥ÌŒÛ: dashboard.html
+2025-04-15 23:14:11,131 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 206, in index
+    return render_template('dashboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: dashboard.html
+
+2025-04-15 23:14:11,131 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:14:11] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:14:11,378 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:14:11] "GET /error?error=dashboard.html HTTP/1.1" 200 -
+2025-04-15 23:16:36,757 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:16:36,774 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.27.44.174:5000
+2025-04-15 23:16:36,774 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-15 23:16:36,774 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 23:16:37,025 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:16:37,043 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 23:16:37,045 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 23:16:43,188 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:16:43] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:16:43,195 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:16:43] "GET /login?next=http://localhost:5000/ HTTP/1.1" 200 -
+2025-04-15 23:16:44,770 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:16:44] "[32mPOST /login?next=http://localhost:5000/ HTTP/1.1[0m" 302 -
+2025-04-15 23:16:45,067 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:16:45,068 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:16:45] "GET / HTTP/1.1" 200 -
+2025-04-15 23:16:57,234 [INFO] dashboard: ∑√Œ …Ë±∏π‹¿Ì“≥√Ê
+2025-04-15 23:16:57,234 [ERROR] dashboard: …Ë±∏π‹¿Ì“≥√Ê‰÷»æ¥ÌŒÛ: devices.html
+2025-04-15 23:16:57,238 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 220, in device_management
+    return render_template('devices.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: devices.html
+
+2025-04-15 23:16:57,239 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:16:57] "[32mGET /devices HTTP/1.1[0m" 302 -
+2025-04-15 23:16:57,318 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:16:57] "GET /error?error=devices.html HTTP/1.1" 200 -
+2025-04-15 23:17:03,671 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:17:03,672 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:17:03] "GET / HTTP/1.1" 200 -
+2025-04-15 23:17:07,552 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:17:07] "GET /security HTTP/1.1" 200 -
+2025-04-15 23:17:07,603 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:17:07] "GET /static/css/dashboard.css HTTP/1.1" 200 -
+2025-04-15 23:17:12,270 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:17:12] "GET /security HTTP/1.1" 200 -
+2025-04-15 23:17:12,335 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:17:12] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2025-04-15 23:17:16,173 [WARNING] dashboard: 404¥ÌŒÛ: /analytics
+2025-04-15 23:17:16,175 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:17:16] "[33mGET /analytics HTTP/1.1[0m" 404 -
+2025-04-15 23:17:20,358 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:17:20,358 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:17:20] "GET / HTTP/1.1" 200 -
+2025-04-15 23:17:21,871 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:17:21] "GET /security HTTP/1.1" 200 -
+2025-04-15 23:17:22,172 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:17:22] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2025-04-15 23:17:26,108 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:17:26,108 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:17:26] "GET / HTTP/1.1" 200 -
+2025-04-15 23:17:58,645 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:17:58,646 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:17:58] "GET / HTTP/1.1" 200 -
+2025-04-15 23:18:16,985 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:18:16] "GET /security HTTP/1.1" 200 -
+2025-04-15 23:18:17,290 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:18:17] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2025-04-15 23:18:28,043 [INFO] dashboard: ∑√Œ ThingsBoardºØ≥…“≥√Ê
+2025-04-15 23:18:28,043 [ERROR] dashboard: ThingsBoardºØ≥…“≥√Ê‰÷»æ¥ÌŒÛ: thingsboard.html
+2025-04-15 23:18:28,044 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 234, in thingsboard_integration
+    return render_template('thingsboard.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         config=thingsboard_config,
+                         devices=[d for d in devices if d['platform'] == 'thingsboard'])
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: thingsboard.html
+
+2025-04-15 23:18:28,044 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:18:28] "[32mGET /thingsboard HTTP/1.1[0m" 302 -
+2025-04-15 23:18:28,131 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:18:28] "GET /error?error=thingsboard.html HTTP/1.1" 200 -
+2025-04-15 23:18:39,844 [INFO] werkzeug:  * Detected change in 'd:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard_app.py', reloading
+2025-04-15 23:18:39,951 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 23:18:40,184 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:18:40,196 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 23:18:40,198 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 23:18:41,215 [INFO] werkzeug:  * Detected change in 'd:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard_app.py', reloading
+2025-04-15 23:18:41,255 [INFO] werkzeug:  * Restarting with stat
+2025-04-15 23:18:41,448 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-15 23:18:41,460 [WARNING] werkzeug:  * Debugger is active!
+2025-04-15 23:18:41,461 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-15 23:18:55,433 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:18:55] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-15 23:18:55,570 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:18:55] "GET /login?next=http://localhost:5000/ HTTP/1.1" 200 -
+2025-04-15 23:18:57,682 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:18:57] "[32mPOST /login?next=http://localhost:5000/ HTTP/1.1[0m" 302 -
+2025-04-15 23:18:57,980 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:18:57,982 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:18:57] "GET / HTTP/1.1" 200 -
+2025-04-15 23:19:01,205 [INFO] dashboard: ∑√Œ …Ë±∏π‹¿Ì“≥√Ê
+2025-04-15 23:19:01,205 [ERROR] dashboard: …Ë±∏π‹¿Ì“≥√Ê‰÷»æ¥ÌŒÛ: devices.html
+2025-04-15 23:19:01,208 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 220, in device_management
+    return render_template('devices.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: devices.html
+
+2025-04-15 23:19:01,209 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:19:01] "[32mGET /devices HTTP/1.1[0m" 302 -
+2025-04-15 23:19:01,283 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:19:01] "GET /error?error=devices.html HTTP/1.1" 200 -
+2025-04-15 23:19:03,661 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:19:03,662 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:19:03] "GET / HTTP/1.1" 200 -
+2025-04-15 23:19:04,693 [INFO] dashboard: ∑√Œ ∞≤»´º‡øÿ“≥√Ê
+2025-04-15 23:19:04,694 [ERROR] dashboard: ∞≤»´º‡øÿ“≥√Ê‰÷»æ¥ÌŒÛ: security.html
+2025-04-15 23:19:04,694 [ERROR] dashboard: Traceback (most recent call last):
+  File "d:\0pj\test-v1\xiaomi-aiot-edge-security\src\dashboard_app.py", line 249, in security_monitoring
+    return render_template('security.html',
+                         current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                         devices=devices)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\0pj\test-v1\0pjtest-v1xiaomi-aiot-edge-securityvenv\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: security.html
+
+2025-04-15 23:19:04,695 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:19:04] "[32mGET /security HTTP/1.1[0m" 302 -
+2025-04-15 23:19:04,999 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:19:04] "GET /error?error=security.html HTTP/1.1" 200 -
+2025-04-15 23:19:06,314 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:19:06,314 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:19:06] "GET / HTTP/1.1" 200 -
+2025-04-15 23:19:07,283 [WARNING] dashboard: 404¥ÌŒÛ: /analytics
+2025-04-15 23:19:07,285 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:19:07] "[33mGET /analytics HTTP/1.1[0m" 404 -
+2025-04-15 23:19:09,379 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:19:09,380 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:19:09] "GET / HTTP/1.1" 200 -
+2025-04-15 23:19:13,451 [WARNING] dashboard: 404¥ÌŒÛ: /settings
+2025-04-15 23:19:13,452 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:19:13] "[33mGET /settings HTTP/1.1[0m" 404 -
+2025-04-15 23:19:15,689 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:19:15,689 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:19:15] "GET / HTTP/1.1" 200 -
+2025-04-15 23:19:34,642 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-15 23:19:34,643 [INFO] werkzeug: 127.0.0.1 - - [15/Apr/2025 23:19:34] "GET / HTTP/1.1" 200 -

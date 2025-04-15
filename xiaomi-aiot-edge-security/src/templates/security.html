@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全监控 - 小米AIoT边缘安全防护研究平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <style>
+        .attack-card {
+            transition: all 0.3s ease;
+        }
+        .attack-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .attack-active {
+            border-left: 5px solid #dc3545;
+        }
+        .attack-inactive {
+            border-left: 5px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <a class="navbar-brand" href="/">小米AIoT边缘安全防护研究平台</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/">首页</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/devices">设备管理</a>
+                            </li>
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/security">安全监控</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/thingsboard">ThingsBoard集成</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/logout">退出</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>攻击模拟控制台</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card attack-card attack-inactive" id="ddos-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">DDoS攻击模拟</h5>
+                                        <p class="card-text">模拟分布式拒绝服务攻击，测试系统抗压能力。</p>
+                                        <button class="btn btn-danger btn-sm" onclick="startAttack('ddos')">启动攻击</button>
+                                        <button class="btn btn-secondary btn-sm" onclick="stopAttack('ddos')" disabled>停止攻击</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card attack-card attack-inactive" id="mitm-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">中间人攻击模拟</h5>
+                                        <p class="card-text">模拟中间人攻击，测试系统安全防护能力。</p>
+                                        <button class="btn btn-danger btn-sm" onclick="startAttack('mitm')">启动攻击</button>
+                                        <button class="btn btn-secondary btn-sm" onclick="stopAttack('mitm')" disabled>停止攻击</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card attack-card attack-inactive" id="credential-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">凭证攻击模拟</h5>
+                                        <p class="card-text">模拟凭证暴力破解攻击，测试认证系统安全性。</p>
+                                        <button class="btn btn-danger btn-sm" onclick="startAttack('credential')">启动攻击</button>
+                                        <button class="btn btn-secondary btn-sm" onclick="stopAttack('credential')" disabled>停止攻击</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card attack-card attack-inactive" id="firmware-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">固件攻击模拟</h5>
+                                        <p class="card-text">模拟固件篡改攻击，测试设备固件防护机制。</p>
+                                        <button class="btn btn-danger btn-sm" onclick="startAttack('firmware')">启动攻击</button>
+                                        <button class="btn btn-secondary btn-sm" onclick="stopAttack('firmware')" disabled>停止攻击</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>最近安全事件</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> 最近没有安全事件
+                        </div>
+                        <div id="attack-events"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function startAttack(attackType) {
+            $(`#${attackType}-card`).removeClass('attack-inactive').addClass('attack-active');
+            $(`#${attackType}-card .btn-danger`).prop('disabled', true);
+            $(`#${attackType}-card .btn-secondary`).prop('disabled', false);
+            
+            // 调用API启动攻击
+            $.post(`/api/security/attack/${attackType}/start`, function(data) {
+                if (data.success) {
+                    addAttackEvent(attackType, 'started');
+                }
+            });
+        }
+
+        function stopAttack(attackType) {
+            $(`#${attackType}-card`).removeClass('attack-active').addClass('attack-inactive');
+            $(`#${attackType}-card .btn-danger`).prop('disabled', false);
+            $(`#${attackType}-card .btn-secondary`).prop('disabled', true);
+            
+            // 调用API停止攻击
+            $.post(`/api/security/attack/${attackType}/stop`, function(data) {
+                if (data.success) {
+                    addAttackEvent(attackType, 'stopped');
+                }
+            });
+        }
+
+        function addAttackEvent(attackType, action) {
+            const eventText = `${new Date().toLocaleString()} - ${getAttackName(attackType)} ${action === 'started' ? '已启动' : '已停止'}`;
+            $('#attack-events').prepend(`<div class="alert alert-${action === 'started' ? 'danger' : 'success'}">${eventText}</div>`);
+        }
+
+        function getAttackName(attackType) {
+            const names = {
+                'ddos': 'DDoS攻击',
+                'mitm': '中间人攻击',
+                'credential': '凭证攻击',
+                'firmware': '固件攻击'
+            };
+            return names[attackType] || attackType;
+        }
+    </script>
+</body>
+</html>

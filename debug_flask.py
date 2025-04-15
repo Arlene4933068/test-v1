@@ -17,8 +17,8 @@ def index():
         <head>
             <title>调试页面</title>
             <style>
-                body { font-family: sans-serif; margin: 20px; }
-                pre { background: #f5f5f5; padding: 10px; border-radius: 5px; }
+                body {{ font-family: sans-serif; margin: 20px; }}
+                pre {{ background: #f5f5f5; padding: 10px; border-radius: 5px; }}
             </style>
         </head>
         <body>

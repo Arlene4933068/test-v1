@@ -102,6 +102,64 @@ app = Flask(__name__,
 app.secret_key = config.get('secret_key', os.urandom(24).hex())
 CORS(app)
 
+# 检查模板目录
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+print(f"模板目录: {template_dir}")
+print(f"模板目录存在: {os.path.exists(template_dir)}")
+print(f"模板目录内容: {os.listdir(template_dir) if os.path.exists(template_dir) else '目录不存在'}")
+
+# 创建基本模板文件
+def create_basic_templates():
+    """创建基本的HTML模板文件"""
+    templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
+    os.makedirs(templates_dir, exist_ok=True)
+    
+    # 登录页面
+    login_path = os.path.join(templates_dir, 'login.html')
+    if not os.path.exists(login_path):
+        with open(login_path, 'w') as f:
+            f.write("""
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+</head>
+<body>
+    <h1>登录</h1>
+    <form method="POST">
+        <input type="text" name="username" placeholder="用户名">
+        <input type="password" name="password" placeholder="密码">
+        <button type="submit">登录</button>
+    </form>
+</body>
+</html>
+""")
+    
+    # 仪表盘页面
+    dashboard_path = os.path.join(templates_dir, 'dashboard.html')
+    if not os.path.exists(dashboard_path):
+        with open(dashboard_path, 'w') as f:
+            f.write("""
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>仪表盘</title>
+</head>
+<body>
+    <h1>仪表盘</h1>
+    <div id="dashboard-content"></div>
+</body>
+</html>
+""")
+    
+    print(f"模板文件已创建/更新: {login_path}, {dashboard_path}")
+    return templates_dir
+
+# 应用启动时创建模板
+create_basic_templates()
+
 class DashboardApp:
     """Dashboard应用程序类"""
     

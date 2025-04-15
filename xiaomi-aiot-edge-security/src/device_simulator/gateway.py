@@ -12,7 +12,7 @@ import threading
 from datetime import datetime
 
 from .simulator_base import DeviceSimulator
-from ..utils.crypto import generate_random_key
+from .utils.crypto import generate_random_key
 
 class GatewaySimulator(DeviceSimulator):
     """网关设备模拟器类"""

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime, timedelta
-from ..utils.logger import get_logger
+from .utils.logger import get_logger
 
 class StatisticalAnalyzer:
     """统计分析器类，用于分析收集的数据并生成统计结果和可视化"""

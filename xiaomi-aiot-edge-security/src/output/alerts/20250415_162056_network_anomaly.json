@@ -1,0 +1,16 @@
+{
+  "type": "network_anomaly",
+  "details": {
+    "anomaly_type": "crypto_mining",
+    "source_ip": "192.168.3.1",
+    "destination_ip": "10.0.2.212",
+    "confidence": 0.85,
+    "packet_count": 1896,
+    "duration": 137,
+    "ports": [
+      29583
+    ],
+    "protocol": "TCP"
+  },
+  "timestamp": 1744705256.0103178
+}

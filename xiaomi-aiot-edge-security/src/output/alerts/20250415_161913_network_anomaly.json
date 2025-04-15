@@ -1,0 +1,16 @@
+{
+  "type": "network_anomaly",
+  "details": {
+    "anomaly_type": "data_exfiltration",
+    "source_ip": "192.168.94.166",
+    "destination_ip": "10.0.239.151",
+    "confidence": 0.83,
+    "packet_count": 4799,
+    "duration": 102,
+    "ports": [
+      11509
+    ],
+    "protocol": "UDP"
+  },
+  "timestamp": 1744705153.9659126
+}

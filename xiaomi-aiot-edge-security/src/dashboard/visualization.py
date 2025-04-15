@@ -5,9 +5,9 @@ import time
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
-from ..utils.logger import get_logger
-from ..analytics.statistical_analyzer import StatisticalAnalyzer
-from ..analytics.report_generator import ReportGenerator
+from .utils.logger import get_logger
+from .analytics.statistical_analyzer import StatisticalAnalyzer
+from .analytics.report_generator import ReportGenerator
 
 class Visualization:
     """数据可视化：提供数据分析和可视化功能"""

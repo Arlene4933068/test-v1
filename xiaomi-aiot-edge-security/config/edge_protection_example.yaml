@@ -1,0 +1,76 @@
+# 边缘计算安全防护配置示例
+
+edge_protection:
+  # 防护级别: low, medium, high
+  protection_level: medium
+  
+  # 是否启用防火墙功能
+  enable_firewall: true
+  
+  # 是否启用入侵检测系统
+  enable_ids: true
+  
+  # 是否启用数据保护（加密）
+  enable_data_protection: true
+  
+  # 设备白名单
+  device_whitelist:
+    - xiaomi_gateway_01
+    - xiaomi_router_01
+    - xiaomi_speaker_01
+    - xiaomi_camera_01
+  
+  # 自定义防火墙规则
+  firewall_rules:
+    - rule_id: custom_rule_001
+      protocol: tcp
+      port: 8080
+      action: allow
+      source: 192.168.1.0/24
+      description: Allow local network access to web interface
+      
+    - rule_id: custom_rule_002
+      protocol: udp
+      port_range: 5000-6000
+      action: deny
+      source: any
+      description: Block unnecessary UDP ports
+  
+  # 安全扫描设置
+  security_scan:
+    # 扫描间隔（秒）
+    interval: 300
+    
+    # 配置文件扫描路径
+    config_scan_paths:
+      - /etc/xiaomi
+      - /var/lib/xiaomi/config
+    
+    # 恶意软件扫描路径
+    malware_scan_paths:
+      - /tmp
+      - /var/lib/xiaomi/downloads
+    
+    # 忽略路径
+    ignore_paths:
+      - /var/log
+      - /tmp/cache
+  
+  # 日志设置
+  logging:
+    # 日志级别: debug, info, warning, error
+    level: info
+    
+    # 是否保存到文件
+    save_to_file: true
+    
+    # 日志文件路径
+    log_file: logs/edge_protection.log
+    
+    # 日志轮转设置
+    rotation:
+      # 单个日志文件最大大小（字节）
+      max_size: 10485760  # 10MB
+      
+      # 保留的日志文件数量
+      backup_count: 5

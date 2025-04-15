@@ -1,0 +1,46 @@
+analytics:
+  output_dir: output
+  report_interval: 300
+  save_alerts: true
+  visualization_enabled: false
+devices:
+  device_count: 4
+  telemetry_enabled: false
+  telemetry_interval: 60
+edge_protection:
+  anomaly_detection:
+    baseline_period: 24
+    machine_learning: false
+    statistical_methods:
+    - z-score
+    - moving-average
+  detection_sensitivity: high
+  device_whitelist:
+  - xiaomi_gateway_01
+  - xiaomi_router_01
+  - xiaomi_speaker_01
+  - xiaomi_camera_01
+  enable_data_protection: true
+  enable_firewall: true
+  enable_ids: true
+  proactive_defense: true
+  protection_level: high
+  threat_intelligence:
+    enabled: true
+    sources:
+    - local
+    - cloud
+    update_interval: 3600
+platform:
+  edgex:
+    host: localhost
+    port: 59880
+  thingsboard:
+    host: localhost
+    port: 8080
+security:
+  attack_complexity: high
+  detection_threshold: 0.6
+  enable_attack_simulation: true
+  scan_interval: 5
+  simulation_probability: 0.2

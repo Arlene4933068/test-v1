@@ -1,0 +1,14 @@
+{
+  "type": "device_tampering",
+  "details": {
+    "device_id": "xiaomi_device_3",
+    "tampering_type": "bootloader_compromised",
+    "severity": "high",
+    "detected_at": 1744705140.9496915,
+    "detection_method": "checksum_verification",
+    "affected_components": [
+      "bootloader"
+    ]
+  },
+  "timestamp": 1744705140.9497328
+}

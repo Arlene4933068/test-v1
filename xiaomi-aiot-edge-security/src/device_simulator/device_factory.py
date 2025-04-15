@@ -8,8 +8,8 @@
 import logging
 import uuid
 from typing import Dict, Any, List, Optional
-from ..platform_connector.edgex_connector import EdgeXConnector
-from ..platform_connector.thingsboard_connector import ThingsBoardConnector
+from .platform_connector.edgex_connector import EdgeXConnector
+from .platform_connector.thingsboard_connector import ThingsBoardConnector
 from .devices.device_base import DeviceBase
 from .devices.gateway import Gateway
 from .devices.router import Router

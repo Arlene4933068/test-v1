@@ -207,33 +207,68 @@ class EdgeXConnector(ConnectorBase):
             bool: 发送成功返回True，否则返回False
         """
         try:
-            # 尝试发送，但即使失败也模拟成功
+            # 构建事件数据
+            event_data = {
+                "apiVersion": "v2",
+                "deviceName": device_name,
+                "readings": readings
+            }
+            
+            # 记录要发送的数据
+            self.logger.debug(f"准备发送设备{device_name}的数据: {readings}")
+            
             try:
-                # 构建事件数据
-                event_data = {
-                    "apiVersion": "v2",
-                    "deviceName": device_name,
-                    "readings": readings
-                }
-                
                 response = requests.post(
                     f"{self.core_data_url}/api/v2/event",
                     headers=self.headers,
-                    json=event_data
+                    json=event_data,
+                    timeout=5
                 )
                 
                 if response.status_code in [200, 201]:
-                    self.logger.debug(f"成功发送设备{device_name}的数据")
+                    self.logger.info(f"成功发送设备{device_name}的数据到EdgeX")
                     return True
-            except Exception:
-                pass
+                else:
+                    self.logger.warning(f"发送设备{device_name}数据到EdgeX失败，状态码: {response.status_code}, 响应: {response.text}")
+                    
+                    # 备份到本地文件
+                    self._backup_data_locally(device_name, readings)
+                    return False
+            except Exception as e:
+                self.logger.warning(f"发送设备{device_name}数据到EdgeX时出现异常: {str(e)}")
                 
-            # 模拟成功
-            self.logger.warning(f"模拟发送设备{device_name}的数据，实际未发送")
-            return True
+                # 备份到本地文件
+                self._backup_data_locally(device_name, readings)
+                return False
         except Exception as e:
-            self.logger.error(f"发送设备数据时发生错误: {str(e)}")
-            return True  # 仍然返回成功
+            self.logger.error(f"处理设备{device_name}数据发送时发生错误: {str(e)}")
+            return False
+    
+    def _backup_data_locally(self, device_name: str, readings: List[Dict[str, Any]]) -> None:
+        """
+        将数据备份到本地文件
+        
+        Args:
+            device_name: 设备名称
+            readings: 读数列表
+        """
+        try:
+            # 确保备份目录存在
+            backup_dir = os.path.join(os.getcwd(), "data_backup")
+            if not os.path.exists(backup_dir):
+                os.makedirs(backup_dir)
+            
+            # 构造文件名
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            backup_file = os.path.join(backup_dir, f"{device_name}_{timestamp}.json")
+            
+            # 写入数据
+            with open(backup_file, "w", encoding="utf-8") as f:
+                json.dump({"device": device_name, "timestamp": time.time(), "readings": readings}, f, indent=2)
+            
+            self.logger.info(f"已将设备{device_name}的数据备份到本地文件: {backup_file}")
+        except Exception as e:
+            self.logger.error(f"备份设备{device_name}数据到本地文件时出错: {str(e)}")
 
     def get_device_readings(self, device_name: str, count: int = 10) -> List[Dict[str, Any]]:
         """

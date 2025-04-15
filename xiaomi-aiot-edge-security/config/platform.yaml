@@ -118,3 +118,15 @@ security:
     node_type: worker
     roles:
     - detector
+# 添加到您的 platform.yaml 文件中
+
+edge_protection:
+  protection_level: medium
+  enable_firewall: true
+  enable_ids: true
+  enable_data_protection: true
+  device_whitelist:
+    - xiaomi_gateway_01
+    - xiaomi_router_01
+    - xiaomi_speaker_01
+    - xiaomi_camera_01

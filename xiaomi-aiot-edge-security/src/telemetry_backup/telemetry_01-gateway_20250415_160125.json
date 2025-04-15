@@ -1,0 +1,12 @@
+{
+  "token": "mock-token-mock-xiaomi_gateway_01-gateway",
+  "timestamp": 1744704085.4783473,
+  "data": {
+    "temperature": 29.0,
+    "humidity": 35.1,
+    "connected_devices": 14,
+    "uptime": 142625,
+    "cpu_usage": 51.3,
+    "memory_usage": 31.1
+  }
+}

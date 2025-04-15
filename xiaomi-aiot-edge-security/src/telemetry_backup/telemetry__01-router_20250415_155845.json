@@ -1,0 +1,12 @@
+{
+  "token": "mock-token-mock-xiaomi_router_01-router",
+  "timestamp": 1744703925.3909829,
+  "data": {
+    "temperature": 35.5,
+    "bandwidth_usage": 45.84,
+    "connected_clients": 10,
+    "tx_bytes": 41347767,
+    "rx_bytes": 38321595,
+    "signal_strength": -87
+  }
+}

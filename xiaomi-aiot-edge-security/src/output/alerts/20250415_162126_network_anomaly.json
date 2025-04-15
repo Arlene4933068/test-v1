@@ -1,0 +1,20 @@
+{
+  "type": "network_anomaly",
+  "details": {
+    "anomaly_type": "port_scan",
+    "source_ip": "192.168.3.6",
+    "destination_ip": "10.0.185.24",
+    "confidence": 0.98,
+    "packet_count": 5173,
+    "duration": 293,
+    "ports": [
+      26044,
+      3028,
+      55396,
+      24768,
+      48304
+    ],
+    "protocol": "TCP"
+  },
+  "timestamp": 1744705286.023641
+}

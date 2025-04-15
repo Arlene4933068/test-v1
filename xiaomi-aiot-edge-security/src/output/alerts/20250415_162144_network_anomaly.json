@@ -1,0 +1,20 @@
+{
+  "type": "network_anomaly",
+  "details": {
+    "anomaly_type": "lateral_movement",
+    "source_ip": "192.168.194.29",
+    "destination_ip": "10.0.127.32",
+    "confidence": 0.76,
+    "packet_count": 8427,
+    "duration": 158,
+    "ports": [
+      64092,
+      43566,
+      63390,
+      55700,
+      47079
+    ],
+    "protocol": "HTTP"
+  },
+  "timestamp": 1744705304.0347567
+}

@@ -12,15 +12,16 @@ import logging
 import argparse
 import threading
 from typing import Dict, Any
+from security.edge_security_protector import EdgeSecurityProtector
 
 # 确保可以导入本项目模块
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
-from src.utils.logger import setup_logger, get_logger
-from src.device_simulator import DeviceFactory, DeviceSimulator
-from src.platform_connector import EdgeXConnector, ThingsBoardConnector
-from src.security import SecurityNode, AttackSimulator
-from src.analytics import StatisticalAnalyzer, DataCollector, ReportGenerator
+from utils.logger import setup_logger, get_logger
+from device_simulator import DeviceFactory, DeviceSimulator
+from platform_connector import EdgeXConnector, ThingsBoardConnector
+from security import SecurityNode, AttackSimulator
+from analytics import StatisticalAnalyzer, DataCollector, ReportGenerator
 
 def load_config(config_file: str) -> Dict[str, Any]:
     """

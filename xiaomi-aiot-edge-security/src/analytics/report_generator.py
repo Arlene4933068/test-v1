@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime
-from ..utils.logger import get_logger
+from .utils.logger import get_logger
 
 class ReportGenerator:
     """报告生成器：生成实验数据分析报告"""

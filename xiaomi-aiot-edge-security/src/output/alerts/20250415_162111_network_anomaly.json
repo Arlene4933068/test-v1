@@ -1,0 +1,18 @@
+{
+  "type": "network_anomaly",
+  "details": {
+    "anomaly_type": "brute_force",
+    "source_ip": "192.168.54.231",
+    "destination_ip": "10.0.74.147",
+    "confidence": 0.7,
+    "packet_count": 9102,
+    "duration": 142,
+    "ports": [
+      59446,
+      18248,
+      22400
+    ],
+    "protocol": "TCP"
+  },
+  "timestamp": 1744705271.0174708
+}

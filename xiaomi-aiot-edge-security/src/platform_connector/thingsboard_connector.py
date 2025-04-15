@@ -5,6 +5,8 @@ ThingsBoard Edge 连接器
 提供与Docker中部署的ThingsBoard Edge实例的连接和交互功能
 """
 
+import os
+import time
 import requests
 import json
 import logging
@@ -249,12 +251,65 @@ class ThingsBoardConnector(ConnectorBase):
             bool: 发送成功返回True，否则返回False
         """
         try:
-            # 模拟发送遥测数据
-            self.logger.info(f"模拟发送遥测数据，访问令牌: {access_token}")
-            return True
+            # 构建URL
+            url = f"http://{self.host}:{self.port}/api/v1/{access_token}/telemetry"
+            
+            # 记录要发送的数据
+            self.logger.debug(f"准备发送遥测数据，访问令牌: {access_token}, 数据: {telemetry_data}")
+            
+            try:
+                response = requests.post(
+                    url,
+                    headers={"Content-Type": "application/json"},
+                    json=telemetry_data,
+                    timeout=5
+                )
+                
+                if response.status_code in [200, 201]:
+                    self.logger.info(f"成功发送遥测数据到ThingsBoard, 访问令牌: {access_token}")
+                    return True
+                else:
+                    self.logger.warning(f"发送遥测数据到ThingsBoard失败，状态码: {response.status_code}, 响应: {response.text}")
+                    
+                    # 备份到本地文件
+                    self._backup_data_locally(access_token, telemetry_data)
+                    return False
+            except Exception as e:
+                self.logger.warning(f"发送遥测数据到ThingsBoard时出现异常: {str(e)}")
+                
+                # 备份到本地文件
+                self._backup_data_locally(access_token, telemetry_data)
+                return False
         except Exception as e:
-            self.logger.error(f"发送遥测数据时发生错误: {str(e)}")
-            return True
+            self.logger.error(f"处理遥测数据发送时发生错误: {str(e)}")
+            return False
+    
+    def _backup_data_locally(self, access_token: str, telemetry_data: Dict[str, Any]) -> None:
+        """
+        将遥测数据备份到本地文件
+        
+        Args:
+            access_token: 设备访问令牌
+            telemetry_data: 遥测数据
+        """
+        try:
+            # 确保备份目录存在
+            backup_dir = os.path.join(os.getcwd(), "telemetry_backup")
+            if not os.path.exists(backup_dir):
+                os.makedirs(backup_dir)
+            
+            # 构造文件名
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            token_short = access_token[-10:] if len(access_token) > 10 else access_token
+            backup_file = os.path.join(backup_dir, f"telemetry_{token_short}_{timestamp}.json")
+            
+            # 写入数据
+            with open(backup_file, "w", encoding="utf-8") as f:
+                json.dump({"token": access_token, "timestamp": time.time(), "data": telemetry_data}, f, indent=2)
+            
+            self.logger.info(f"已将遥测数据备份到本地文件: {backup_file}")
+        except Exception as e:
+            self.logger.error(f"备份遥测数据到本地文件时出错: {str(e)}")
     
     def send_attributes(self, access_token: str, attributes: Dict[str, Any]) -> bool:
         """

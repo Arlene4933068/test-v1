@@ -1,0 +1,14 @@
+{
+  "type": "device_tampering",
+  "details": {
+    "device_id": "xiaomi_device_6",
+    "tampering_type": "bootloader_compromised",
+    "severity": "critical",
+    "detected_at": 1744705241.0022025,
+    "detection_method": "behavioral_analysis",
+    "affected_components": [
+      "configuration"
+    ]
+  },
+  "timestamp": 1744705241.002215
+}

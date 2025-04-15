@@ -1,0 +1,18 @@
+{
+  "type": "network_anomaly",
+  "details": {
+    "anomaly_type": "unusual_protocol",
+    "source_ip": "192.168.1.6",
+    "destination_ip": "10.0.79.102",
+    "confidence": 0.78,
+    "packet_count": 7338,
+    "duration": 228,
+    "ports": [
+      24482,
+      58011,
+      62350
+    ],
+    "protocol": "DNS"
+  },
+  "timestamp": 1744705262.0127842
+}

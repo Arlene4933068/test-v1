@@ -1,0 +1,12 @@
+{
+  "token": "mock-token-mock-xiaomi_camera_01-camera",
+  "timestamp": 1744703714.659214,
+  "data": {
+    "resolution": "1080p",
+    "recording_status": "standby",
+    "motion_detected": false,
+    "storage_usage": 74.5,
+    "battery_level": 16,
+    "night_mode": true
+  }
+}

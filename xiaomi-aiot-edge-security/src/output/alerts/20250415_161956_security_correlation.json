@@ -1,0 +1,15 @@
+{
+  "type": "security_correlation",
+  "details": {
+    "correlation_type": "common_attacker",
+    "confidence": 0.91,
+    "related_event_count": 3,
+    "attacker_profile": {
+      "sophistication": "low",
+      "motivation": "espionage",
+      "persistence": "transient"
+    },
+    "summary": "Multiple related security events detected"
+  },
+  "timestamp": 1744705196.9816701
+}

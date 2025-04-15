@@ -1,0 +1,20 @@
+{
+  "type": "network_anomaly",
+  "details": {
+    "anomaly_type": "brute_force",
+    "source_ip": "192.168.1.7",
+    "destination_ip": "10.0.192.115",
+    "confidence": 0.94,
+    "packet_count": 1096,
+    "duration": 77,
+    "ports": [
+      28489,
+      34941,
+      27845,
+      62232,
+      12628
+    ],
+    "protocol": "UDP"
+  },
+  "timestamp": 1744705147.962085
+}

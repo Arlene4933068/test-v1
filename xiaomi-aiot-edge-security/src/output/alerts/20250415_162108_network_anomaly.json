@@ -1,0 +1,19 @@
+{
+  "type": "network_anomaly",
+  "details": {
+    "anomaly_type": "dns_tunneling",
+    "source_ip": "192.168.3.1",
+    "destination_ip": "10.0.7.194",
+    "confidence": 0.93,
+    "packet_count": 1591,
+    "duration": 265,
+    "ports": [
+      54902,
+      34375,
+      14672,
+      15433
+    ],
+    "protocol": "DNS"
+  },
+  "timestamp": 1744705268.0153892
+}

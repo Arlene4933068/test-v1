@@ -1,0 +1,31 @@
+analytics:
+  output_dir: output
+  report_interval: 3600
+edge_protection:
+  device_whitelist:
+  - xiaomi_gateway_01
+  - xiaomi_router_01
+  - xiaomi_speaker_01
+  - xiaomi_camera_01
+  enable_data_protection: true
+  enable_firewall: true
+  enable_ids: true
+  protection_level: medium
+platform:
+  edgex:
+    api_version: v2
+    core_command_port: 59882
+    device_service_name: xiaomi-device-service
+    host: localhost
+    metadata_port: 59881
+    port: 59880
+  thingsboard:
+    host: localhost
+    password: wlsxcdh52jy.L
+    port: 8080
+    username: yy3205543808@gmail.com
+security:
+  detection_threshold: 0.7
+  enable_attack_simulation: true
+  scan_interval: 10
+  simulation_probability: 0.1

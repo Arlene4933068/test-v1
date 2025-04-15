@@ -1,0 +1,16 @@
+{
+  "type": "device_tampering",
+  "details": {
+    "device_id": "xiaomi_device_8",
+    "tampering_type": "bootloader_compromised",
+    "severity": "critical",
+    "detected_at": 1744705286.0236485,
+    "detection_method": "checksum_verification",
+    "affected_components": [
+      "bootloader",
+      "certificates",
+      "configuration"
+    ]
+  },
+  "timestamp": 1744705286.0236561
+}

@@ -1,0 +1,11 @@
+{
+  "token": "mock-token-mock-xiaomi_speaker_01-smart_speaker",
+  "timestamp": 1744703865.28033,
+  "data": {
+    "volume": 70,
+    "playing_status": "playing",
+    "active_timers": 3,
+    "temperature": 32.4,
+    "last_command": "\u8bbe\u7f6e\u95f9\u949f"
+  }
+}

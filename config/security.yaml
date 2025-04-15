@@ -1,24 +1,9 @@
-protection:
-  auto_update: true
-  enabled: true
-  log_level: info
-response:
-  alert: true
-  block: true
-  quarantine: false
-rules:
-  credential:
-    enabled: true
-    lockout_threshold: 5
-    lockout_time: 300
-  ddos:
-    enabled: true
-    threshold: 100
-    window: 60
-  firmware:
-    enabled: true
-    verify_checksum: true
-    verify_signature: true
-  mitm:
-    certificate_verification: true
-    enabled: true
+{
+    "web_port": 5000,
+    "log_dir": "data/attack_logs",
+    "capture_dir": "data/packet_capture",
+    "attack_log_retention_days": 30,
+    "packet_capture_limit": 100,
+    "refresh_interval": 5,
+    "enable_packet_capture": true
+}

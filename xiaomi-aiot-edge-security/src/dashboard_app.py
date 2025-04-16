@@ -1,19 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-小米AIoT边缘安全防护研究平台 - ThingsBoard Edge 集成
+小米AIoT边缘安全防护研究平台 - 主应用程序
+实现各模块数据互通
 """
 
 import os
 import sys
 import json
+import time
 import logging
 import traceback
 import secrets
 import functools
+import threading
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
-from datetime import datetime
-from attack_engine import AttackEngine
+from flask_socketio import SocketIO, emit
+
+# 设置路径
+base_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(base_dir)
+
+# 导入攻击引擎
+from dashboard.attack_engine import AttackEngine
 
 # 辅助函数定义
 def banner(message):
@@ -44,7 +54,6 @@ logger = logging.getLogger("dashboard")
 logger.info("应用启动中...")
 
 # 确保目录路径
-base_dir = os.path.dirname(os.path.abspath(__file__))
 templates_dir = os.path.join(base_dir, 'templates')
 static_dir = os.path.join(base_dir, 'static')
 
@@ -60,112 +69,53 @@ app = Flask(__name__,
            template_folder=templates_dir,
            static_folder=static_dir)
 app.config['DEBUG'] = True
+app.config['SECRET_KEY'] = secrets.token_hex(16)  # 为session和SocketIO设置密钥
 app.config['PROPAGATE_EXCEPTIONS'] = True  # 确保错误被传递到日志
-app.secret_key = secrets.token_hex(16)     # 为session设置密钥
 
-# 模拟ThingsBoard连接配置
-thingsboard_config = {
-    "host": "localhost",
-    "port": 8080,
-    "mqtt_port": 1883,
-    "auth": {
-        "username": "yy3205543068@gmail.com",
-        "password": "wlsxcdh52jy.L"
+# 初始化SocketIO
+socketio = SocketIO(app)
+
+# 初始化攻击引擎
+attack_engine = AttackEngine()
+
+# 全局应用状态 - 用于在各模块间共享数据
+app_state = {
+    "devices": [
+        {"id": 'gateway_001', "name": '家庭网关', "type": 'gateway', "platform": 'simulator', "status": 'online', "lastActive": '2分钟前', "ip": "192.168.1.1", "security_score": 76},
+        {"id": 'speaker_001', "name": '小爱音箱', "type": 'speaker', "platform": 'thingsboard', "status": 'online', "lastActive": '5分钟前', "ip": "192.168.1.2", "security_score": 82},
+        {"id": 'camera_001', "name": '门口摄像头', "type": 'camera', "platform": 'thingsboard', "status": 'online', "lastActive": '1分钟前', "ip": "192.168.1.10", "security_score": 65},
+        {"id": 'router_001', "name": '客厅路由器', "type": 'router', "platform": 'edgex', "status": 'online', "lastActive": '3分钟前', "ip": "192.168.1.254", "security_score": 70},
+        {"id": 'sensor_001', "name": '温湿度传感器', "type": 'sensor', "platform": 'edgex', "status": 'offline', "lastActive": '1小时前', "ip": "192.168.1.20", "security_score": 90}
+    ],
+    "vulnerabilities": [],
+    "active_attacks": [],
+    "attack_history": [],
+    "system_stats": {
+        "security_score": 76,
+        "total_vulnerabilities": 24,
+        "recent_attacks": 56,
+        "fix_rate": 65
     },
-    "settings": {
-        "mqtt_enabled": True,
-        "auto_sync": True,
-        "sync_interval_minutes": 15,
-        "retry_on_failure": True,
-        "max_retries": 3
+    "notifications": [],
+    "thingsboard_config": {
+        "host": "localhost",
+        "port": 8080,
+        "mqtt_port": 1883,
+        "auth": {
+            "username": "yy3205543068@gmail.com",
+            "password": "wlsxcdh52jy.L"
+        },
+        "settings": {
+            "mqtt_enabled": True,
+            "auto_sync": True,
+            "sync_interval_minutes": 15,
+            "retry_on_failure": True,
+            "max_retries": 3
+        }
     }
 }
 
-# 模拟设备数据
-devices = [
-    {"id": 'gateway_001', "name": '家庭网关', "type": 'gateway', "platform": 'simulator', "status": 'online', "lastActive": '2分钟前'},
-    {"id": 'speaker_001', "name": '小爱音箱', "type": 'speaker', "platform": 'thingsboard', "status": 'online', "lastActive": '5分钟前'},
-    {"id": 'camera_001', "name": '门口摄像头', "type": 'camera', "platform": 'thingsboard', "status": 'online', "lastActive": '1分钟前'},
-    {"id": 'router_001', "name": '客厅路由器', "type": 'router', "platform": 'edgex', "status": 'online', "lastActive": '3分钟前'},
-    {"id": 'sensor_001', "name": '温湿度传感器', "type": 'sensor', "platform": 'edgex', "status": 'offline', "lastActive": '1小时前'}
-]
-
-# 创建CSS文件
-css_file_path = os.path.join(static_dir, 'css', 'dashboard.css')
-if not os.path.exists(css_file_path):
-    with open(css_file_path, 'w', encoding='utf-8') as f:
-        f.write("""/* 基本样式 */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #f8f9fa;
-}
-
-/* 卡片样式 */
-.card {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border: none;
-  margin-bottom: 20px;
-}
-
-.card-header {
-  background-color: #fff;
-  border-bottom: 1px solid rgba(0,0,0,.125);
-}
-
-/* 网格和列表视图切换 */
-.grid-view .device-card {
-  height: 100%;
-}
-
-.list-view .device-card {
-  margin-bottom: 10px;
-}
-
-.list-view {
-  flex-direction: column;
-}
-
-/* 设备状态指示器 */
-.status-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 5px;
-}
-
-.status-online {
-  background-color: #28a745;
-}
-
-.status-offline {
-  background-color: #6c757d;
-}
-
-.status-warning {
-  background-color: #ffc107;
-}
-
-/* 平台徽章 */
-.platform-badge {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  margin-right: 5px;
-}
-
-.tb-badge {
-  background-color: #1976D2; 
-  color: white;
-}
-
-.edgex-badge {
-  background-color: #6610f2; 
-  color: white;
-}""")
-    logger.info(f"创建了CSS文件: {css_file_path}")
-
-# 身份验证装饰器 - 修复了重复端点的问题
+# 身份验证装饰器
 def login_required(view_func):
     @functools.wraps(view_func)
     def wrapped_view(*args, **kwargs):
@@ -204,9 +154,21 @@ def index():
     """应用主页/仪表盘"""
     try:
         logger.info("访问仪表盘页面")
+        
+        # 获取最新的攻击历史
+        recent_attacks = app_state['attack_history'][:5]
+        
+        # 获取设备安全状态
+        devices_with_security = app_state['devices']
+        
+        # 获取系统统计数据
+        system_stats = app_state['system_stats']
+        
         return render_template('dashboard.html', 
                              current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                             devices=devices)
+                             devices=devices_with_security,
+                             recent_attacks=recent_attacks,
+                             system_stats=system_stats)
     except Exception as e:
         logger.error(f"仪表盘页面渲染错误: {str(e)}")
         logger.error(traceback.format_exc())
@@ -218,9 +180,23 @@ def device_management():
     """设备管理页面"""
     try:
         logger.info("访问设备管理页面")
+        
+        # 获取设备数据，包括安全相关信息
+        devices = app_state['devices']
+        
+        # 获取设备相关的漏洞信息
+        device_vulnerabilities = {}
+        for vulnerability in app_state['vulnerabilities']:
+            device_id = vulnerability.get('device_id')
+            if device_id:
+                if device_id not in device_vulnerabilities:
+                    device_vulnerabilities[device_id] = []
+                device_vulnerabilities[device_id].append(vulnerability)
+        
         return render_template('devices.html', 
                              current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                             devices=devices)
+                             devices=devices,
+                             device_vulnerabilities=device_vulnerabilities)
     except Exception as e:
         logger.error(f"设备管理页面渲染错误: {str(e)}")
         logger.error(traceback.format_exc())
@@ -232,12 +208,95 @@ def thingsboard_integration():
     """ThingsBoard集成页面"""
     try:
         logger.info("访问ThingsBoard集成页面")
+        
+        # 获取ThingsBoard配置
+        config = app_state['thingsboard_config']
+        
+        # 获取ThingsBoard设备
+        thingsboard_devices = [d for d in app_state['devices'] if d['platform'] == 'thingsboard']
+        
         return render_template('thingsboard.html', 
                              current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                             config=thingsboard_config,
-                             devices=[d for d in devices if d['platform'] == 'thingsboard'])
+                             config=config,
+                             devices=thingsboard_devices)
     except Exception as e:
         logger.error(f"ThingsBoard集成页面渲染错误: {str(e)}")
+        logger.error(traceback.format_exc())
+        return redirect(url_for('error_page', error=str(e)))
+
+@app.route('/attack')
+@login_required
+def attack_module():
+    """攻击模块页面"""
+    try:
+        logger.info("访问攻击模块页面")
+        
+        # 获取可用的设备作为攻击目标
+        devices = app_state['devices']
+        
+        # 获取活跃攻击
+        active_attacks = app_state['active_attacks']
+        
+        # 获取攻击历史
+        attack_history = app_state['attack_history']
+        
+        return render_template('attack.html', 
+                             current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                             devices=devices,
+                             active_attacks=active_attacks,
+                             attack_history=attack_history)
+    except Exception as e:
+        logger.error(f"攻击模块页面渲染错误: {str(e)}")
+        logger.error(traceback.format_exc())
+        return redirect(url_for('error_page', error=str(e)))
+
+@app.route('/analysis')
+@login_required
+def analysis_module():
+    """数据分析页面"""
+    try:
+        logger.info("访问数据分析页面")
+        
+        # 获取系统统计数据
+        system_stats = app_state['system_stats']
+        
+        # 获取漏洞信息
+        vulnerabilities = app_state['vulnerabilities']
+        
+        # 按设备分组漏洞
+        device_vulnerabilities = {}
+        for vulnerability in vulnerabilities:
+            device_id = vulnerability.get('device_id')
+            if device_id:
+                if device_id not in device_vulnerabilities:
+                    device_vulnerabilities[device_id] = []
+                device_vulnerabilities[device_id].append(vulnerability)
+        
+        # 按类型分组漏洞
+        vulnerability_types = {}
+        for vulnerability in vulnerabilities:
+            vuln_type = vulnerability.get('type', 'unknown')
+            if vuln_type not in vulnerability_types:
+                vulnerability_types[vuln_type] = {'count': 0, 'severity': {}}
+            
+            vulnerability_types[vuln_type]['count'] += 1
+            severity = vulnerability.get('severity', 'low')
+            if severity not in vulnerability_types[vuln_type]['severity']:
+                vulnerability_types[vuln_type]['severity'][severity] = 0
+            vulnerability_types[vuln_type]['severity'][severity] += 1
+        
+        # 获取攻击历史
+        attack_history = app_state['attack_history']
+        
+        return render_template('analysis.html', 
+                             current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                             system_stats=system_stats,
+                             vulnerabilities=vulnerabilities,
+                             device_vulnerabilities=device_vulnerabilities,
+                             vulnerability_types=vulnerability_types,
+                             attack_history=attack_history)
+    except Exception as e:
+        logger.error(f"数据分析页面渲染错误: {str(e)}")
         logger.error(traceback.format_exc())
         return redirect(url_for('error_page', error=str(e)))
 
@@ -247,9 +306,21 @@ def security_monitoring():
     """安全监控页面"""
     try:
         logger.info("访问安全监控页面")
+        
+        # 获取所有漏洞
+        vulnerabilities = app_state['vulnerabilities']
+        
+        # 获取活跃攻击
+        active_attacks = app_state['active_attacks']
+        
+        # 获取通知
+        notifications = app_state['notifications']
+        
         return render_template('security.html', 
                              current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                             devices=devices)
+                             vulnerabilities=vulnerabilities,
+                             active_attacks=active_attacks,
+                             notifications=notifications)
     except Exception as e:
         logger.error(f"安全监控页面渲染错误: {str(e)}")
         logger.error(traceback.format_exc())
@@ -265,12 +336,45 @@ def error_page():
                           current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                           error=error_message)
 
+# 设备管理API
 @app.route('/api/devices', methods=['GET'])
 @login_required
 def api_get_devices():
     """API: 获取所有设备"""
     try:
-        return jsonify({"success": True, "data": devices})
+        return jsonify({"success": True, "data": app_state['devices']})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/devices/<device_id>', methods=['GET'])
+@login_required
+def api_get_device(device_id):
+    """API: 获取指定设备信息"""
+    try:
+        for device in app_state['devices']:
+            if device['id'] == device_id:
+                # 获取设备相关的漏洞
+                device_vulnerabilities = []
+                for vulnerability in app_state['vulnerabilities']:
+                    if vulnerability.get('device_id') == device_id:
+                        device_vulnerabilities.append(vulnerability)
+                
+                # 获取设备相关的攻击历史
+                device_attacks = []
+                for attack in app_state['attack_history']:
+                    if attack.get('target_id') == device_id or attack.get('target') == device.get('ip'):
+                        device_attacks.append(attack)
+                
+                return jsonify({
+                    "success": True, 
+                    "data": {
+                        "device": device,
+                        "vulnerabilities": device_vulnerabilities,
+                        "attack_history": device_attacks
+                    }
+                })
+        
+        return jsonify({"success": False, "error": f"未找到设备: {device_id}"}), 404
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
@@ -280,28 +384,40 @@ def api_add_device():
     """API: 添加设备"""
     try:
         data = request.json
+        
+        # 生成设备ID
+        device_id = f"{data['type']}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        
         new_device = {
-            "id": f"{data['type']}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "id": device_id,
             "name": data['name'],
             "type": data['type'],
             "platform": data.get('platform', 'simulator'),
             "status": 'online',
-            "lastActive": '刚刚'
+            "lastActive": '刚刚',
+            "ip": data.get('ip', '192.168.1.100'),
+            "security_score": data.get('security_score', 80)
         }
-        devices.append(new_device)
-        logger.info(f"添加了新设备: {new_device['id']}")
+        
+        app_state['devices'].append(new_device)
+        logger.info(f"添加了新设备: {device_id}")
+        
+        # 发送WebSocket通知所有客户端
+        socketio.emit('device_added', {'device': new_device})
+        
         return jsonify({"success": True, "data": new_device})
     except Exception as e:
         logger.error(f"添加设备失败: {str(e)}")
         return jsonify({"success": False, "error": str(e)})
 
+# ThingsBoard配置API
 @app.route('/api/thingsboard/config', methods=['GET'])
 @login_required
 def api_get_tb_config():
     """API: 获取ThingsBoard配置"""
     try:
         # 返回配置时隐藏密码
-        config_copy = dict(thingsboard_config)
+        config_copy = dict(app_state['thingsboard_config'])
         if 'auth' in config_copy and 'password' in config_copy['auth']:
             config_copy['auth']['password'] = '******'
         return jsonify({"success": True, "data": config_copy})
@@ -316,28 +432,28 @@ def api_update_tb_config():
         data = request.json
         
         # 更新配置
-        thingsboard_config.update({
-            "host": data.get('host', thingsboard_config['host']),
-            "port": data.get('port', thingsboard_config['port']),
-            "mqtt_port": data.get('mqtt_port', thingsboard_config['mqtt_port'])
+        app_state['thingsboard_config'].update({
+            "host": data.get('host', app_state['thingsboard_config']['host']),
+            "port": data.get('port', app_state['thingsboard_config']['port']),
+            "mqtt_port": data.get('mqtt_port', app_state['thingsboard_config']['mqtt_port'])
         })
         
         # 仅当提供了新密码时更新
         if 'auth' in data:
-            thingsboard_config['auth'].update({
-                "username": data['auth'].get('username', thingsboard_config['auth']['username'])
+            app_state['thingsboard_config']['auth'].update({
+                "username": data['auth'].get('username', app_state['thingsboard_config']['auth']['username'])
             })
             if data['auth'].get('password') and data['auth']['password'] != '******':
-                thingsboard_config['auth']['password'] = data['auth']['password']
+                app_state['thingsboard_config']['auth']['password'] = data['auth']['password']
         
         # 更新设置
         if 'settings' in data:
-            thingsboard_config['settings'].update(data['settings'])
+            app_state['thingsboard_config']['settings'].update(data['settings'])
         
         logger.info("更新了ThingsBoard配置")
         
         # 返回更新后的配置，但隐藏密码
-        config_copy = dict(thingsboard_config)
+        config_copy = dict(app_state['thingsboard_config'])
         if 'auth' in config_copy and 'password' in config_copy['auth']:
             config_copy['auth']['password'] = '******'
         return jsonify({"success": True, "data": config_copy})
@@ -345,105 +461,13 @@ def api_update_tb_config():
         logger.error(f"更新ThingsBoard配置失败: {str(e)}")
         return jsonify({"success": False, "error": str(e)})
 
-@app.route('/attack')
-@login_required
-def attack_module():
-    """攻击模块页面"""
-    try:
-        logger.info("访问攻击模块页面")
-        return render_template('attack.html', 
-                             current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    except Exception as e:
-        logger.error(f"攻击模块页面渲染错误: {str(e)}")
-        logger.error(traceback.format_exc())
-        return redirect(url_for('error_page', error=str(e)))
-
-
-# 创建攻击引擎实例
-attack_engine = AttackEngine()
-
-# 添加以下路由
-@app.route('/api/attack')
-@login_required
-def attack_api():
-    """攻击模块API页面"""
-    try:
-        logger.info("访问攻击模块API页面")
-        return render_template('attack.html', 
-                             current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    except Exception as e:
-        logger.error(f"攻击模块API页面渲染错误: {str(e)}")
-        logger.error(traceback.format_exc())
-        return redirect(url_for('error_page', error=str(e)))
-
-@app.route('/analytics')
-@login_required
-def analytics():
-    """数据分析页面"""
-    try:
-        logger.info("访问数据分析页面")
-        
-        # 获取统计数据
-        devices_count = len(devices)
-        online_devices = len([d for d in devices if d['status'] == 'online'])
-        
-        # 从攻击引擎获取攻击和警报数据
-        attack_history = attack_engine.get_attack_history(limit=100)
-        attack_count = len(attack_history)
-        alert_count = len([a for a in attack_history if a.get('severity', '') == 'high'])
-        
-        return render_template('analysis.html',
-                             current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                             devices_count=devices_count,
-                             online_devices=online_devices,
-                             attack_count=attack_count,
-                             alert_count=alert_count)
-    except Exception as e:
-        logger.error(f"数据分析页面渲染错误: {str(e)}")
-        logger.error(traceback.format_exc())
-        return redirect(url_for('error_page', error=str(e)))
-
-@app.route('/api/analysis/data', methods=['GET'])
-@login_required
-def get_analysis_data():
-    """获取分析数据API"""
-    try:
-        data_type = request.args.get('type', 'device_status')
-        time_range = request.args.get('range', '24h')
-        
-        if data_type == 'device_status':
-            # 返回设备状态数据
-            return jsonify({
-                'success': True,
-                'data': {
-                    'online': len([d for d in devices if d['status'] == 'online']),
-                    'offline': len([d for d in devices if d['status'] == 'offline'])
-                }
-            })
-        elif data_type == 'security_events':
-            # 返回安全事件数据
-            events = attack_engine.get_attack_history(limit=100)
-            return jsonify({
-                'success': True,
-                'data': {
-                    'attacks': len(events),
-                    'alerts': len([e for e in events if e.get('severity') == 'high'])
-                }
-            })
-        else:
-            return jsonify({'success': False, 'error': '不支持的数据类型'}), 400
-            
-    except Exception as e:
-        logger.error(f"获取分析数据失败: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-# 攻击模块API路由
+# 攻击模块API
 @app.route('/api/attacks', methods=['GET'])
 @login_required
 def api_get_attacks():
     """API: 获取所有活动攻击"""
     try:
-        return jsonify({"success": True, "data": attack_engine.get_active_attacks()})
+        return jsonify({"success": True, "data": app_state['active_attacks']})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
@@ -454,7 +478,8 @@ def api_get_attack_history():
     try:
         limit = request.args.get('limit', 20, type=int)
         offset = request.args.get('offset', 0, type=int)
-        return jsonify({"success": True, "data": attack_engine.get_attack_history(limit, offset)})
+        history = app_state['attack_history'][offset:offset+limit]
+        return jsonify({"success": True, "data": history})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
@@ -463,10 +488,17 @@ def api_get_attack_history():
 def api_get_attack_details(attack_id):
     """API: 获取攻击详情"""
     try:
-        attack = attack_engine.get_attack_details(attack_id)
-        if not attack:
-            return jsonify({"success": False, "error": f"未找到攻击: {attack_id}"}), 404
-        return jsonify({"success": True, "data": attack})
+        # 先在活动攻击中查找
+        for attack in app_state['active_attacks']:
+            if attack['id'] == attack_id:
+                return jsonify({"success": True, "data": attack})
+        
+        # 再在历史记录中查找
+        for attack in app_state['attack_history']:
+            if attack['id'] == attack_id:
+                return jsonify({"success": True, "data": attack})
+        
+        return jsonify({"success": False, "error": f"未找到攻击: {attack_id}"}), 404
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
@@ -477,15 +509,150 @@ def api_launch_attack():
     try:
         data = request.json
         attack_type = data.get('type')
-        target = data.get('target')
+        target_id = data.get('target')
         params = data.get('params', {})
         duration = data.get('duration', 30)
         analysis = data.get('analysis', True)
         
-        if not attack_type or not target:
+        if not attack_type or not target_id:
             return jsonify({"success": False, "error": "缺少必要参数"}), 400
         
-        result = attack_engine.launch_attack(attack_type, target, params, duration, analysis)
+        # 查找目标设备
+        target_device = None
+        for device in app_state['devices']:
+            if device['id'] == target_id:
+                target_device = device
+                break
+        
+        if not target_device:
+            return jsonify({"success": False, "error": f"未找到设备: {target_id}"}), 404
+        
+        # 使用攻击引擎启动攻击
+        result = attack_engine.launch_attack(attack_type, target_device['ip'], params, duration, analysis)
+        
+        if result.get('success'):
+            # 创建攻击记录
+            attack_id = result.get('attack_id')
+            attack_record = {
+                "id": attack_id,
+                "type": attack_type,
+                "target_id": target_id,
+                "target": target_device['ip'],
+                "target_name": target_device['name'],
+                "params": params,
+                "status": "running",
+                "start_time": datetime.now().isoformat(),
+                "duration": duration,
+                "logs": [],
+                "results": None
+            }
+            
+            # 添加到活动攻击
+            app_state['active_attacks'].append(attack_record)
+            
+            # 创建线程监控攻击状态
+            threading.Thread(target=monitor_attack, args=(attack_id,), daemon=True).start()
+            
+            # 发送WebSocket通知
+            socketio.emit('attack_started', {'attack': attack_record})
+            
+            return jsonify({
+                "success": True,
+                "attack_id": attack_id,
+                "message": f"攻击已启动: {attack_id}"
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": result.get('error', '启动攻击失败')
+            }), 500
+    except Exception as e:
+        logger.error(f"启动攻击失败: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/security/attack/mitm/start', methods=['POST'])
+@login_required
+def api_start_mitm_attack():
+    """API: 启动中间人攻击"""
+    try:
+        data = request.json
+        target_id = data.get('target')
+        interface = data.get('interface', 'eth0')
+        duration = data.get('duration', 30)
+        
+        if not target_id:
+            return jsonify({"success": False, "error": "缺少目标设备ID"}), 400
+        
+        # 查找目标设备
+        target_device = None
+        for device in app_state['devices']:
+            if device['id'] == target_id:
+                target_device = device
+                break
+        
+        if not target_device:
+            return jsonify({"success": False, "error": f"未找到设备: {target_id}"}), 404
+        
+        # 配置MITM攻击参数
+        mitm_params = {
+            "interface": interface,
+            "target_mac": data.get('target_mac'),  # 可选MAC地址
+            "gateway_ip": data.get('gateway_ip'),  # 可选网关IP
+            "packet_filter": data.get('packet_filter', ''),  # 可选数据包过滤规则
+            "save_pcap": data.get('save_pcap', True)  # 是否保存捕获的数据包
+        }
+        
+        # 使用攻击引擎启动MITM攻击
+        result = attack_engine.launch_attack('mitm', target_device['ip'], mitm_params, duration, True)
+        
+        if result.get('success'):
+            attack_id = result.get('attack_id')
+            attack_record = {
+                "id": attack_id,
+                "type": "mitm",
+                "target_id": target_id,
+                "target": target_device['ip'],
+                "target_name": target_device['name'],
+                "params": mitm_params,
+                "status": "running",
+                "start_time": datetime.now().isoformat(),
+                "duration": duration,
+                "logs": [],
+                "results": None
+            }
+            
+            # 添加到活动攻击
+            app_state['active_attacks'].append(attack_record)
+            
+            # 创建线程监控攻击状态
+            threading.Thread(target=monitor_attack, args=(attack_id,), daemon=True).start()
+            
+            return jsonify({
+                "success": True,
+                "attack_id": attack_id,
+                "message": "MITM攻击已启动"
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": result.get('error', '启动MITM攻击失败')
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"启动MITM攻击失败: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"success": False, "error": str(e)}), 500
+            
+            # 发送WebSocket通知
+        socketio.emit('attack_launched', {
+                'attack': attack_record,
+                'device': target_device
+            })
+            
+            # 添加通知
+        add_notification(f"启动了对 {target_device['name']} 的 {get_attack_name(attack_type)} 攻击", "warning")
+        
         return jsonify(result)
     except Exception as e:
         logger.error(f"启动攻击失败: {str(e)}")
@@ -496,11 +663,73 @@ def api_launch_attack():
 def api_stop_attack(attack_id):
     """API: 停止攻击"""
     try:
+        # 使用攻击引擎停止攻击
         result = attack_engine.stop_attack(attack_id)
+        
+        if result.get('success'):
+            # 更新活动攻击状态
+            for i, attack in enumerate(app_state['active_attacks']):
+                if attack['id'] == attack_id:
+                    app_state['active_attacks'][i]['status'] = 'stopped'
+                    
+                    # 添加到历史记录
+                    attack_copy = app_state['active_attacks'][i].copy()
+                    attack_copy['end_time'] = datetime.now().isoformat()
+                    app_state['attack_history'].insert(0, attack_copy)
+                    
+                    # 从活动攻击中移除
+                    app_state['active_attacks'].pop(i)
+                    
+                    # 发送WebSocket通知
+                    socketio.emit('attack_stopped', {
+                        'attack_id': attack_id,
+                        'status': 'stopped'
+                    })
+                    
+                    # 添加通知
+                    add_notification(f"停止了对 {attack_copy['target_name']} 的攻击", "info")
+                    
+                    break
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
+# 漏洞API
+@app.route('/api/vulnerabilities', methods=['GET'])
+@login_required
+def api_get_vulnerabilities():
+    """API: 获取所有漏洞"""
+    try:
+        return jsonify({"success": True, "data": app_state['vulnerabilities']})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/vulnerabilities/<device_id>', methods=['GET'])
+@login_required
+def api_get_device_vulnerabilities(device_id):
+    """API: 获取指定设备的漏洞"""
+    try:
+        device_vulnerabilities = []
+        for vulnerability in app_state['vulnerabilities']:
+            if vulnerability.get('device_id') == device_id:
+                device_vulnerabilities.append(vulnerability)
+        
+        return jsonify({"success": True, "data": device_vulnerabilities})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+# 系统状态API
+@app.route('/api/system/stats', methods=['GET'])
+@login_required
+def api_get_system_stats():
+    """API: 获取系统统计数据"""
+    try:
+        return jsonify({"success": True, "data": app_state['system_stats']})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+# 调试路由
 @app.route('/debug')
 def debug():
     """调试页面"""
@@ -512,7 +741,7 @@ def debug():
         
         # 检查依赖模块
         dependencies = {}
-        for module_name in ['flask', 'werkzeug', 'jinja2', 'matplotlib', 'pandas']:
+        for module_name in ['flask', 'werkzeug', 'jinja2', 'matplotlib', 'pandas', 'flask_socketio']:
             try:
                 module = __import__(module_name)
                 dependencies[module_name] = getattr(module, '__version__', '未知版本')
@@ -595,12 +824,48 @@ def debug():
             
             <div class="section">
                 <h2>ThingsBoard 集成信息</h2>
-                <pre>""" + json.dumps(thingsboard_config, indent=2).replace(thingsboard_config['auth']['password'], '******') + """</pre>
+        """
+        
+        tb_config = dict(app_state['thingsboard_config'])
+        if 'auth' in tb_config and 'password' in tb_config['auth']:
+            tb_config['auth']['password'] = '******'
+        
+        html += f'<pre>{json.dumps(tb_config, indent=2)}</pre>'
+        
+        html += """
             </div>
             
             <div class="section">
-                <h2>模拟设备</h2>
-                <pre>""" + json.dumps(devices, indent=2) + """</pre>
+                <h2>设备信息</h2>
+        """
+        
+        html += f'<pre>{json.dumps(app_state["devices"], indent=2)}</pre>'
+        
+        html += """
+            </div>
+            
+            <div class="section">
+                <h2>攻击模块状态</h2>
+        """
+        
+        attack_engine_state = {
+            "active_attacks": len(app_state['active_attacks']),
+            "attack_history": len(app_state['attack_history']),
+            "available_modules": attack_engine.get_available_modules()
+        }
+        
+        html += f'<pre>{json.dumps(attack_engine_state, indent=2)}</pre>'
+        
+        html += """
+            </div>
+            
+            <div class="section">
+                <h2>系统统计</h2>
+        """
+        
+        html += f'<pre>{json.dumps(app_state["system_stats"], indent=2)}</pre>'
+        
+        html += """
             </div>
             
             <div class="section">
@@ -609,6 +874,8 @@ def debug():
                     <li><a href="/">首页</a></li>
                     <li><a href="/devices">设备管理</a></li>
                     <li><a href="/thingsboard">ThingsBoard集成</a></li>
+                    <li><a href="/attack">攻击模块</a></li>
+                    <li><a href="/analysis">数据分析</a></li>
                 </ul>
             </div>
         </body>
@@ -621,6 +888,7 @@ def debug():
         logger.error(traceback.format_exc())
         return f"调试页面生成错误: {str(e)}", 500
 
+# 错误处理器
 @app.errorhandler(404)
 def page_not_found(e):
     """处理404错误"""
@@ -668,184 +936,277 @@ def internal_error(error):
         </html>
         """, 500
 
+# WebSocket事件处理
+@socketio.on('connect')
+def handle_connect():
+    """处理客户端连接"""
+    logger.info(f"WebSocket客户端连接: {request.sid}")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    """处理客户端断开连接"""
+    logger.info(f"WebSocket客户端断开连接: {request.sid}")
+
+@socketio.on('subscribe_attack_updates')
+def handle_subscribe_attack(data):
+    """处理客户端订阅攻击更新"""
+    attack_id = data.get('attack_id')
+    logger.info(f"客户端 {request.sid} 订阅攻击 {attack_id} 的更新")
+
+# 辅助函数
+def monitor_attack(attack_id):
+    """监控攻击状态并更新数据"""
+    try:
+        # 每秒检查一次攻击状态
+        while True:
+            attack_details = attack_engine.get_attack_details(attack_id)
+            
+            if not attack_details:
+                # 如果找不到攻击，可能已结束
+                for i, attack in enumerate(app_state['active_attacks']):
+                    if attack['id'] == attack_id:
+                        # 更新状态
+                        app_state['active_attacks'][i]['status'] = 'completed'
+                        
+                        # 添加到历史记录
+                        attack_copy = app_state['active_attacks'][i].copy()
+                        attack_copy['end_time'] = datetime.now().isoformat()
+                        app_state['attack_history'].insert(0, attack_copy)
+                        
+                        # 从活动攻击中移除
+                        app_state['active_attacks'].pop(i)
+                        
+                        # 发送WebSocket通知
+                        socketio.emit('attack_completed', {
+                            'attack_id': attack_id,
+                            'status': 'completed',
+                            'attack': attack_copy
+                        })
+                        
+                        # 处理漏洞发现
+                        process_attack_results(attack_copy)
+                        
+                        break
+                break
+            
+            # 更新攻击状态
+            for i, attack in enumerate(app_state['active_attacks']):
+                if attack['id'] == attack_id:
+                    # 更新状态、日志和结果
+                    app_state['active_attacks'][i]['status'] = attack_details.get('status', attack['status'])
+                    app_state['active_attacks'][i]['logs'] = attack_details.get('logs', attack.get('logs', []))
+                    app_state['active_attacks'][i]['results'] = attack_details.get('results', attack.get('results'))
+                    
+                    # 如果攻击已完成
+                    if attack_details.get('status') in ['completed', 'failed', 'stopped']:
+                        # 添加到历史记录
+                        attack_copy = app_state['active_attacks'][i].copy()
+                        attack_copy['end_time'] = datetime.now().isoformat()
+                        app_state['attack_history'].insert(0, attack_copy)
+                        
+                        # 从活动攻击中移除
+                        app_state['active_attacks'].pop(i)
+                        
+                        # 发送WebSocket通知
+                        socketio.emit('attack_completed', {
+                            'attack_id': attack_id,
+                            'status': attack_details.get('status', 'completed'),
+                            'attack': attack_copy
+                        })
+                        
+                        # 处理漏洞发现
+                        process_attack_results(attack_copy)
+                        
+                        return
+                    
+                    # 发送WebSocket更新
+                    socketio.emit('attack_update', {
+                        'attack_id': attack_id,
+                        'logs': app_state['active_attacks'][i]['logs'][-5:] if app_state['active_attacks'][i]['logs'] else [],
+                        'status': app_state['active_attacks'][i]['status']
+                    })
+                    break
+            
+            time.sleep(1)
+    except Exception as e:
+        logger.error(f"监控攻击 {attack_id} 时出错: {str(e)}")
+
+def process_attack_results(attack):
+    """处理攻击结果，提取漏洞并更新系统状态"""
+    try:
+        results = attack.get('results', {})
+        findings = results.get('findings', [])
+        
+        if not findings:
+            return
+        
+        # 查找目标设备
+        target_device = None
+        for device in app_state['devices']:
+            if device['id'] == attack['target_id']:
+                target_device = device
+                break
+        
+        if not target_device:
+            logger.warning(f"找不到攻击目标设备: {attack['target_id']}")
+            return
+        
+        # 处理每个发现的漏洞
+        for finding in findings:
+            # 创建漏洞记录
+            vuln_id = f"VULN-{datetime.now().strftime('%Y%m%d%H%M%S')}-{len(app_state['vulnerabilities'])}"
+            
+            vulnerability = {
+                "id": vuln_id,
+                "device_id": target_device['id'],
+                "device_name": target_device['name'],
+                "attack_id": attack['id'],
+                "type": finding.get('type', 'unknown'),
+                "severity": finding.get('severity', 'low'),
+                "details": finding.get('details', '无详细信息'),
+                "discovered_at": datetime.now().isoformat(),
+                "status": "open"
+            }
+            
+            # 添加到漏洞列表
+            app_state['vulnerabilities'].append(vulnerability)
+            
+            # 降低设备安全评分
+            severity_score = {
+                'critical': 15,
+                'high': 10,
+                'medium': 5,
+                'low': 2
+            }
+            
+            score_reduction = severity_score.get(finding.get('severity', 'low'), 2)
+            target_device['security_score'] = max(0, target_device['security_score'] - score_reduction)
+            
+            # 更新系统统计数据
+            app_state['system_stats']['total_vulnerabilities'] += 1
+            
+            # 发送WebSocket通知
+            socketio.emit('vulnerability_found', {
+                'vulnerability': vulnerability,
+                'device': target_device
+            })
+            
+            # 添加通知
+            severity_text = {
+                'critical': '严重',
+                'high': '高危',
+                'medium': '中危',
+                'low': '低危'
+            }
+            
+            severity = finding.get('severity', 'low')
+            add_notification(
+                f"在 {target_device['name']} 上发现了 {severity_text.get(severity, '未知')} 级别的 {get_vulnerability_name(finding.get('type', 'unknown'))} 漏洞",
+                "danger" if severity in ['critical', 'high'] else "warning"
+            )
+        
+        # 重新计算系统安全评分
+        recalculate_system_security_score()
+        
+    except Exception as e:
+        logger.error(f"处理攻击结果时出错: {str(e)}")
+
+def add_notification(message, level="info"):
+    """添加系统通知"""
+    notification = {
+        "id": len(app_state['notifications']),
+        "message": message,
+        "level": level,
+        "timestamp": datetime.now().isoformat(),
+        "read": False
+    }
+    
+    app_state['notifications'].insert(0, notification)
+    
+    # 保持通知数量在合理范围内
+    if len(app_state['notifications']) > 50:
+        app_state['notifications'] = app_state['notifications'][:50]
+    
+    # 发送WebSocket通知
+    socketio.emit('notification', notification)
+
+def recalculate_system_security_score():
+    """重新计算系统安全评分"""
+    try:
+        # 基于设备安全评分计算整体评分
+        if not app_state['devices']:
+            return
+        
+        total_score = sum(d['security_score'] for d in app_state['devices'])
+        avg_score = total_score / len(app_state['devices'])
+        
+        # 考虑漏洞数量的影响
+        vuln_penalty = min(20, len(app_state['vulnerabilities']) * 0.5)
+        
+        # 计算最终评分
+        final_score = max(0, min(100, avg_score - vuln_penalty))
+        
+        # 更新系统统计
+        app_state['system_stats']['security_score'] = round(final_score)
+        app_state['system_stats']['recent_attacks'] = len(app_state['attack_history'])
+        
+        # 计算修复比例
+        fixed_vulns = sum(1 for v in app_state['vulnerabilities'] if v['status'] == 'fixed')
+        total_vulns = len(app_state['vulnerabilities'])
+        fix_rate = (fixed_vulns / total_vulns * 100) if total_vulns > 0 else 100
+        
+        app_state['system_stats']['fix_rate'] = round(fix_rate)
+        
+    except Exception as e:
+        logger.error(f"计算安全评分时出错: {str(e)}")
+
+def get_attack_name(attack_type):
+    """获取攻击类型的中文名称"""
+    attack_names = {
+        'dos': 'DoS/DDoS攻击',
+        'arp-spoof': 'ARP欺骗攻击',
+        'wifi-deauth': 'Wi-Fi去认证攻击',
+        'port-scan': '端口扫描',
+        'man-in-middle': '中间人攻击',
+        'packet-sniffing': '数据包嗅探',
+        'wifi-crack': 'Wi-Fi密码破解',
+        'dns-spoof': 'DNS欺骗',
+        'syn-flood': 'SYN洪水攻击',
+        'icmp-flood': 'ICMP洪水攻击',
+        'mqtt-vuln': 'MQTT协议漏洞攻击',
+        'coap-vuln': 'CoAP协议漏洞攻击',
+        'zigbee-vuln': 'Zigbee协议漏洞攻击',
+        'firmware-extract': '固件提取',
+        'password-bypass': '密码绕过',
+        'custom-script': '自定义脚本攻击'
+    }
+    return attack_names.get(attack_type, attack_type)
+
+def get_vulnerability_name(vuln_type):
+    """获取漏洞类型的中文名称"""
+    vuln_names = {
+        'authentication': '认证漏洞',
+        'topic_enumeration': '主题枚举漏洞',
+        'payload_injection': '负载注入漏洞',
+        'weak_password': '弱密码漏洞',
+        'sql_injection': 'SQL注入漏洞',
+        'command_injection': '命令注入漏洞',
+        'xss': '跨站脚本漏洞',
+        'csrf': '跨站请求伪造漏洞',
+        'session_manipulation': '会话操纵漏洞'
+    }
+    return vuln_names.get(vuln_type, vuln_type)
+
+# 初始化页面模板
 def init_templates():
     """初始化应用所需的HTML模板"""
     # 确保模板目录存在
     os.makedirs(templates_dir, exist_ok=True)
     
-    # 登录页模板
-    login_template_path = os.path.join(templates_dir, 'login.html')
-    if not os.path.exists(login_template_path):
-        with open(login_template_path, 'w', encoding='utf-8') as f:
-            f.write("""<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录 - 小米AIoT边缘安全防护研究平台</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .login-container {
-            max-width: 450px;
-            width: 100%;
-            padding: 15px;
-        }
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        .card-header {
-            border-radius: 10px 10px 0 0 !important;
-            background: linear-gradient(135deg, #4e73df 0%, #36b9cc 100%);
-            padding: 25px 20px;
-            text-align: center;
-            border: none;
-        }
-        .platform-logo {
-            max-width: 80px;
-            margin-bottom: 15px;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #4e73df 0%, #36b9cc 100%);
-            border: none;
-            padding: 10px;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #3e63cf 0%, #26a9bc 100%);
-        }
-        .card-body {
-            padding: 30px;
-        }
-        .form-group label {
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .form-control {
-            padding: 12px;
-            height: auto;
-        }
-        .footer-text {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #6c757d;
-        }
-        .platform-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin: 0 3px;
-        }
-        .tb-badge { background-color: #1976D2; color: white; }
-        .edgex-badge { background-color: #6610f2; color: white; }
-    </style>
-</head>
-<body>
-    <div class="login-container">
-        <div class="card">
-            <div class="card-header text-white">
-                <img src="https://i.imgur.com/IyvGWDM.png" alt="Platform Logo" class="platform-logo">
-                <h4 class="mb-0">小米AIoT边缘安全防护研究平台</h4>
-                <p class="mb-0">边缘设备安全仿真与防护系统</p>
-            </div>
-            <div class="card-body">
-                {% if error %}
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle"></i> {{ error }}
-                </div>
-                {% endif %}
-                
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">
-                            <i class="fas fa-info-circle"></i> {{ message }}
-                        </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-                
-                <form method="POST">
-                    <div class="form-group">
-                        <label for="username">
-                            <i class="fas fa-user"></i> 用户名
-                        </label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="输入您的用户名" required autofocus>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">
-                            <i class="fas fa-lock"></i> 密码
-                        </label>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="输入您的密码" required>
-                    </div>
-                    <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                        <label class="form-check-label" for="remember">记住我</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">
-                        <i class="fas fa-sign-in-alt"></i> 登录
-                    </button>
-                </form>
-                
-                <div class="mt-4">
-                    <h6 class="text-center">集成平台</h6>
-                    <div class="text-center">
-                        <span class="platform-badge tb-badge">
-                            <i class="fas fa-cloud"></i> ThingsBoard Edge
-                        </span>
-                        <span class="platform-badge edgex-badge">
-                            <i class="fas fa-server"></i> EdgeX Foundry
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="footer-text">
-            <p>小米AIoT边缘安全防护研究平台 &copy; 2025</p>
-            <p>当前时间: <span id="current-time">{{ current_time }}</span></p>
-            <p>推荐使用Chrome、Firefox或Edge浏览器访问</p>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // 更新时间显示
-        function updateTime() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            
-            const formattedTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-            document.getElementById('current-time').textContent = formattedTime;
-        }
-        
-        // 每秒更新一次时间
-        setInterval(updateTime, 1000);
-        updateTime();
-    </script>
-</body>
-</html>""")
-        logger.info(f"创建了登录页面模板: {login_template_path}")
-    
-    # 404错误页面
-    not_found_template_path = os.path.join(templates_dir, '404.html')
-    if not os.path.exists(not_found_template_path):
-        with open(not_found_template_path, 'w', encoding='utf-8') as f:
+    # 初始化404错误页面模板
+    error_404_path = os.path.join(templates_dir, '404.html')
+    if not os.path.exists(error_404_path):
+        with open(error_404_path, 'w', encoding='utf-8') as f:
             f.write("""<!DOCTYPE html>
 <html>
 <head>
@@ -871,12 +1232,11 @@ def init_templates():
     </div>
 </body>
 </html>""")
-        logger.info(f"创建了404错误模板: {not_found_template_path}")
     
-    # 500错误页面
-    error_template_path = os.path.join(templates_dir, '500.html')
-    if not os.path.exists(error_template_path):
-        with open(error_template_path, 'w', encoding='utf-8') as f:
+    # 初始化500错误页面模板
+    error_500_path = os.path.join(templates_dir, '500.html')
+    if not os.path.exists(error_500_path):
+        with open(error_500_path, 'w', encoding='utf-8') as f:
             f.write("""<!DOCTYPE html>
 <html>
 <head>
@@ -905,7 +1265,8 @@ def init_templates():
     </div>
 </body>
 </html>""")
-        logger.info(f"创建了500错误模板: {error_template_path}")
+    
+    # 可以根据需要添加其他模板的初始化
 
 if __name__ == "__main__":
     try:
@@ -919,8 +1280,36 @@ if __name__ == "__main__":
         print(f"• 静态目录: {static_dir}")
         print("\n• 账号信息: 用户名=admin, 密码=admin")
         
+        # 在子线程中定期更新系统状态，模拟真实环境
+        def update_system_state():
+            while True:
+                try:
+                    # 更新设备活跃时间
+                    for i, device in enumerate(app_state['devices']):
+                        if device['status'] == 'online':
+                            app_state['devices'][i]['lastActive'] = '刚刚'
+                    
+                    # 模拟随机事件
+                    if len(app_state['active_attacks']) > 0 and random.random() < 0.1:
+                        # 随机更新攻击日志
+                        attack = random.choice(app_state['active_attacks'])
+                        attack['logs'].append({
+                            "timestamp": datetime.now().isoformat(),
+                            "level": random.choice(["info", "success", "warning", "error"]),
+                            "message": f"自动生成的攻击日志消息 {datetime.now().strftime('%H:%M:%S')}"
+                        })
+                except Exception as e:
+                    logger.error(f"更新系统状态时出错: {str(e)}")
+                
+                time.sleep(30)  # 每30秒更新一次
+        
+        # 启动后台任务线程
+        import random
+        import threading
+        threading.Thread(target=update_system_state, daemon=True).start()
+        
         print("\n启动服务器，访问 http://localhost:5000 查看应用...")
-        app.run(host='0.0.0.0', port=5000, debug=True)
+        socketio.run(app, host='0.0.0.0', port=5000, debug=True)
     except Exception as e:
         logger.critical(f"启动失败: {str(e)}")
         logger.critical(traceback.format_exc())

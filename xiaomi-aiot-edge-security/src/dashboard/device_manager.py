@@ -1,9 +1,9 @@
 # src/dashboard/device_manager.py
 import uuid
 import time
-from src.utils.logger import get_logger
-from src.platform_connector.edgex_connector import EdgeXConnector
-from src.platform_connector.thingsboard_connector import ThingsBoardConnector
+from utils.logger import get_logger
+from platform_connector.edgex_connector import EdgeXConnector
+from platform_connector.thingsboard_connector import ThingsBoardConnector
 
 class DeviceManager:
     """设备管理器：管理边缘设备的创建、删除和监控"""

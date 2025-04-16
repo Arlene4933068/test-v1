@@ -1272,3 +1272,60 @@ jinja2.exceptions.TemplateNotFound: devices.html
 2025-04-16 09:44:21,240 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
 2025-04-16 09:44:21,243 [INFO] attack_engine: “—º”‘ÿ 10 ∏ˆπ•ª˜ƒ£øÈ
 2025-04-16 09:44:21,243 [INFO] attack_engine: π•ª˜“˝«Ê≥ı ºªØÕÍ≥…
+2025-04-16 09:45:02,045 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-16 09:45:02,048 [INFO] attack_engine: “—º”‘ÿ 10 ∏ˆπ•ª˜ƒ£øÈ
+2025-04-16 09:45:02,048 [INFO] attack_engine: π•ª˜“˝«Ê≥ı ºªØÕÍ≥…
+2025-04-16 09:45:03,311 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.27.44.174:5000
+2025-04-16 09:45:03,311 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-04-16 09:45:03,312 [INFO] werkzeug:  * Restarting with stat
+2025-04-16 09:45:03,495 [INFO] dashboard: ”¶”√∆Ù∂Ø÷–...
+2025-04-16 09:45:03,498 [INFO] attack_engine: “—º”‘ÿ 10 ∏ˆπ•ª˜ƒ£øÈ
+2025-04-16 09:45:03,498 [INFO] attack_engine: π•ª˜“˝«Ê≥ı ºªØÕÍ≥…
+2025-04-16 09:45:03,507 [WARNING] werkzeug:  * Debugger is active!
+2025-04-16 09:45:03,508 [INFO] werkzeug:  * Debugger PIN: 427-483-642
+2025-04-16 09:45:05,911 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:45:05] "[32mGET /analytics HTTP/1.1[0m" 302 -
+2025-04-16 09:45:05,918 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:45:05] "GET /login?next=http://localhost:5000/analytics HTTP/1.1" 200 -
+2025-04-16 09:45:07,450 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:45:07] "[32mPOST /login?next=http://localhost:5000/analytics HTTP/1.1[0m" 302 -
+2025-04-16 09:45:07,756 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-16 09:45:07,758 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:45:07] "GET / HTTP/1.1" 200 -
+2025-04-16 09:45:09,778 [INFO] dashboard: ∑√Œ  ˝æ›∑÷Œˆ“≥√Ê
+2025-04-16 09:45:09,781 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:45:09] "GET /analytics HTTP/1.1" 200 -
+2025-04-16 09:45:09,893 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:45:09] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2025-04-16 09:45:10,856 [INFO] dashboard: ∑√Œ π•ª˜ƒ£øÈ“≥√Ê
+2025-04-16 09:45:10,860 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:45:10] "GET /attack HTTP/1.1" 200 -
+2025-04-16 09:46:01,764 [INFO] dashboard: ∑√Œ  ˝æ›∑÷Œˆ“≥√Ê
+2025-04-16 09:46:01,765 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:46:01] "GET /analytics HTTP/1.1" 200 -
+2025-04-16 09:46:02,065 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:46:02] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2025-04-16 09:46:09,100 [WARNING] dashboard: 404¥ÌŒÛ: /analysis
+2025-04-16 09:46:09,101 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:46:09] "[33mGET /analysis HTTP/1.1[0m" 404 -
+2025-04-16 09:46:12,054 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-16 09:46:12,054 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:46:12] "GET / HTTP/1.1" 200 -
+2025-04-16 09:46:13,363 [INFO] dashboard: ∑√Œ  ˝æ›∑÷Œˆ“≥√Ê
+2025-04-16 09:46:13,363 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:46:13] "GET /analytics HTTP/1.1" 200 -
+2025-04-16 09:46:13,662 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:46:13] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2025-04-16 09:46:31,837 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-16 09:46:31,837 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:46:31] "GET / HTTP/1.1" 200 -
+2025-04-16 09:46:33,536 [INFO] dashboard: ∑√Œ ∞≤»´º‡øÿ“≥√Ê
+2025-04-16 09:46:33,538 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:46:33] "GET /security HTTP/1.1" 200 -
+2025-04-16 09:46:33,570 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:46:33] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2025-04-16 09:46:46,294 [INFO] dashboard: ∑√Œ  ˝æ›∑÷Œˆ“≥√Ê
+2025-04-16 09:46:46,295 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:46:46] "GET /analytics HTTP/1.1" 200 -
+2025-04-16 09:46:46,325 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:46:46] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2025-04-16 09:47:41,663 [INFO] dashboard: ∑√Œ π•ª˜ƒ£øÈ“≥√Ê
+2025-04-16 09:47:41,663 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:47:41] "GET /attack HTTP/1.1" 200 -
+2025-04-16 09:48:02,051 [INFO] dashboard: ∑√Œ ∞≤»´º‡øÿ“≥√Ê
+2025-04-16 09:48:02,051 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:48:02] "GET /security HTTP/1.1" 200 -
+2025-04-16 09:48:02,360 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:48:02] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2025-04-16 09:48:05,451 [WARNING] dashboard: 404¥ÌŒÛ: /api/security/attack/ddos/start
+2025-04-16 09:48:05,451 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:48:05] "[33mPOST /api/security/attack/ddos/start HTTP/1.1[0m" 404 -
+2025-04-16 09:48:06,432 [WARNING] dashboard: 404¥ÌŒÛ: /api/security/attack/ddos/stop
+2025-04-16 09:48:06,433 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:48:06] "[33mPOST /api/security/attack/ddos/stop HTTP/1.1[0m" 404 -
+2025-04-16 09:48:07,628 [INFO] dashboard: ∑√Œ ThingsBoardºØ≥…“≥√Ê
+2025-04-16 09:48:07,632 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:48:07] "GET /thingsboard HTTP/1.1" 200 -
+2025-04-16 09:48:31,467 [INFO] dashboard: ∑√Œ “«±Ì≈Ã“≥√Ê
+2025-04-16 09:48:31,468 [INFO] werkzeug: 127.0.0.1 - - [16/Apr/2025 09:48:31] "GET / HTTP/1.1" 200 -
+2025-04-16 09:59:52,372 [INFO] werkzeug:  * Detected change in 'd:\\0pj\\test-v1\\xiaomi-aiot-edge-security\\src\\dashboard_app.py', reloading
+2025-04-16 09:59:52,409 [INFO] werkzeug:  * Restarting with stat

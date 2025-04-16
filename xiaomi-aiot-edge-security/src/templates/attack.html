@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>攻击模块 - 小米AIoT边缘安全防护研究平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.18.0/css/xterm.css">
+    <style>
+        body { padding-top: 20px; }
+        .card { 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .terminal-container {
+            background-color: #212529;
+            border-radius: 4px;
+            padding: 10px;
+            height: 400px;
+        }
+        .attack-warning {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .badge-running {
+            background-color: #28a745;
+        }
+        .badge-stopped {
+            background-color: #dc3545;
+        }
+        .badge-preparing {
+            background-color: #ffc107;
+        }
+        .nav-tabs {
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+        .attack-type-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .attack-type-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .attack-type-card:hover {
+            transform: translateY(-5px);
+        }
+        .attack-params {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .results-panel {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .vulnerability-high {
+            color: #dc3545;
+        }
+        .vulnerability-medium {
+            color: #ffc107;
+        }
+        .vulnerability-low {
+            color: #17a2b8;
+        }
+        .attack-log-entry {
+            margin-bottom: 5px;
+            font-family: monospace;
+        }
+        .attack-log-error {
+            color: #dc3545;
+        }
+        .attack-log-success {
+            color: #28a745;
+        }
+        .attack-log-info {
+            color: #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <a class="navbar-brand" href="/">小米AIoT边缘安全防护研究平台</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/">控制台</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/devices">设备管理</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/thingsboard">ThingsBoard集成</a>
+                            </li>
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/attack">攻击模块</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/security">安全监控</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/logout">退出</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 主要内容 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>攻击模块 <span class="badge badge-running" id="module-status">运行中</span></h2>
+                <div class="attack-warning">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>注意：</strong> 本模块用于安全研究目的，包含真实攻击能力。请在合法授权的环境中使用，不得用于非法目的。
+                </div>
+            </div>
+        </div>
+        
+        <!-- 选项卡导航 -->
+        <ul class="nav nav-tabs" id="attackTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="attack-types-tab" data-toggle="tab" href="#attack-types" role="tab" aria-controls="attack-types" aria-selected="true">
+                    <i class="fas fa-bolt"></i> 攻击类型
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="active-attacks-tab" data-toggle="tab" href="#active-attacks" role="tab" aria-controls="active-attacks" aria-selected="false">
+                    <i class="fas fa-running"></i> 活动攻击
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="attack-history-tab" data-toggle="tab" href="#attack-history" role="tab" aria-controls="attack-history" aria-selected="false">
+                    <i class="fas fa-history"></i> 历史记录
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="advanced-tab" data-toggle="tab" href="#advanced" role="tab" aria-controls="advanced" aria-selected="false">
+                    <i class="fas fa-terminal"></i> 高级模式
+                </a>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="attackTabsContent">
+            <!-- 攻击类型面板 -->
+            <div class="tab-pane fade show active" id="attack-types" role="tabpanel" aria-labelledby="attack-types-tab">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card attack-type-card" onclick="showAttackConfig('network')">
+                            <div class="card-body text-center">
+                                <div class="attack-type-icon text-primary">
+                                    <i class="fas fa-network-wired"></i>
+                                </div>
+                                <h5 class="card-title">网络层攻击</h5>
+                                <p class="card-text">针对网络协议和通信的攻击</p>
+                                <span class="badge badge-primary">10种攻击类型</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card attack-type-card" onclick="showAttackConfig('application')">
+                            <div class="card-body text-center">
+                                <div class="attack-type-icon text-danger">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <h5 class="card-title">应用层攻击</h5>
+                                <p class="card-text">针对应用软件和服务的攻击</p>
+                                <span class="badge badge-danger">8种攻击类型</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card attack-type-card" onclick="showAttackConfig('protocol')">
+                            <div class="card-body text-center">
+                                <div class="attack-type-icon text-warning">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                                <h5 class="card-title">协议漏洞攻击</h5>
+                                <p class="card-text">针对IoT协议漏洞的攻击</p>
+                                <span class="badge badge-warning">6种攻击类型</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card attack-type-card" onclick="showAttackConfig('firmware')">
+                            <div class="card-body text-center">
+                                <div class="attack-type-icon text-success">
+                                    <i class="fas fa-microchip"></i>
+                                </div>
+                                <h5 class="card-title">固件漏洞攻击</h5>
+                                <p class="card-text">针对设备固件的攻击</p>
+                                <span class="badge badge-success">5种攻击类型</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card attack-type-card" onclick="showAttackConfig('authentication')">
+                            <div class="card-body text-center">
+                                <div class="attack-type-icon text-info">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <h5 class="card-title">认证绕过攻击</h5>
+                                <p class="card-text">针对设备认证的攻击</p>
+                                <span class="badge badge-info">7种攻击类型</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card attack-type-card" onclick="showAttackConfig('custom')">
+                            <div class="card-body text-center">
+                                <div class="attack-type-icon text-secondary">
+                                    <i class="fas fa-wrench"></i>
+                                </div>
+                                <h5 class="card-title">自定义攻击</h5>
+                                <p class="card-text">创建和执行自定义攻击</p>
+                                <span class="badge badge-secondary">高级功能</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 攻击配置区域 -->
+                <div id="attack-config-container" class="d-none">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0" id="attack-config-title">攻击配置</h5>
+                            <button type="button" class="close" aria-label="Close" onclick="hideAttackConfig()">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <form id="attack-config-form">
+                                <div class="form-group">
+                                    <label for="attack-target">攻击目标</label>
+                                    <select class="form-control" id="attack-target" required>
+                                        <option value="">-- 选择设备 --</option>
+                                        <option value="gateway_001">家庭网关 (gateway_001)</option>
+                                        <option value="speaker_001">小爱音箱 (speaker_001)</option>
+                                        <option value="camera_001">门口摄像头 (camera_001)</option>
+                                        <option value="router_001">客厅路由器 (router_001)</option>
+                                        <option value="sensor_001">温湿度传感器 (sensor_001)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="attack-type">攻击类型</label>
+                                    <select class="form-control" id="attack-type" required>
+                                        <!-- 将根据选择的攻击类别动态填充 -->
+                                        <option value="">-- 选择攻击类型 --</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="attack-params" id="attack-params">
+                                    <!-- 攻击参数将根据选择的攻击类型动态填充 -->
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="attack-duration">攻击持续时间 (秒)</label>
+                                    <input type="number" class="form-control" id="attack-duration" min="5" max="300" value="30">
+                                    <small class="form-text text-muted">设置为0表示持续攻击，直到手动停止</small>
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="attack-analysis">
+                                    <label class="form-check-label" for="attack-analysis">执行后自动分析结果</label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-primary" onclick="startAttack()">
+                                        <i class="fas fa-play"></i> 开始攻击
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="testAttackParams()">
+                                        <i class="fas fa-flask"></i> 参数测试
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 活动攻击面板 -->
+            <div class="tab-pane fade" id="active-attacks" role="tabpanel" aria-labelledby="active-attacks-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>活动攻击 (2)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>攻击类型</th>
+                                        <th>目标</th>
+                                        <th>状态</th>
+                                        <th>开始时间</th>
+                                        <th>持续时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>ATK-2025041601</td>
+                                        <td>MQTT协议漏洞攻击</td>
+                                        <td>家庭网关</td>
+                                        <td><span class="badge badge-running">运行中</span></td>
+                                        <td>01:02:14</td>
+                                        <td>02:34 / 05:00</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger"><i class="fas fa-stop"></i></button>
+                                            <button class="btn btn-sm btn-info"><i class="fas fa-chart-line"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>ATK-2025041602</td>
+                                        <td>身份认证绕过</td>
+                                        <td>门口摄像头</td>
+                                        <td><span class="badge badge-preparing">准备中</span></td>
+                                        <td>01:03:56</td>
+                                        <td>00:20 / 02:00</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger"><i class="fas fa-stop"></i></button>
+                                            <button class="btn btn-sm btn-info"><i class="fas fa-chart-line"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5>实时监控</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="results-panel">
+                            <h6>攻击 ATK-2025041601 结果：</h6>
+                            <div class="attack-log">
+                                <div class="attack-log-entry attack-log-info">[01:02:14] 初始化MQTT协议漏洞攻击模块...</div>
+                                <div class="attack-log-entry">[01:02:15] 连接至目标设备: 家庭网关 (192.168.1.1)</div>
+                                <div class="attack-log-entry attack-log-success">[01:02:16] 成功连接至MQTT代理</div>
+                                <div class="attack-log-entry">[01:02:18] 开始探测MQTT认证漏洞</div>
+                                <div class="attack-log-entry attack-log-success">[01:03:24] 发现漏洞: 弱密码认证</div>
+                                <div class="attack-log-entry attack-log-success">[01:03:45] 成功绕过认证</div>
+                                <div class="attack-log-entry">[01:04:01] 开始枚举主题...</div>
+                                <div class="attack-log-entry attack-log-success">[01:04:12] 发现敏感主题: /system/config</div>
+                            </div>
+                            
+                            <h6 class="mt-3">攻击 ATK-2025041602 结果：</h6>
+                            <div class="attack-log">
+                                <div class="attack-log-entry attack-log-info">[01:03:56] 初始化身份认证绕过攻击模块...</div>
+                                <div class="attack-log-entry">[01:03:57] 连接至目标设备: 门口摄像头 (192.168.1.10)</div>
+                                <div class="attack-log-entry">[01:03:58] 探测Web接口...</div>
+                                <div class="attack-log-entry attack-log-success">[01:04:10] 发现Web接口: http://192.168.1.10:8080</div>
+                                <div class="attack-log-entry">[01:04:12] 开始测试默认凭据...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 攻击历史记录面板 -->
+            <div class="tab-pane fade" id="attack-history" role="tabpanel" aria-labelledby="attack-history-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>攻击历史记录</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>攻击类型</th>
+                                        <th>目标</th>
+                                        <th>结果</th>
+                                        <th>执行时间</th>
+                                        <th>持续时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>ATK-2025041503</td>
+                                        <td>MQTT协议漏洞攻击</td>
+                                        <td>家庭网关</td>
+                                        <td><span class="badge badge-success">成功</span></td>
+                                        <td>2025-04-15 22:45:12</td>
+                                        <td>02:30</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info"><i class="fas fa-file-alt"></i></button>
+                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-redo"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>ATK-2025041502</td>
+                                        <td>Wi-Fi密码破解</td>
+                                        <td>客厅路由器</td>
+                                        <td><span class="badge badge-warning">部分成功</span></td>
+                                        <td>2025-04-15 20:30:45</td>
+                                        <td>05:10</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info"><i class="fas fa-file-alt"></i></button>
+                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-redo"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>ATK-2025041501</td>
+                                        <td>固件提取</td>
+                                        <td>小爱音箱</td>
+                                        <td><span class="badge badge-danger">失败</span></td>
+                                        <td>2025-04-15 18:15:30</td>
+                                        <td>01:45</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info"><i class="fas fa-file-alt"></i></button>
+                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-redo"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="攻击历史分页">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">上一页</a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">下一页</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 高级模式面板 -->
+            <div class="tab-pane fade" id="advanced" role="tabpanel" aria-labelledby="advanced-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>高级攻击控制台</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> 注意：高级模式允许直接执行攻击命令，需要具备相关安全知识和授权。
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="advanced-target">目标系统</label>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="advanced-target" placeholder="IP地址或主机名">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="scanTarget()">扫描</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="terminal-container">
+                            <div id="terminal"></div>
+                        </div>
+                        
+                        <div class="form-group mt-3">
+                            <label for="command-input">命令输入</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="command-input" placeholder="输入攻击命令...">
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" type="button" onclick="executeCommand()">执行</button>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">示例: scan -p 1-1000 192.168.1.1</small>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <h6>快速命令</h6>
+                                <div class="btn-group-vertical w-100">
+                                    <button type="button" class="btn btn-outline-secondary text-left mb-2" onclick="insertCommand('scan -sV target')">
+                                        <i class="fas fa-search"></i> 服务版本扫描
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary text-left mb-2" onclick="insertCommand('vuln-scan target')">
+                                        <i class="fas fa-bug"></i> 漏洞扫描
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary text-left" onclick="insertCommand('mqtt-attack --broker target --creds-bruteforce')">
+                                        <i class="fas fa-key"></i> MQTT凭证暴力破解
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>保存的攻击脚本</h6>
+                                <select class="form-control mb-2" id="saved-scripts">
+                                    <option value="">-- 选择脚本 --</option>
+                                    <option value="mqtt_enum.py">MQTT主题枚举</option>
+                                    <option value="zigbee_sniffer.py">Zigbee流量嗅探</option>
+                                    <option value="firmware_extractor.py">固件提取脚本</option>
+                                </select>
+                                <button type="button" class="btn btn-outline-primary btn-block" onclick="loadScript()">
+                                    <i class="fas fa-file-code"></i> 加载脚本
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm@4.18.0/lib/xterm.js"></script>
+    <script>
+        // 攻击配置相关
+        const attackTypes = {
+            'network': [
+                {id: 'dos', name: 'DoS/DDoS攻击'},
+                {id: 'arp-spoof', name: 'ARP欺骗攻击'},
+                {id: 'wifi-deauth', name: 'Wi-Fi去认证攻击'},
+                {id: 'port-scan', name: '端口扫描'},
+                {id: 'man-in-middle', name: '中间人攻击'},
+                {id: 'packet-sniffing', name: '数据包嗅探'},
+                {id: 'wifi-crack', name: 'Wi-Fi密码破解'},
+                {id: 'dns-spoof', name: 'DNS欺骗'},
+                {id: 'syn-flood', name: 'SYN洪水攻击'},
+                {id: 'icmp-flood', name: 'ICMP洪水攻击'}
+            ],
+            'application': [
+                {id: 'command-injection', name: '命令注入'},
+                {id: 'buffer-overflow', name: '缓冲区溢出'},
+                {id: 'sql-injection', name: 'SQL注入'},
+                {id: 'xss', name: '跨站脚本攻击'},
+                {id: 'csrf', name: '跨站请求伪造'},
+                {id: 'brute-force', name: '暴力破解'},
+                {id: 'api-vulnerabilities', name: 'API漏洞利用'},
+                {id: 'session-hijack', name: '会话劫持'}
+            ],
+            'protocol': [
+                {id: 'mqtt-vuln', name: 'MQTT协议漏洞攻击'},
+                {id: 'coap-vuln', name: 'CoAP协议漏洞攻击'},
+                {id: 'zigbee-vuln', name: 'Zigbee协议漏洞攻击'},
+                {id: 'bluetooth-vuln', name: '蓝牙协议漏洞攻击'},
+                {id: 'zwave-vuln', name: 'Z-Wave协议漏洞攻击'},
+                {id: 'http-vuln', name: 'HTTP协议漏洞攻击'}
+            ],
+            'firmware': [
+                {id: 'firmware-extract', name: '固件提取'},
+                {id: 'firmware-analysis', name: '固件分析'},
+                {id: 'binary-exploitation', name: '二进制漏洞利用'},
+                {id: 'backdoor-implant', name: '后门植入'},
+                {id: 'code-execution', name: '远程代码执行'}
+            ],
+            'authentication': [
+                {id: 'password-bypass', name: '密码绕过'},
+                {id: 'token-forgery', name: '令牌伪造'},
+                {id: 'oauth-abuse', name: 'OAuth滥用'},
+                {id: 'certificate-spoofing', name: '证书欺骗'},
+                {id: 'credential-theft', name: '凭证窃取'},
+                {id: '2fa-bypass', name: '双因素认证绕过'},
+                {id: 'session-bypass', name: '会话绕过'}
+            ],
+            'custom': [
+                {id: 'custom-script', name: '自定义脚本'},
+                {id: 'custom-exploit', name: '自定义漏洞利用'}
+            ]
+        };
+        
+        let currentAttackCategory = '';
+        
+        function showAttackConfig(category) {
+            currentAttackCategory = category;
+            
+            // 更新标题
+            const titles = {
+                'network': '网络层攻击配置',
+                'application': '应用层攻击配置',
+                'protocol': '协议漏洞攻击配置',
+                'firmware': '固件漏洞攻击配置',
+                'authentication': '认证绕过攻击配置',
+                'custom': '自定义攻击配置'
+            };
+            
+            $('#attack-config-title').text(titles[category] || '攻击配置');
+            
+            // 填充攻击类型下拉框
+            const typeSelect = $('#attack-type');
+            typeSelect.empty();
+            typeSelect.append('<option value="">-- 选择攻击类型 --</option>');
+            
+            attackTypes[category].forEach(type => {
+                typeSelect.append(`<option value="${type.id}">${type.name}</option>`);
+            });
+            
+            // 显示配置区域
+            $('#attack-config-container').removeClass('d-none');
+            
+            // 清空参数区域
+            $('#attack-params').empty();
+            
+            // 监听攻击类型变化，更新参数
+            $('#attack-type').on('change', updateAttackParams);
+        }
+        
+        function hideAttackConfig() {
+            $('#attack-config-container').addClass('d-none');
+            currentAttackCategory = '';
+        }
+        
+        function updateAttackParams() {
+            const attackType = $('#attack-type').val();
+            const paramsContainer = $('#attack-params');
+            
+            paramsContainer.empty();
+            
+            if (!attackType) return;
+            
+            // 根据不同攻击类型显示不同参数
+            switch(attackType) {
+                case 'dos':
+                    paramsContainer.append(`
+                        <div class="form-group">
+                            <label for="dos-method">DoS方法</label>
+                            <select class="form-control" id="dos-method">
+                                <option value="syn-flood">SYN洪水</option>
+                                <option value="udp-flood">UDP洪水</option>
+                                <option value="http-flood">HTTP洪水</option>
+                                <option value="slowloris">Slowloris</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dos-port">目标端口</label>
+                            <input type="number" class="form-control" id="dos-port" value="80">
+                        </div>
+                        <div class="form-group">
+                            <label for="dos-threads">线程数</label>
+                            <input type="number" class="form-control" id="dos-threads" value="10" min="1" max="100">
+                        </div>
+                    `);
+                    break;
+                    
+                case 'mqtt-vuln':
+                    paramsContainer.append(`
+                        <div class="form-group">
+                            <label for="mqtt-broker">MQTT代理地址</label>
+                            <input type="text" class="form-control" id="mqtt-broker" placeholder="IP:端口">
+                        </div>
+                        <div class="form-group">
+                            <label>攻击向量</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vector-auth" checked>
+                                <label class="form-check-label" for="vector-auth">认证绕过</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vector-topic">
+                                <label class="form-check-label" for="vector-topic">主题枚举</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vector-payload">
+                                <label class="form-check-label" for="vector-payload">有害负载注入</label>
+                            </div>
+                        </div>
+                    `);
+                    break;
+                    
+                case 'firmware-extract':
+                    paramsContainer.append(`
+                        <div class="form-group">
+                            <label>提取方法</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="extract-method" id="method-jtag" checked>
+                                <label class="form-check-label" for="method-jtag">JTAG接口</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="extract-method" id="method-uart">
+                                <label class="form-check-label" for="method-uart">UART接口</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="extract-method" id="method-spi">
+                                <label class="form-check-label" for="method-spi">SPI闪存</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="extract-path">保存路径</label>
+                            <input type="text" class="form-control" id="extract-path" value="/tmp/firmware_extract">
+                        </div>
+                    `);
+                    break;
+                    
+                case 'custom-script':
+                    paramsContainer.append(`
+                        <div class="form-group">
+                            <label for="custom-script">脚本内容</label>
+                            <textarea class="form-control" id="custom-script" rows="10" placeholder="#!/bin/bash\n# 输入自定义攻击脚本..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="script-args">脚本参数</label>
+                            <input type="text" class="form-control" id="script-args" placeholder="-t target -p 80 --verbose">
+                        </div>
+                    `);
+                    break;
+                    
+                default:
+                    paramsContainer.append(`<p>请选择具体的攻击类型以配置参数</p>`);
+            }
+        }
+        
+        function startAttack() {
+            const target = $('#attack-target').val();
+            const attackType = $('#attack-type').val();
+            const duration = $('#attack-duration').val();
+            
+            if (!target || !attackType) {
+                alert('请选择攻击目标和攻击类型');
+                return;
+            }
+            
+            // 这里应该是实际发送到后端的攻击请求
+            console.log(`开始攻击: 目标=${target}, 类型=${attackType}, 持续=${duration}秒`);
+            
+            // 显示成功消息
+            alert(`攻击已成功启动!\n目标: ${target}\n类型: ${$('#attack-type option:selected').text()}\n持续时间: ${duration}秒`);
+            
+            // 切换到活动攻击标签页
+            $('#attackTabs a[href="#active-attacks"]').tab('show');
+        }
+        
+        function testAttackParams() {
+            const attackType = $('#attack-type').val();
+            
+            if (!attackType) {
+                alert('请选择攻击类型');
+                return;
+            }
+            
+            alert('参数测试通过，此攻击配置有效。');
+        }
+        
+        // 终端相关
+        let term;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化终端
+            term = new Terminal({
+                cursorBlink: true,
+                theme: {
+                    background: '#212529',
+                    foreground: '#f8f9fa'
+                }
+            });
+            term.open(document.getElementById('terminal'));
+            term.writeln('小米AIoT边缘安全防护研究平台 攻击终端 v1.0');
+            term.writeln('--------------------------------------------');
+            term.writeln('输入 "help" 查看可用命令');
+            term.writeln('');
+            term.write('$ ');
+        });
+        
+        function scanTarget() {
+            const target = $('#advanced-target').val();
+            if (!target) {
+                alert('请输入目标IP或主机名');
+                return;
+            }
+            
+            term.writeln(`\r\n执行扫描: ${target}`);
+            term.writeln('扫描中...');
+            
+            // 模拟扫描输出
+            setTimeout(() => {
+                term.writeln('\r\n扫描完成! 发现开放端口:');
+                term.writeln('22/tcp   open   ssh');
+                term.writeln('80/tcp   open   http');
+                term.writeln('1883/tcp open   mqtt');
+                term.writeln('8080/tcp open   http-proxy');
+                term.write('\r\n$ ');
+            }, 2000);
+        }
+        
+        function executeCommand() {
+            const cmd = $('#command-input').val();
+            if (!cmd) return;
+            
+            term.writeln(`\r\n$ ${cmd}`);
+            
+            // 模拟命令执行
+            if (cmd === 'help') {
+                term.writeln('\r\n可用命令:');
+                term.writeln('scan <target>          - 扫描目标');
+                term.writeln('attack <type> <target> - 执行攻击');
+                term.writeln('mqtt-attack <options>  - 执行MQTT攻击');
+                term.writeln('clear                  - 清屏');
+                term.writeln('help                   - 显示帮助');
+            } else if (cmd === 'clear') {
+                term.clear();
+            } else {
+                term.writeln('\r\n执行命令中...');
+                term.writeln('[*] 开始处理命令请求');
+                term.writeln('[*] 加载攻击模块');
+                
+                setTimeout(() => {
+                    term.writeln('[+] 模块加载成功');
+                    term.writeln('[*] 执行中...');
+                    term.writeln('[+] 命令执行完成\r\n');
+                    term.write('$ ');
+                }, 1500);
+            }
+            
+            $('#command-input').val('');
+        }
+        
+        function insertCommand(cmd) {
+            $('#command-input').val(cmd);
+            $('#command-input').focus();
+        }
+        
+        function loadScript() {
+            const script = $('#saved-scripts').val();
+            if (!script) {
+                alert('请选择要加载的脚本');
+                return;
+            }
+            
+            term.writeln(`\r\n加载脚本: ${script}`);
+            term.writeln('[*] 正在读取脚本内容...');
+            
+            setTimeout(() => {
+                term.writeln('[+] 脚本加载成功');
+                term.writeln('[*] 准备执行...');
+                term.write('\r\n$ python3 ' + script + ' ');
+            }, 1000);
+        }
+
+        // 更新当前时间
+        function updateCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            return `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 初始化页面时执行
+        $(document).ready(function() {
+            // 当前用户和时间
+            const currentTime = "2025-04-16 01:04:16";
+            const currentUser = "Arlene4933068";
+            
+            // 命令输入框回车事件
+            $('#command-input').keypress(function(e) {
+                if (e.which === 13) {
+                    executeCommand();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

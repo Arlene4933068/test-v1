@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据分析 - 小米AIoT边缘安全防护研究平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <style>
+        .analysis-card {
+            min-height: 300px;
+        }
+        
+        .chart-container {
+            min-height: 300px;
+            width: 100%;
+        }
+        
+        .chart-legend {
+            margin-top: 15px;
+        }
+        
+        .legend-item {
+            display: inline-block;
+            margin-right: 15px;
+        }
+        
+        .legend-color {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+        }
+        
+        .severity-critical {
+            color: #d63031;
+        }
+        
+        .severity-high {
+            color: #e17055;
+        }
+        
+        .severity-medium {
+            color: #fdcb6e;
+        }
+        
+        .severity-low {
+            color: #00b894;
+        }
+        
+        .analysis-summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-number {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .data-table {
+            font-size: 0.9rem;
+        }
+        
+        .trend-indicator {
+            margin-left: 5px;
+        }
+        
+        .trend-up {
+            color: #e74c3c;
+        }
+        
+        .trend-down {
+            color: #2ecc71;
+        }
+        
+        .trend-neutral {
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <a class="navbar-brand" href="/">小米AIoT边缘安全防护研究平台</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/">控制台</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/devices">设备管理</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/thingsboard">ThingsBoard集成</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/attack">攻击模块</a>
+                            </li>
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/analysis">数据分析</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/logout">退出</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 主要内容 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>安全数据分析 
+                    <div class="btn-group float-right">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-data">
+                            <i class="fas fa-sync-alt"></i> 刷新数据
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+                            <i class="fas fa-calendar"></i> 时间范围
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#" data-range="day">最近24小时</a>
+                            <a class="dropdown-item" href="#" data-range="week">最近7天</a>
+                            <a class="dropdown-item active" href="#" data-range="month">最近30天</a>
+                            <a class="dropdown-item" href="#" data-range="custom">自定义范围</a>
+                        </div>
+                    </div>
+                </h2>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 此页面展示对边缘设备的安全分析结果，包括攻击历史、漏洞分布和安全建议。
+                </div>
+            </div>
+        </div>
+        
+        <!-- 摘要卡片 -->
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="text-primary mb-2">
+                            <i class="fas fa-shield-alt fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">安全评分</h5>
+                        <div class="summary-number">76<span style="font-size: 1rem">/100</span></div>
+                        <div class="text-muted">较上周 <span class="trend-indicator trend-up"><i class="fas fa-arrow-down"></i> -4</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="text-danger mb-2">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">安全漏洞</h5>
+                        <div class="summary-number">24</div>
+                        <div class="text-muted">较上周 <span class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i> +3</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="text-warning mb-2">
+                            <i class="fas fa-bolt fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">近期攻击</h5>
+                        <div class="summary-number">56</div>
+                        <div class="text-muted">较上周 <span class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i> +12</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="text-success mb-2">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">修复比例</h5>
+                        <div class="summary-number">65%</div>
+                        <div class="text-muted">较上周 <span class="trend-indicator trend-down"><i class="fas fa-arrow-up"></i> +5%</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 图表和详细分析 -->
+        <div class="row">
+            <!-- 漏洞按严重性分布 -->
+            <div class="col-md-6 mb-4">
+                <div class="card analysis-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">漏洞严重性分布</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" id="vulnerabilities-chart"></div>
+                        <div class="chart-legend text-center">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #e74c3c;"></span>
+                                <span>严重</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #e67e22;"></span>
+                                <span>高危</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #f1c40f;"></span>
+                                <span>中危</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #2ecc71;"></span>
+                                <span>低危</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 攻击类型分布 -->
+            <div class="col-md-6 mb-4">
+                <div class="card analysis-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">攻击类型分布</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" id="attack-types-chart"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 攻击历史趋势 -->
+            <div class="col-md-12 mb-4">
+                <div class="card analysis-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">攻击历史趋势</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" id="attack-history-chart"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 设备漏洞分布 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">设备漏洞分布</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover data-table">
+                                <thead>
+                                    <tr>
+                                        <th>设备</th>
+                                        <th>漏洞数</th>
+                                        <th>最高风险</th>
+                                        <th>状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>家庭网关</td>
+                                        <td>7</td>
+                                        <td><span class="severity-critical">严重</span></td>
+                                        <td>
+                                            <div class="progress" style="height: 5px;">
+                                                <div class="progress-bar bg-danger" role="progressbar" style="width: 85%"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>小爱音箱</td>
+                                        <td>4</td>
+                                        <td><span class="severity-high">高危</span></td>
+                                        <td>
+                                            <div class="progress" style="height: 5px;">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: 60%"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>门口摄像头</td>
+                                        <td>6</td>
+                                        <td><span class="severity-high">高危</span></td>
+                                        <td>
+                                            <div class="progress" style="height: 5px;">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: 70%"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>客厅路由器</td>
+                                        <td>5</td>
+                                        <td><span class="severity-medium">中危</span></td>
+                                        <td>
+                                            <div class="progress" style="height: 5px;">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: 45%"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>温湿度传感器</td>
+                                        <td>2</td>
+                                        <td><span class="severity-low">低危</span></td>
+                                        <td>
+                                            <div class="progress" style="height: 5px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 25%"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 漏洞类型分布 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">漏洞类型分布</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover data-table">
+                                <thead>
+                                    <tr>
+                                        <th>漏洞类型</th>
+                                        <th>数量</th>
+                                        <th>严重性</th>
+                                        <th>趋势</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>认证绕过</td>
+                                        <td>5</td>
+                                        <td><span class="severity-critical">严重</span></td>
+                                        <td><span class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>弱密码</td>
+                                        <td>4</td>
+                                        <td><span class="severity-high">高危</span></td>
+                                        <td><span class="trend-indicator trend-neutral"><i class="fas fa-minus"></i></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>命令注入</td>
+                                        <td>3</td>
+                                        <td><span class="severity-critical">严重</span></td>
+                                        <td><span class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>MQTT认证漏洞</td>
+                                        <td>3</td>
+                                        <td><span class="severity-high">高危</span></td>
+                                        <td><span class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>过时固件</td>
+                                        <td>6</td>
+                                        <td><span class="severity-medium">中危</span></td>
+                                        <td><span class="trend-indicator trend-down"><i class="fas fa-arrow-down"></i></span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 安全建议 -->
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">安全建议</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-danger"><i class="fas fa-exclamation-circle"></i> 高优先级</h6>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        修复家庭网关上的认证绕过漏洞
+                                        <span class="badge badge-danger">严重</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        更新门口摄像头的固件版本
+                                        <span class="badge badge-danger">严重</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        为所有设备实施强密码策略
+                                        <span class="badge badge-warning">高危</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-warning"><i class="fas fa-bell"></i> 中优先级</h6>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        隔离智能家居网络
+                                        <span class="badge badge-warning">建议</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        禁用未使用的网络服务
+                                        <span class="badge badge-warning">建议</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        实施定期安全扫描
+                                        <span class="badge badge-info">建议</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 详细攻击报告模态框 -->
+        <div class="modal fade" id="attackReportModal" tabindex="-1" aria-labelledby="attackReportModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="attackReportModalLabel">攻击详细报告</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="attack-report-content">
+                        <!-- 报告内容将通过JavaScript动态填充 -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="downloadReport()">下载报告</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载JavaScript库 -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 漏洞严重性分布饼图
+            const vulnerabilitiesCtx = document.getElementById('vulnerabilities-chart').getContext('2d');
+            const vulnerabilitiesChart = new Chart(vulnerabilitiesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['严重', '高危', '中危', '低危'],
+                    datasets: [{
+                        data: [5, 8, 7, 4],
+                        backgroundColor: [
+                            '#e74c3c',
+                            '#e67e22',
+                            '#f1c40f',
+                            '#2ecc71'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 攻击类型分布图
+            const attackTypesCtx = document.getElementById('attack-types-chart').getContext('2d');
+            const attackTypesChart = new Chart(attackTypesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['网络层攻击', '应用层攻击', '协议漏洞攻击', '认证绕过', '固件漏洞'],
+                    datasets: [{
+                        label: '攻击次数',
+                        data: [18, 12, 9, 15, 2],
+                        backgroundColor: '#3498db'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '攻击次数'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 攻击历史趋势图
+            const attackHistoryCtx = document.getElementById('attack-history-chart').getContext('2d');
+            
+            // 生成过去30天的日期标签
+            const labels = [];
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
+            }
+            
+            const attackHistoryChart = new Chart(attackHistoryCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '总攻击次数',
+                        data: [2, 5, 3, 1, 4, 6, 8, 7, 5, 3, 2, 1, 2, 3, 5, 8, 10, 7, 5, 3, 2, 4, 6, 5, 3, 2, 4, 7, 8, 6],
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: '成功防御',
+                        data: [1, 3, 2, 1, 3, 4, 5, 4, 3, 2, 1, 1, 1, 2, 3, 5, 7, 5, 3, 2, 1, 3, 4, 3, 2, 1, 3, 5, 6, 4],
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '攻击次数'
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+            
+            // 刷新数据按钮点击事件
+            document.getElementById('refresh-data').addEventListener('click', function() {
+                // 模拟刷新数据
+                alert('数据已刷新');
+                // 这里可以添加API调用来获取最新数据
+            });
+            
+            // 时间范围下拉菜单选择
+            document.querySelectorAll('.dropdown-item[data-range]').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有活动状态
+                    document.querySelectorAll('.dropdown-item[data-range]').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                    
+                    // 设置当前项为活动状态
+                    this.classList.add('active');
+                    
+                    const range = this.getAttribute('data-range');
+                    
+                    // 如果选择自定义范围，显示日期选择器
+                    if (range === 'custom') {
+                        // 实现自定义日期范围选择器
+                        alert('自定义日期范围选择功能将在此实现');
+                    } else {
+                        // 这里可以添加API调用来获取指定时间范围的数据
+                        console.log(`选择时间范围: ${range}`);
+                    }
+                });
+            });
+            
+        });
+        
+        // 查看攻击报告
+        function viewAttackReport(id) {
+            // 这里可以根据ID加载具体攻击的详细报告
+            // 示例报告内容
+            const reportContent = `
+                <div class="attack-report">
+                    <h4>MQTT协议漏洞攻击 (ATK-2025041503)</h4>
+                    <p><strong>执行时间:</strong> 2025-04-15 22:45:12</p>
+                    <p><strong>攻击目标:</strong> 家庭网关 (192.168.1.1)</p>
+                    <p><strong>攻击状态:</strong> <span class="badge badge-success">成功</span></p>
+                    
+                    <h5 class="mt-4">发现的漏洞:</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <h6 class="text-danger">弱密码认证</h6>
+                            <p>发现MQTT代理使用弱密码: admin/admin123</p>
+                            <p><strong>严重性:</strong> 高</p>
+                        </li>
+                        <li class="list-group-item">
+                            <h6 class="text-warning">未授权主题访问</h6>
+                            <p>发现可访问敏感主题: /system/config</p>
+                            <p><strong>严重性:</strong> 中</p>
+                        </li>
+                    </ul>
+                    
+                    <h5 class="mt-4">攻击日志:</h5>
+                    <pre class="bg-dark text-light p-3">[22:45:12] 初始化MQTT协议漏洞攻击模块...
+[22:45:13] 连接至目标设备: 家庭网关 (192.168.1.1)
+[22:45:14] 成功连接至MQTT代理
+[22:45:16] 开始探测MQTT认证漏洞
+[22:46:22] 发现漏洞: 弱密码认证
+[22:46:43] 成功绕过认证
+[22:46:59] 开始枚举主题...
+[22:47:10] 发现敏感主题: /system/config</pre>
+                    
+                    <h5 class="mt-4">修复建议:</h5>
+                    <ol>
+                        <li>更改MQTT代理的默认凭据，使用强密码</li>
+                        <li>实施适当的访问控制列表(ACL)限制客户端访问主题</li>
+                        <li>配置TLS/SSL加密保护MQTT通信</li>
+                        <li>监控异常的MQTT连接和订阅行为</li>
+                    </ol>
+                </div>
+            `;
+            
+            // 填充模态框内容
+            document.getElementById('attack-report-content').innerHTML = reportContent;
+            
+            // 显示模态框
+            $('#attackReportModal').modal('show');
+        }
+        
+        // 下载报告
+        function downloadReport() {
+            // 模拟下载功能
+            alert('报告下载功能将在此实现');
+        }
+    </script>
+</body>
+</html>

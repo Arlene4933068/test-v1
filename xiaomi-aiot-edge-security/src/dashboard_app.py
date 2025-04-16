@@ -13,6 +13,7 @@ import secrets
 import functools
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from datetime import datetime
+from attack_engine import AttackEngine
 
 # 辅助函数定义
 def banner(message):
@@ -344,28 +345,160 @@ def api_update_tb_config():
         logger.error(f"更新ThingsBoard配置失败: {str(e)}")
         return jsonify({"success": False, "error": str(e)})
 
-@app.route('/api/security/attack/<attack_type>/start', methods=['POST'])
+@app.route('/attack')
 @login_required
-def api_start_attack(attack_type):
-    """API: 启动攻击模拟"""
+def attack_module():
+    """攻击模块页面"""
     try:
-        # 这里应该调用攻击模拟器的相应方法
-        logger.info(f"启动攻击模拟: {attack_type}")
-        return jsonify({"success": True, "message": f"{attack_type}攻击模拟已启动"})
+        logger.info("访问攻击模块页面")
+        return render_template('attack.html', 
+                             current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     except Exception as e:
-        logger.error(f"启动攻击模拟失败: {str(e)}")
+        logger.error(f"攻击模块页面渲染错误: {str(e)}")
+        logger.error(traceback.format_exc())
+        return redirect(url_for('error_page', error=str(e)))
+
+
+# 创建攻击引擎实例
+attack_engine = AttackEngine()
+
+# 添加以下路由
+@app.route('/api/attack')
+@login_required
+def attack_api():
+    """攻击模块API页面"""
+    try:
+        logger.info("访问攻击模块API页面")
+        return render_template('attack.html', 
+                             current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    except Exception as e:
+        logger.error(f"攻击模块API页面渲染错误: {str(e)}")
+        logger.error(traceback.format_exc())
+        return redirect(url_for('error_page', error=str(e)))
+
+@app.route('/analytics')
+@login_required
+def analytics():
+    """数据分析页面"""
+    try:
+        logger.info("访问数据分析页面")
+        
+        # 获取统计数据
+        devices_count = len(devices)
+        online_devices = len([d for d in devices if d['status'] == 'online'])
+        
+        # 从攻击引擎获取攻击和警报数据
+        attack_history = attack_engine.get_attack_history(limit=100)
+        attack_count = len(attack_history)
+        alert_count = len([a for a in attack_history if a.get('severity', '') == 'high'])
+        
+        return render_template('analysis.html',
+                             current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                             devices_count=devices_count,
+                             online_devices=online_devices,
+                             attack_count=attack_count,
+                             alert_count=alert_count)
+    except Exception as e:
+        logger.error(f"数据分析页面渲染错误: {str(e)}")
+        logger.error(traceback.format_exc())
+        return redirect(url_for('error_page', error=str(e)))
+
+@app.route('/api/analysis/data', methods=['GET'])
+@login_required
+def get_analysis_data():
+    """获取分析数据API"""
+    try:
+        data_type = request.args.get('type', 'device_status')
+        time_range = request.args.get('range', '24h')
+        
+        if data_type == 'device_status':
+            # 返回设备状态数据
+            return jsonify({
+                'success': True,
+                'data': {
+                    'online': len([d for d in devices if d['status'] == 'online']),
+                    'offline': len([d for d in devices if d['status'] == 'offline'])
+                }
+            })
+        elif data_type == 'security_events':
+            # 返回安全事件数据
+            events = attack_engine.get_attack_history(limit=100)
+            return jsonify({
+                'success': True,
+                'data': {
+                    'attacks': len(events),
+                    'alerts': len([e for e in events if e.get('severity') == 'high'])
+                }
+            })
+        else:
+            return jsonify({'success': False, 'error': '不支持的数据类型'}), 400
+            
+    except Exception as e:
+        logger.error(f"获取分析数据失败: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# 攻击模块API路由
+@app.route('/api/attacks', methods=['GET'])
+@login_required
+def api_get_attacks():
+    """API: 获取所有活动攻击"""
+    try:
+        return jsonify({"success": True, "data": attack_engine.get_active_attacks()})
+    except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-@app.route('/api/security/attack/<attack_type>/stop', methods=['POST'])
+@app.route('/api/attacks/history', methods=['GET'])
 @login_required
-def api_stop_attack(attack_type):
-    """API: 停止攻击模拟"""
+def api_get_attack_history():
+    """API: 获取攻击历史"""
     try:
-        # 这里应该调用攻击模拟器的相应方法
-        logger.info(f"停止攻击模拟: {attack_type}")
-        return jsonify({"success": True, "message": f"{attack_type}攻击模拟已停止"})
+        limit = request.args.get('limit', 20, type=int)
+        offset = request.args.get('offset', 0, type=int)
+        return jsonify({"success": True, "data": attack_engine.get_attack_history(limit, offset)})
     except Exception as e:
-        logger.error(f"停止攻击模拟失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/attacks/<attack_id>', methods=['GET'])
+@login_required
+def api_get_attack_details(attack_id):
+    """API: 获取攻击详情"""
+    try:
+        attack = attack_engine.get_attack_details(attack_id)
+        if not attack:
+            return jsonify({"success": False, "error": f"未找到攻击: {attack_id}"}), 404
+        return jsonify({"success": True, "data": attack})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/attacks', methods=['POST'])
+@login_required
+def api_launch_attack():
+    """API: 启动攻击"""
+    try:
+        data = request.json
+        attack_type = data.get('type')
+        target = data.get('target')
+        params = data.get('params', {})
+        duration = data.get('duration', 30)
+        analysis = data.get('analysis', True)
+        
+        if not attack_type or not target:
+            return jsonify({"success": False, "error": "缺少必要参数"}), 400
+        
+        result = attack_engine.launch_attack(attack_type, target, params, duration, analysis)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"启动攻击失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/attacks/<attack_id>', methods=['DELETE'])
+@login_required
+def api_stop_attack(attack_id):
+    """API: 停止攻击"""
+    try:
+        result = attack_engine.stop_attack(attack_id)
+        return jsonify(result)
+    except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
 @app.route('/debug')

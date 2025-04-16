@@ -15,7 +15,7 @@ import secrets
 import functools
 import threading
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, make_response
 from flask_socketio import SocketIO, emit
 
 # 设置路径
@@ -250,6 +250,507 @@ def attack_module():
         logger.error(traceback.format_exc())
         return redirect(url_for('error_page', error=str(e)))
 
+# 设置API端点
+@app.route('/api/settings/general', methods=['POST'])
+@login_required
+def api_save_general_settings():
+    """API: 保存通用设置"""
+    try:
+        data = request.json
+        # 在实际应用中，这里会保存设置到数据库或配置文件
+        logger.info(f"保存通用设置: {data}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"保存通用设置失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/settings/security', methods=['POST'])
+@login_required
+def api_save_security_settings():
+    """API: 保存安全设置"""
+    try:
+        data = request.json
+        # 在实际应用中，这里会保存设置到数据库或配置文件
+        logger.info(f"保存安全设置: {data}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"保存安全设置失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/settings/network', methods=['POST'])
+@login_required
+def api_save_network_settings():
+    """API: 保存网络设置"""
+    try:
+        data = request.json
+        # 在实际应用中，这里会保存设置到数据库或配置文件
+        logger.info(f"保存网络设置: {data}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"保存网络设置失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/settings/integration', methods=['POST'])
+@login_required
+def api_save_integration_settings():
+    """API: 保存集成设置"""
+    try:
+        data = request.json
+        # 在实际应用中，这里会保存设置到数据库或配置文件
+        logger.info(f"保存集成设置: {data}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"保存集成设置失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/settings/logs', methods=['POST'])
+@login_required
+def api_save_log_settings():
+    """API: 保存日志设置"""
+    try:
+        data = request.json
+        # 在实际应用中，这里会保存设置到数据库或配置文件
+        logger.info(f"保存日志设置: {data}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"保存日志设置失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/settings/attack_engine', methods=['POST'])
+@login_required
+def api_save_attack_engine_settings():
+    """API: 保存攻击引擎设置"""
+    try:
+        data = request.json
+        # 在实际应用中，这里会保存设置到数据库或配置文件
+        logger.info(f"保存攻击引擎设置: {data}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"保存攻击引擎设置失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/users', methods=['POST'])
+@login_required
+def api_add_user():
+    """API: 添加用户"""
+    try:
+        data = request.json
+        # 在实际应用中，这里会创建新用户
+        logger.info(f"添加新用户: {data}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"添加用户失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/users/<username>', methods=['DELETE'])
+@login_required
+def api_delete_user(username):
+    """API: 删除用户"""
+    try:
+        # 在实际应用中，这里会删除指定用户
+        logger.info(f"删除用户: {username}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"删除用户失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/apikeys', methods=['POST'])
+@login_required
+def api_create_apikey():
+    """API: 创建API密钥"""
+    try:
+        data = request.json
+        # 在实际应用中，这里会生成新的API密钥
+        logger.info(f"创建API密钥: {data}")
+        
+        # 生成随机API密钥
+        import secrets
+        api_key = "aiot_" + secrets.token_hex(16)
+        
+        return jsonify({"success": True, "api_key": api_key})
+    except Exception as e:
+        logger.error(f"创建API密钥失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/apikeys/<key_id>', methods=['DELETE'])
+@login_required
+def api_revoke_apikey(key_id):
+    """API: 撤销API密钥"""
+    try:
+        # 在实际应用中，这里会撤销指定的API密钥
+        logger.info(f"撤销API密钥: {key_id}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"撤销API密钥失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/system/restart', methods=['POST'])
+@login_required
+def api_restart_system():
+    """API: 重启系统"""
+    try:
+        # 在实际应用中，这里会安排系统重启
+        logger.info("系统重启请求")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"系统重启请求失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/services/<service>/restart', methods=['POST'])
+@login_required
+def api_restart_service(service):
+    """API: 重启服务"""
+    try:
+        # 在实际应用中，这里会重启指定的服务
+        logger.info(f"重启服务: {service}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"重启服务失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/system/updates', methods=['GET'])
+@login_required
+def api_check_updates():
+    """API: 检查系统更新"""
+    try:
+        # 在实际应用中，这里会检查系统更新
+        logger.info("检查系统更新")
+        
+        # 模拟更新信息
+        updates = {
+            "available": True,
+            "current_version": "1.2.0",
+            "latest_version": "1.3.0",
+            "release_date": "2025-04-15",
+            "changes": [
+                "新增Wi-Fi协议漏洞检测模块",
+                "改进MQTT协议攻击引擎性能",
+                "优化数据分析功能，增加更多可视化图表",
+                "修复安全监控中的数据统计错误",
+                "修复多处UI界面问题",
+                "更新依赖库，提高系统安全性"
+            ]
+        }
+        
+        return jsonify({"success": True, "data": updates})
+    except Exception as e:
+        logger.error(f"检查系统更新失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/system/updates', methods=['POST'])
+@login_required
+def api_start_update():
+    """API: 开始系统更新"""
+    try:
+        data = request.json
+        # 在实际应用中，这里会开始系统更新
+        logger.info(f"开始系统更新: {data}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"系统更新失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/logs', methods=['GET'])
+@login_required
+def api_get_logs():
+    """API: 获取日志"""
+    try:
+        log_file = request.args.get('file', 'app.log')
+        log_level = request.args.get('level', 'all')
+        search_term = request.args.get('search', '')
+        
+        # 在实际应用中，这里会读取并过滤日志
+        logger.info(f"获取日志: 文件={log_file}, 级别={log_level}, 搜索={search_term}")
+        
+        # 模拟日志数据
+        logs = [
+            {"timestamp": "2025-04-16 04:38:45", "level": "INFO", "module": "dashboard.app", "message": "应用启动成功"},
+            {"timestamp": "2025-04-16 04:38:45", "level": "INFO", "module": "dashboard.architecture", "message": "Dashboard集成管理器初始化完成"},
+            {"timestamp": "2025-04-16 04:38:45", "level": "INFO", "module": "dashboard.packet_analyzer", "message": "数据包分析器初始化完成，监听接口: ['eth0']"},
+            {"timestamp": "2025-04-16 04:38:45", "level": "WARNING", "module": "dashboard.app", "message": "使用默认配置"},
+            {"timestamp": "2025-04-16 04:38:47", "level": "INFO", "module": "dashboard.app", "message": "用户 admin 登录成功"},
+            {"timestamp": "2025-04-16 04:38:52", "level": "INFO", "module": "dashboard.device_manager", "message": "发现新设备: 192.168.1.10 (camera_001)"},
+            {"timestamp": "2025-04-16 04:39:01", "level": "INFO", "module": "dashboard.attack_engine", "message": "攻击引擎初始化完成"},
+            {"timestamp": "2025-04-16 04:39:12", "level": "ERROR", "module": "dashboard.attack_logger", "message": "清理过期日志失败: cannot VACUUM from within a transaction"},
+            {"timestamp": "2025-04-16 04:39:15", "level": "INFO", "module": "dashboard.app", "message": "访问仪表盘页面"},
+            {"timestamp": "2025-04-16 04:39:30", "level": "INFO", "module": "dashboard.app", "message": "访问设置页面"}
+        ]
+        
+        # 如果有搜索词，进行过滤
+        if search_term:
+            logs = [log for log in logs if search_term.lower() in log["message"].lower()]
+        
+        # 按日志级别过滤
+        if log_level != 'all':
+            levels = {'error': 4, 'warning': 3, 'info': 2, 'debug': 1}
+            min_level = levels.get(log_level, 0)
+            logs = [log for log in logs if levels.get(log["level"].lower(), 0) >= min_level]
+        
+        return jsonify({"success": True, "data": logs})
+    except Exception as e:
+        logger.error(f"获取日志失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/logs', methods=['DELETE'])
+@login_required
+def api_clear_logs():
+    """API: 清除日志"""
+    try:
+        log_file = request.args.get('file', 'app.log')
+        
+        # 在实际应用中，这里会清除指定的日志文件
+        logger.info(f"清除日志: {log_file}")
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"清除日志失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/logs/download', methods=['GET'])
+@login_required
+def api_download_logs():
+    """API: 下载日志"""
+    try:
+        log_file = request.args.get('file', 'app.log')
+        
+        # 在实际应用中，这里会生成并返回日志文件以供下载
+        logger.info(f"下载日志: {log_file}")
+        
+        # 模拟日志内容
+        log_content = "This is a sample log file content"
+        
+        # 创建响应并设置为附件下载
+        response = make_response(log_content)
+        response.headers["Content-Disposition"] = f"attachment; filename={log_file}"
+        response.headers["Content-Type"] = "text/plain"
+        
+        return response
+    except Exception as e:
+        logger.error(f"下载日志失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/settings')
+@login_required
+def settings():
+    """设置页面"""
+    try:
+        logger.info("访问设置页面")
+        return render_template('settings.html',
+                             current_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                             app_state=app_state)
+    except Exception as e:
+        logger.error(f"设置页面渲染错误: {str(e)}")
+        logger.error(traceback.format_exc())
+        return redirect(url_for('error_page', error=str(e)))
+
+@app.route('/api/logs/analyze', methods=['POST'])
+@login_required
+def api_analyze_attack_logs():
+    """API: 分析攻击日志"""
+    try:
+        data = request.json
+        
+        # 在实际应用中，这里会分析攻击日志并返回结果
+        logger.info(f"分析攻击日志: {data}")
+        
+        # 模拟分析结果
+        analysis_result = {
+            "total_attacks": 56,
+            "successful_attacks": 38,
+            "attack_types": {
+                "mqtt": 18,
+                "dos": 12,
+                "auth": 15,
+                "firmware": 8,
+                "other": 3
+            },
+            "top_targets": [
+                {"name": "gateway_001", "count": 15},
+                {"name": "camera_001", "count": 12},
+                {"name": "router_001", "count": 10}
+            ],
+            "trends": {
+                "days": ["04-01", "04-02", "04-03", "04-04", "04-05", "04-06", "04-07", "04-08", "04-09", "04-10",
+                         "04-11", "04-12", "04-13", "04-14", "04-15", "04-16"],
+                "attacks": [2, 3, 1, 0, 2, 4, 5, 3, 2, 4, 6, 7, 5, 4, 5, 3]
+            }
+        }
+        
+        return jsonify({"success": True, "data": analysis_result})
+    except Exception as e:
+        logger.error(f"分析攻击日志失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/certificates', methods=['POST'])
+@login_required
+def api_generate_certificate():
+    """API: 生成SSL证书"""
+    try:
+        data = request.json
+        
+        # 在实际应用中，这里会生成自签名证书
+        logger.info(f"生成SSL证书: {data}")
+        
+        # 模拟生成的证书文件路径
+        cert_path = f"/etc/ssl/certs/aiot-edge-{datetime.now().strftime('%Y-%m-%d')}.crt"
+        key_path = f"/etc/ssl/private/aiot-edge-{datetime.now().strftime('%Y-%m-%d')}.key"
+        
+        return jsonify({
+            "success": True,
+            "cert_path": cert_path,
+            "key_path": key_path
+        })
+    except Exception as e:
+        logger.error(f"生成SSL证书失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/connections/test', methods=['POST'])
+@login_required
+def api_test_connection():
+    """API: 测试连接"""
+    try:
+        data = request.json
+        connection_type = data.get('type')  # mqtt, proxy, thingsboard, edgex, webhook
+        
+        # 在实际应用中，这里会测试指定类型的连接
+        logger.info(f"测试连接: {connection_type}, 数据: {data}")
+        
+        # 模拟测试结果
+        return jsonify({
+            "success": True,
+            "message": f"{connection_type} 连接测试成功"
+        })
+    except Exception as e:
+        logger.error(f"连接测试失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/modules/updates', methods=['GET'])
+@login_required
+def api_check_module_updates():
+    """API: 检查模块更新"""
+    try:
+        # 在实际应用中，这里会检查攻击模块更新
+        logger.info("检查攻击模块更新")
+        
+        # 模拟更新信息
+        updates = {
+            "available_updates": [
+                {
+                    "module_id": "firmware-extract",
+                    "name": "固件提取与分析",
+                    "current_version": "2.0.1",
+                    "latest_version": "2.1.0",
+                    "changes": "增强固件解析能力，添加对新芯片组的支持"
+                }
+            ]
+        }
+        
+        return jsonify({"success": True, "data": updates})
+    except Exception as e:
+        logger.error(f"检查模块更新失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/system/info', methods=['GET'])
+@login_required
+def api_get_system_info():
+    """API: 获取系统信息"""
+    try:
+        # 在实际应用中，这里会获取系统信息
+        logger.info("获取系统信息")
+        
+        import platform
+        import psutil
+        
+        # 收集系统信息
+        system_info = {
+            "os": platform.platform(),
+            "python_version": platform.python_version(),
+            "hostname": platform.node(),
+            "cpu": {
+                "usage": psutil.cpu_percent(interval=1),
+                "cores": psutil.cpu_count(logical=False),
+                "logical_cores": psutil.cpu_count(logical=True)
+            },
+            "memory": {
+                "total": psutil.virtual_memory().total,
+                "available": psutil.virtual_memory().available,
+                "used": psutil.virtual_memory().used,
+                "percent": psutil.virtual_memory().percent
+            },
+            "disk": {
+                "total": psutil.disk_usage('/').total,
+                "free": psutil.disk_usage('/').free,
+                "used": psutil.disk_usage('/').used,
+                "percent": psutil.disk_usage('/').percent
+            },
+            "app": {
+                "start_time": "2025-04-16 04:38:45",
+                "uptime": "08:07:21",
+                "version": "1.2.0"
+            },
+            "network": {
+                "interfaces": list(psutil.net_if_addrs().keys()),
+                "connections": len(psutil.net_connections())
+            }
+        }
+        
+        return jsonify({"success": True, "data": system_info})
+    except Exception as e:
+        logger.error(f"获取系统信息失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/system/export', methods=['GET'])
+@login_required
+def api_export_system_info():
+    """API: 导出系统信息"""
+    try:
+        # 在实际应用中，这里会生成并返回系统信息文件以供下载
+        logger.info("导出系统信息")
+        
+        # 获取系统信息
+        system_info = {
+            "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "user": session.get('user', 'Guest'),
+            "system": {
+                "platform": "Linux-5.10.0-amd64",
+                "python_version": "3.9.7",
+                "hostname": "aiot-edge-server"
+            },
+            "app": {
+                "version": "1.2.0",
+                "start_time": "2025-04-16 04:38:45",
+                "uptime": "08:07:21"
+            },
+            "resources": {
+                "cpu_usage": 35,
+                "memory_usage": 60,
+                "disk_usage": 45
+            },
+            "services": {
+                "attack_engine": {"status": "running", "uptime": "2天13小时"},
+                "data_analytics": {"status": "running", "uptime": "2天13小时"},
+                "thingsboard": {"status": "partial", "uptime": "1天7小时"}
+            },
+            "devices": [
+                {"id": 'gateway_001', "name": '家庭网关', "type": 'gateway', "platform": 'simulator', "status": 'online'},
+                {"id": 'speaker_001', "name": '小爱音箱', "type": 'speaker', "platform": 'thingsboard', "status": 'online'},
+                {"id": 'camera_001', "name": '门口摄像头', "type": 'camera', "platform": 'thingsboard', "status": 'online'},
+                {"id": 'router_001', "name": '客厅路由器', "type": 'router', "platform": 'edgex', "status": 'online'},
+                {"id": 'sensor_001', "name": '温湿度传感器', "type": 'sensor', "platform": 'edgex', "status": 'offline'}
+            ]
+        }
+        
+        # 转换为JSON
+        system_info_json = json.dumps(system_info, indent=2)
+        
+        # 创建响应并设置为附件下载
+        response = make_response(system_info_json)
+        response.headers["Content-Disposition"] = f"attachment; filename=system_info_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        response.headers["Content-Type"] = "application/json"
+        
+        return response
+    except Exception as e:
+        logger.error(f"导出系统信息失败: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
 @app.route('/analysis')
 @login_required
 def analysis_module():

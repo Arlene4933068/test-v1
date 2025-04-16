@@ -1,0 +1,2249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置 - 小米AIoT边缘安全防护研究平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <style>
+        .settings-card {
+            margin-bottom: 20px;
+        }
+        
+        .settings-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #ff6700;
+        }
+        
+        .settings-header {
+            padding: 15px;
+            border-bottom: 1px solid rgba(0,0,0,.125);
+        }
+        
+        .settings-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            max-width: 350px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-on {
+            background-color: #28a745;
+        }
+        
+        .status-off {
+            background-color: #dc3545;
+        }
+        
+        .status-pending {
+            background-color: #ffc107;
+        }
+        
+        .settings-tab-content {
+            padding-top: 20px;
+        }
+        
+        .custom-switch .custom-control-input:checked ~ .custom-control-label::before {
+            background-color: #ff6700;
+            border-color: #ff6700;
+        }
+        
+        .log-console {
+            background-color: #212529;
+            color: #f8f9fa;
+            font-family: 'Courier New', monospace;
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .log-line {
+            margin-bottom: 2px;
+        }
+        
+        .log-info {
+            color: #17a2b8;
+        }
+        
+        .log-warning {
+            color: #ffc107;
+        }
+        
+        .log-error {
+            color: #dc3545;
+        }
+        
+        .log-success {
+            color: #28a745;
+        }
+        
+        .modal-xl {
+            max-width: 90%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <a class="navbar-brand" href="/">小米AIoT边缘安全防护研究平台</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/">控制台</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/devices">设备管理</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/thingsboard">ThingsBoard集成</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/attack">攻击模块</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/analysis">数据分析</a>
+                            </li>
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/settings">系统设置</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/logout">退出</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 主要内容 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>系统设置 
+                    <div class="float-right">
+                        <button id="save-all-settings" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 保存所有设置
+                        </button>
+                    </div>
+                </h2>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 在此页面您可以配置平台的各项设置，包括安全策略、网络设置、攻击引擎配置等。
+                </div>
+            </div>
+        </div>
+        
+        <!-- 设置选项卡 -->
+        <div class="row">
+            <div class="col-12">
+                <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="general-tab" data-toggle="tab" href="#general" role="tab">
+                            <i class="fas fa-cog"></i> 基本设置
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="security-tab" data-toggle="tab" href="#security" role="tab">
+                            <i class="fas fa-shield-alt"></i> 安全设置
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="network-tab" data-toggle="tab" href="#network" role="tab">
+                            <i class="fas fa-network-wired"></i> 网络设置
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="attack-tab" data-toggle="tab" href="#attack" role="tab">
+                            <i class="fas fa-bolt"></i> 攻击引擎
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="integration-tab" data-toggle="tab" href="#integration" role="tab">
+                            <i class="fas fa-plug"></i> 集成配置
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="logs-tab" data-toggle="tab" href="#logs" role="tab">
+                            <i class="fas fa-list"></i> 日志管理
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="tab-content settings-tab-content" id="settingsTabContent">
+                    <!-- 基本设置面板 -->
+                    <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">平台基本设置</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="general-settings-form">
+                                    <div class="form-group">
+                                        <label for="platform-name">平台名称</label>
+                                        <input type="text" class="form-control" id="platform-name" value="小米AIoT边缘安全防护研究平台">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="admin-email">管理员邮箱</label>
+                                        <input type="email" class="form-control" id="admin-email" value="admin@example.com">
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label for="data-storage-path">数据存储路径</label>
+                                            <input type="text" class="form-control" id="data-storage-path" value="data/">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="data-retention">数据保留期限（天）</label>
+                                            <input type="number" class="form-control" id="data-retention" value="30" min="1" max="365">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>自动更新</label>
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="auto-update" checked>
+                                            <label class="custom-control-label" for="auto-update">启用自动更新</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>主题</label>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="theme-light" name="theme" class="custom-control-input" checked>
+                                            <label class="custom-control-label" for="theme-light">浅色主题</label>
+                                        </div>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="theme-dark" name="theme" class="custom-control-input">
+                                            <label class="custom-control-label" for="theme-dark">深色主题</label>
+                                        </div>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="theme-auto" name="theme" class="custom-control-input">
+                                            <label class="custom-control-label" for="theme-auto">跟随系统</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveGeneralSettings()">保存设置</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">系统状态</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>系统资源</h6>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td>CPU 使用率</td>
+                                                <td>
+                                                    <div class="progress" style="height: 5px;">
+                                                        <div class="progress-bar" role="progressbar" style="width: 35%"></div>
+                                                    </div>
+                                                    <small class="text-muted">35%</small>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>内存使用率</td>
+                                                <td>
+                                                    <div class="progress" style="height: 5px;">
+                                                        <div class="progress-bar" role="progressbar" style="width: 60%"></div>
+                                                    </div>
+                                                    <small class="text-muted">60%</small>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>磁盘使用率</td>
+                                                <td>
+                                                    <div class="progress" style="height: 5px;">
+                                                        <div class="progress-bar" role="progressbar" style="width: 45%"></div>
+                                                    </div>
+                                                    <small class="text-muted">45%</small>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <h6>系统服务</h6>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td>攻击引擎</td>
+                                                <td><span class="status-indicator status-on"></span> 运行中</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-secondary" onclick="restartService('attack-engine')">
+                                                        <i class="fas fa-redo-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>数据分析服务</td>
+                                                <td><span class="status-indicator status-on"></span> 运行中</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-secondary" onclick="restartService('data-analytics')">
+                                                        <i class="fas fa-redo-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>ThingsBoard集成</td>
+                                                <td><span class="status-indicator status-pending"></span> 部分连接</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-secondary" onclick="restartService('thingsboard')">
+                                                        <i class="fas fa-redo-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button class="btn btn-warning" onclick="restartSystem()">
+                                        <i class="fas fa-sync"></i> 重启系统
+                                    </button>
+                                    <button class="btn btn-info" onclick="checkUpdates()">
+                                        <i class="fas fa-download"></i> 检查更新
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="exportSystemInfo()">
+                                        <i class="fas fa-file-export"></i> 导出系统信息
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 安全设置面板 -->
+                    <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">访问控制</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="access-control-form">
+                                    <div class="form-group">
+                                        <label for="session-timeout">会话超时（分钟）</label>
+                                        <input type="number" class="form-control" id="session-timeout" value="30" min="5" max="1440">
+                                        <small class="form-text text-muted">设置为0表示永不超时（不推荐）</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="login-attempts">登录尝试次数</label>
+                                        <input type="number" class="form-control" id="login-attempts" value="5" min="1" max="10">
+                                        <small class="form-text text-muted">超过此次数账户将被锁定</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="lockout-duration">锁定时间（分钟）</label>
+                                        <input type="number" class="form-control" id="lockout-duration" value="15" min="1" max="1440">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>密码策略</label>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="enforce-complexity" checked>
+                                            <label class="custom-control-label" for="enforce-complexity">强制密码复杂度</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="require-uppercase" checked>
+                                            <label class="custom-control-label" for="require-uppercase">需要大写字母</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="require-number" checked>
+                                            <label class="custom-control-label" for="require-number">需要数字</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="require-special" checked>
+                                            <label class="custom-control-label" for="require-special">需要特殊字符</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="password-length">密码最小长度</label>
+                                        <input type="number" class="form-control" id="password-length" value="8" min="6" max="64">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="password-expiry">密码过期天数</label>
+                                        <input type="number" class="form-control" id="password-expiry" value="90" min="0" max="365">
+                                        <small class="form-text text-muted">设置为0表示密码永不过期</small>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveAccessControlSettings()">保存设置</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">用户管理</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <button class="btn btn-success" onclick="showAddUserModal()">
+                                        <i class="fas fa-user-plus"></i> 添加用户
+                                    </button>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>用户名</th>
+                                                <th>角色</th>
+                                                <th>上次登录</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>admin</td>
+                                                <td>管理员</td>
+                                                <td>2025-04-16 08:45:12</td>
+                                                <td><span class="badge badge-success">活跃</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary" onclick="editUser('admin')">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" disabled>
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>operator</td>
+                                                <td>运维人员</td>
+                                                <td>2025-04-15 16:30:05</td>
+                                                <td><span class="badge badge-success">活跃</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary" onclick="editUser('operator')">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('operator')">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>analyst</td>
+                                                <td>安全分析师</td>
+                                                <td>2025-04-14 09:15:32</td>
+                                                <td><span class="badge badge-secondary">锁定</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary" onclick="editUser('analyst')">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('analyst')">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">API 密钥管理</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <button class="btn btn-success" onclick="generateApiKey()">
+                                        <i class="fas fa-key"></i> 生成新密钥
+                                    </button>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>密钥名称</th>
+                                                <th>密钥前缀</th>
+                                                <th>创建时间</th>
+                                                <th>上次使用</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>ThingsBoard集成</td>
+                                                <td>aiot_tb_****</td>
+                                                <td>2025-04-01</td>
+                                                <td>2025-04-16</td>
+                                                <td><span class="badge badge-success">活跃</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-secondary" onclick="showApiKey('aiot_tb_1234')">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" onclick="revokeApiKey('aiot_tb_1234')">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>攻击自动化</td>
+                                                <td>aiot_atk_****</td>
+                                                <td>2025-04-10</td>
+                                                <td>2025-04-15</td>
+                                                <td><span class="badge badge-success">活跃</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-secondary" onclick="showApiKey('aiot_atk_5678')">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" onclick="revokeApiKey('aiot_atk_5678')">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 网络设置面板 -->
+                    <div class="tab-pane fade" id="network" role="tabpanel" aria-labelledby="network-tab">
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">网络接口配置</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="network-interface-form">
+                                    <div class="form-group">
+                                        <label for="listen-interface">监听接口</label>
+                                        <select class="form-control" id="listen-interface">
+                                            <option value="all">所有接口</option>
+                                            <option value="eth0">eth0 (192.168.1.100)</option>
+                                            <option value="wlan0">wlan0 (192.168.1.101)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label for="listen-port">HTTP 端口</label>
+                                            <input type="number" class="form-control" id="listen-port" value="5000" min="1" max="65535">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="listen-port-ssl">HTTPS 端口</label>
+                                            <input type="number" class="form-control" id="listen-port-ssl" value="5443" min="1" max="65535">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="enable-ssl" checked>
+                                            <label class="custom-control-label" for="enable-ssl">启用SSL/TLS</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="ssl-settings">
+                                        <div class="form-group">
+                                            <label for="ssl-cert">SSL证书路径</label>
+                                            <input type="text" class="form-control" id="ssl-cert" value="/etc/ssl/certs/aiot-edge.crt">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="ssl-key">SSL密钥路径</label>
+                                            <input type="text" class="form-control" id="ssl-key" value="/etc/ssl/private/aiot-edge.key">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="generateSelfSignedCert()">
+                                                <i class="fas fa-certificate"></i> 生成自签名证书
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveNetworkSettings()">保存设置</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">MQTT 配置</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="mqtt-config-form">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="enable-mqtt" checked>
+                                            <label class="custom-control-label" for="enable-mqtt">启用MQTT代理</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="mqtt-settings">
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <label for="mqtt-port">MQTT 端口</label>
+                                                <input type="number" class="form-control" id="mqtt-port" value="1883" min="1" max="65535">
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="mqtt-ws-port">MQTT WebSocket 端口</label>
+                                                <input type="number" class="form-control" id="mqtt-ws-port" value="9001" min="1" max="65535">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="mqtt-auth">认证方式</label>
+                                            <select class="form-control" id="mqtt-auth">
+                                                <option value="none">无认证</option>
+                                                <option value="username" selected>用户名/密码</option>
+                                                <option value="certificate">证书认证</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div id="mqtt-username-auth">
+                                            <div class="form-group">
+                                                <label for="mqtt-username">默认用户名</label>
+                                                <input type="text" class="form-control" id="mqtt-username" value="aiot_mqtt">
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="mqtt-password">默认密码</label>
+                                                <input type="password" class="form-control" id="mqtt-password" value="mqtt_secure_password">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveMqttSettings()">保存设置</button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="testMqttConnection()">测试连接</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">代理设置</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="proxy-settings-form">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="enable-proxy">
+                                            <label class="custom-control-label" for="enable-proxy">使用代理服务器</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="proxy-settings" class="d-none">
+                                        <div class="form-group">
+                                            <label for="proxy-type">代理类型</label>
+                                            <select class="form-control" id="proxy-type">
+                                                <option value="http">HTTP</option>
+                                                <option value="socks5">SOCKS5</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-row">
+                                            <div class="form-group col-md-8">
+                                                <label for="proxy-host">代理主机</label>
+                                                <input type="text" class="form-control" id="proxy-host" placeholder="例如: proxy.example.com">
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label for="proxy-port">代理端口</label>
+                                                <input type="number" class="form-control" id="proxy-port" placeholder="例如: 8080" min="1" max="65535">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="proxy-auth">
+                                                <label class="custom-control-label" for="proxy-auth">需要认证</label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div id="proxy-auth-settings" class="d-none">
+                                            <div class="form-group">
+                                                <label for="proxy-username">用户名</label>
+                                                <input type="text" class="form-control" id="proxy-username">
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="proxy-password">密码</label>
+                                                <input type="password" class="form-control" id="proxy-password">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveProxySettings()">保存设置</button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="testProxyConnection()">测试连接</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 攻击引擎面板 -->
+                    <div class="tab-pane fade" id="attack" role="tabpanel" aria-labelledby="attack-tab">
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">攻击引擎基本配置</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="attack-engine-form">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="enable-attack-engine" checked>
+                                            <label class="custom-control-label" for="enable-attack-engine">启用攻击引擎</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="attack-threads">最大并行攻击数</label>
+                                        <input type="number" class="form-control" id="attack-threads" value="3" min="1" max="10">
+                                        <small class="form-text text-muted">可同时运行的攻击任务数量</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="attack-timeout">攻击超时（秒）</label>
+                                        <input type="number" class="form-control" id="attack-timeout" value="600" min="10" max="3600">
+                                        <small class="form-text text-muted">单次攻击的最大执行时间</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="attack-log-level">日志级别</label>
+                                        <select class="form-control" id="attack-log-level">
+                                            <option value="debug">调试</option>
+                                            <option value="info" selected>信息</option>
+                                            <option value="warning">警告</option>
+                                            <option value="error">错误</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="automatic-analysis" checked>
+                                            <label class="custom-control-label" for="automatic-analysis">攻击后自动分析结果</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="report-vulnerabilities" checked>
+                                            <label class="custom-control-label" for="report-vulnerabilities">自动记录发现的漏洞</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveAttackEngineSettings()">保存设置</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">攻击模块配置</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>攻击模块</th>
+                                                <th>类型</th>
+                                                <th>状态</th>
+                                                <th>版本</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>DoS/DDoS攻击模块</td>
+                                                <td>网络层攻击</td>
+                                                <td><span class="badge badge-success">已启用</span></td>
+                                                <td>v2.1.3</td>
+                                                <td>
+                                                    <div class="custom-control custom-switch">
+                                                        <input type="checkbox" class="custom-control-input" id="module-dos" checked>
+                                                        <label class="custom-control-label" for="module-dos"></label>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>MQTT协议漏洞攻击</td>
+                                                <td>协议漏洞攻击</td>
+                                                <td><span class="badge badge-success">已启用</span></td>
+                                                <td>v1.5.0</td>
+                                                <td>
+                                                    <div class="custom-control custom-switch">
+                                                        <input type="checkbox" class="custom-control-input" id="module-mqtt" checked>
+                                                        <label class="custom-control-label" for="module-mqtt"></label>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>固件提取与分析</td>
+                                                <td>固件漏洞攻击</td>
+                                                <td><span class="badge badge-success">已启用</span></td>
+                                                <td>v2.0.1</td>
+                                                <td>
+                                                    <div class="custom-control custom-switch">
+                                                        <input type="checkbox" class="custom-control-input" id="module-firmware" checked>
+                                                        <label class="custom-control-label" for="module-firmware"></label>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>密码绕过攻击</td>
+                                                <td>认证绕过</td>
+                                                <td><span class="badge badge-success">已启用</span></td>
+                                                <td>v1.4.2</td>
+                                                <td>
+                                                    <div class="custom-control custom-switch">
+                                                        <input type="checkbox" class="custom-control-input" id="module-password" checked>
+                                                        <label class="custom-control-label" for="module-password"></label>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Wi-Fi去认证攻击</td>
+                                                <td>网络层攻击</td>
+                                                <td><span class="badge badge-danger">已禁用</span></td>
+                                                <td>v1.2.0</td>
+                                                <td>
+                                                    <div class="custom-control custom-switch">
+                                                        <input type="checkbox" class="custom-control-input" id="module-wifi">
+                                                        <label class="custom-control-label" for="module-wifi"></label>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-primary" onclick="checkModuleUpdates()">
+                                        <i class="fas fa-sync"></i> 检查模块更新
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="importAttackModule()">
+                                        <i class="fas fa-file-import"></i> 导入模块
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">安全限制</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="attack-limits-form">
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> 警告：这些设置控制攻击能力的限制，请谨慎配置，确保符合相关法律法规和安全标准。
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>攻击范围限制</label>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="limit-local-network" checked>
+                                            <label class="custom-control-label" for="limit-local-network">仅限本地网络</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="limit-registered-devices" checked>
+                                            <label class="custom-control-label" for="limit-registered-devices">仅限注册设备</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="prohibited-targets">禁止攻击的目标</label>
+                                        <textarea class="form-control" id="prohibited-targets" rows="3">192.168.1.1,192.168.1.254,*.gov,*.edu</textarea>
+                                        <small class="form-text text-muted">输入IP地址、MAC地址或域名通配符，用逗号分隔</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>禁止的攻击类型</label>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="prohibit-persistent" checked>
+                                            <label class="custom-control-label" for="prohibit-persistent">持久化攻击</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="prohibit-data-destruction" checked>
+                                            <label class="custom-control-label" for="prohibit-data-destruction">数据破坏</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="prohibit-ransom" checked>
+                                            <label class="custom-control-label" for="prohibit-ransom">勒索软件仿真</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveAttackLimitSettings()">保存设置</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 集成配置面板 -->
+                    <div class="tab-pane fade" id="integration" role="tabpanel" aria-labelledby="integration-tab">
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">ThingsBoard 集成</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="thingsboard-integration-form">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="enable-thingsboard" checked>
+                                            <label class="custom-control-label" for="enable-thingsboard">启用 ThingsBoard 集成</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="thingsboard-settings">
+                                        <div class="form-group">
+                                            <label for="tb-url">ThingsBoard URL</label>
+                                            <input type="url" class="form-control" id="tb-url" value="http://localhost:8080">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="tb-mqtt-port">MQTT 端口</label>
+                                            <input type="number" class="form-control" id="tb-mqtt-port" value="1883" min="1" max="65535">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="tb-auth-type">认证方式</label>
+                                            <select class="form-control" id="tb-auth-type">
+                                                <option value="basic">基本认证</option>
+                                                <option value="token">访问令牌</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div id="tb-basic-auth">
+                                            <div class="form-group">
+                                                <label for="tb-username">用户名</label>
+                                                <input type="text" class="form-control" id="tb-username" value="yy3205543068@gmail.com">
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="tb-password">密码</label>
+                                                <input type="password" class="form-control" id="tb-password" value="wlsxcdh52jy.L">
+                                            </div>
+                                        </div>
+                                        
+                                        <div id="tb-token-auth" class="d-none">
+                                            <div class="form-group">
+                                                <label for="tb-token">访问令牌</label>
+                                                <input type="text" class="form-control" id="tb-token">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label>同步设置</label>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="tb-auto-sync" checked>
+                                                <label class="custom-control-label" for="tb-auto-sync">自动同步</label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="tb-sync-interval">同步间隔（分钟）</label>
+                                            <input type="number" class="form-control" id="tb-sync-interval" value="15" min="1" max="1440">
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveThingsboardSettings()">保存设置</button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="testThingsboardConnection()">测试连接</button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="syncNow()">立即同步</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">EdgeX Foundry 集成</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="edgex-integration-form">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="enable-edgex" checked>
+                                            <label class="custom-control-label" for="enable-edgex">启用 EdgeX Foundry 集成</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="edgex-settings">
+                                        <div class="form-group">
+                                            <label for="edgex-url">EdgeX API URL</label>
+                                            <input type="url" class="form-control" id="edgex-url" value="http://localhost:48080">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="edgex-core-data-url">Core Data URL</label>
+                                            <input type="url" class="form-control" id="edgex-core-data-url" value="http://localhost:48080/api/v1/event">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="edgex-core-metadata-url">Core Metadata URL</label>
+                                            <input type="url" class="form-control" id="edgex-core-metadata-url" value="http://localhost:48081/api/v1/device">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="edgex-service-name">服务名称</label>
+                                            <input type="text" class="form-control" id="edgex-service-name" value="aiot-security-service">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="edgex-register-service" checked>
+                                                <label class="custom-control-label" for="edgex-register-service">注册为EdgeX服务</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveEdgexSettings()">保存设置</button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="testEdgexConnection()">测试连接</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">WebHook 配置</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="webhook-settings-form">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="enable-webhooks">
+                                            <label class="custom-control-label" for="enable-webhooks">启用 WebHook</label>
+                                        </div>
+                                        <small class="form-text text-muted">当重要事件发生时，自动通知外部系统</small>
+                                    </div>
+                                    
+                                    <div id="webhook-settings" class="d-none">
+                                        <div class="mb-3">
+                                            <button type="button" class="btn btn-outline-success btn-sm" onclick="addWebhook()">
+                                                <i class="fas fa-plus"></i> 添加 WebHook
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="webhook-item border rounded p-3 mb-3">
+                                            <div class="form-group">
+                                                <label>WebHook 名称</label>
+                                                <input type="text" class="form-control" placeholder="例如: 安全警报通知" value="安全警报通知">
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label>URL</label>
+                                                <input type="url" class="form-control" placeholder="例如: https://api.example.com/webhook" value="https://security-alerts.xiaomi-iot.com/webhook">
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label>触发事件</label>
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="webhook1-trigger-attack" checked>
+                                                    <label class="custom-control-label" for="webhook1-trigger-attack">攻击检测</label>
+                                                </div>
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="webhook1-trigger-vuln" checked>
+                                                    <label class="custom-control-label" for="webhook1-trigger-vuln">漏洞发现</label>
+                                                </div>
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="webhook1-trigger-system">
+                                                    <label class="custom-control-label" for="webhook1-trigger-system">系统事件</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label>认证方式</label>
+                                                <select class="form-control">
+                                                    <option>无认证</option>
+                                                    <option selected>Bearer Token</option>
+                                                    <option>Basic Auth</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label>Token</label>
+                                                <input type="text" class="form-control" value="sec_tok_aiot_xiaomi_123456">
+                                            </div>
+                                            
+                                            <div class="text-right">
+                                                <button type="button" class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-trash-alt"></i> 删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveWebhookSettings()">保存设置</button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="testWebhook()">测试 WebHook</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 日志管理面板 -->
+                    <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab">
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">日志配置</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="log-settings-form">
+                                    <div class="form-group">
+                                        <label for="log-level">日志级别</label>
+                                        <select class="form-control" id="log-level">
+                                            <option value="debug">调试</option>
+                                            <option value="info" selected>信息</option>
+                                            <option value="warning">警告</option>
+                                            <option value="error">错误</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="log-path">日志路径</label>
+                                        <input type="text" class="form-control" id="log-path" value="logs/">
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label for="log-rotation">日志轮转（天）</label>
+                                            <input type="number" class="form-control" id="log-rotation" value="7" min="1" max="30">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="log-max-size">单个日志最大大小（MB）</label>
+                                            <input type="number" class="form-control" id="log-max-size" value="50" min="1" max="1000">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>日志类别</label>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="log-system" checked>
+                                            <label class="custom-control-label" for="log-system">系统日志</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="log-attack" checked>
+                                            <label class="custom-control-label" for="log-attack">攻击日志</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="log-security" checked>
+                                            <label class="custom-control-label" for="log-security">安全事件</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="log-audit" checked>
+                                            <label class="custom-control-label" for="log-audit">审计日志</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveLogSettings()">保存设置</button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="clearLogs()">清除日志</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">系统日志查看器</h5>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="refreshLogs()">
+                                            <i class="fas fa-sync"></i> 刷新
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="downloadLogs()">
+                                            <i class="fas fa-download"></i> 下载
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-row mb-3">
+                                    <div class="col-md-3">
+                                        <select class="form
+                                        <select class="form-control" id="log-file-select">
+                                            <option>app.log</option>
+                                            <option>attack.log</option>
+                                            <option>security.log</option>
+                                            <option>audit.log</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-control" id="log-filter-level">
+                                            <option value="all">所有级别</option>
+                                            <option value="debug">调试及以上</option>
+                                            <option value="info">信息及以上</option>
+                                            <option value="warning">警告及以上</option>
+                                            <option value="error">仅错误</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" placeholder="搜索日志..." id="log-search">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary btn-block" onclick="searchLogs()">搜索</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="log-console" id="log-viewer">
+                                    <div class="log-line log-info">[2025-04-16 04:38:45] INFO - dashboard.app - 应用启动成功</div>
+                                    <div class="log-line">[2025-04-16 04:38:45] INFO - dashboard.architecture - Dashboard集成管理器初始化完成</div>
+                                    <div class="log-line">[2025-04-16 04:38:45] INFO - dashboard.packet_analyzer - 数据包分析器初始化完成，监听接口: ['eth0']</div>
+                                    <div class="log-line log-warning">[2025-04-16 04:38:45] WARNING - dashboard.app - 使用默认配置</div>
+                                    <div class="log-line">[2025-04-16 04:38:47] INFO - dashboard.app - 用户 admin 登录成功</div>
+                                    <div class="log-line">[2025-04-16 04:38:52] INFO - dashboard.device_manager - 发现新设备: 192.168.1.10 (camera_001)</div>
+                                    <div class="log-line">[2025-04-16 04:39:01] INFO - dashboard.attack_engine - 攻击引擎初始化完成</div>
+                                    <div class="log-line log-error">[2025-04-16 04:39:12] ERROR - dashboard.attack_logger - 清理过期日志失败: cannot VACUUM from within a transaction</div>
+                                    <div class="log-line">[2025-04-16 04:39:15] INFO - dashboard.app - 访问仪表盘页面</div>
+                                    <div class="log-line">[2025-04-16 04:39:30] INFO - dashboard.app - 访问设置页面</div>
+                                </div>
+                                
+                                <div class="mt-2">
+                                    <small class="text-muted">显示最近100条日志记录。更多日志请下载完整日志文件。</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card settings-card">
+                            <div class="card-header settings-header">
+                                <h5 class="mb-0">攻击日志分析</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="attack-log-start-date">开始日期</label>
+                                            <input type="date" class="form-control" id="attack-log-start-date" value="2025-04-01">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="attack-log-end-date">结束日期</label>
+                                            <input type="date" class="form-control" id="attack-log-end-date" value="2025-04-16">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="attack-log-type">攻击类型</label>
+                                            <select class="form-control" id="attack-log-type">
+                                                <option value="all">所有类型</option>
+                                                <option value="dos">DoS/DDoS攻击</option>
+                                                <option value="mqtt">MQTT协议攻击</option>
+                                                <option value="firmware">固件攻击</option>
+                                                <option value="auth">认证攻击</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-primary" onclick="analyzeAttackLogs()">分析日志</button>
+                                <button class="btn btn-outline-secondary" onclick="exportAttackAnalysis()">导出分析</button>
+                                
+                                <div class="mt-4">
+                                    <h6>攻击统计</h6>
+                                    <p>此功能将分析选定日期范围内的攻击日志，生成统计数据和趋势图表。</p>
+                                    
+                                    <div class="text-center">
+                                        <img src="https://via.placeholder.com/800x300?text=攻击数据统计图表" class="img-fluid" alt="攻击数据统计">
+                                        <small class="text-muted">数据分析图表将在此处显示</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模态框 - 添加用户 -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">添加新用户</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-user-form">
+                        <div class="form-group">
+                            <label for="new-username">用户名</label>
+                            <input type="text" class="form-control" id="new-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-user-password">密码</label>
+                            <input type="password" class="form-control" id="new-user-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-user-confirm-password">确认密码</label>
+                            <input type="password" class="form-control" id="new-user-confirm-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-user-role">角色</label>
+                            <select class="form-control" id="new-user-role" required>
+                                <option value="admin">管理员</option>
+                                <option value="operator">运维人员</option>
+                                <option value="analyst">安全分析师</option>
+                                <option value="viewer">只读用户</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-user-email">电子邮件</label>
+                            <input type="email" class="form-control" id="new-user-email">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="addUser()">添加用户</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模态框 - 生成API密钥 -->
+    <div class="modal fade" id="generateApiKeyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">生成API密钥</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="api-key-form">
+                        <div class="form-group">
+                            <label for="api-key-name">密钥名称</label>
+                            <input type="text" class="form-control" id="api-key-name" required>
+                            <small class="form-text text-muted">为此密钥指定一个描述性名称（如"ThingsBoard集成"）</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="api-key-expiry">过期时间</label>
+                            <select class="form-control" id="api-key-expiry">
+                                <option value="never">永不过期</option>
+                                <option value="30">30天</option>
+                                <option value="90">90天</option>
+                                <option value="365">1年</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>访问权限</label>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="perm-read" checked>
+                                <label class="custom-control-label" for="perm-read">读取数据</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="perm-write">
+                                <label class="custom-control-label" for="perm-write">修改数据</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="perm-attack">
+                                <label class="custom-control-label" for="perm-attack">执行攻击</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="perm-admin">
+                                <label class="custom-control-label" for="perm-admin">管理权限</label>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i> API密钥生成后将显示一次。请务必保存，因为它不会再次显示。
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="createApiKey()">生成密钥</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模态框 - 查看API密钥 -->
+    <div class="modal fade" id="viewApiKeyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">API密钥详情</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success" id="api-key-display">
+                        <p><strong>API密钥：</strong></p>
+                        <p class="mb-0" id="api-key-value">aiot_XXXXXXXXXXXXXXXXXXXX</p>
+                    </div>
+                    
+                    <p><strong>复制此密钥并安全存储。出于安全原因，它不会再次显示。</strong></p>
+                    
+                    <div class="form-group">
+                        <label>密钥详情</label>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                名称
+                                <span id="key-name-display">ThingsBoard集成</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                创建时间
+                                <span id="key-created-display">2025-04-16</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                过期时间
+                                <span id="key-expires-display">永不过期</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="copyApiKey()">复制密钥</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模态框 - 系统更新 -->
+    <div class="modal fade" id="systemUpdateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">系统更新</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> 发现新版本! 当前版本: v1.2.0，最新版本: v1.3.0
+                    </div>
+                    
+                    <h6>更新内容:</h6>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>v1.3.0 (2025-04-15)</h5>
+                            <ul>
+                                <li>新增Wi-Fi协议漏洞检测模块</li>
+                                <li>改进MQTT协议攻击引擎性能</li>
+                                <li>优化数据分析功能，增加更多可视化图表</li>
+                                <li>修复安全监控中的数据统计错误</li>
+                                <li>修复多处UI界面问题</li>
+                                <li>更新依赖库，提高系统安全性</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h6>更新选项:</h6>
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="backup-before-update" checked>
+                            <label class="custom-control-label" for="backup-before-update">更新前备份数据</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="restart-after-update" checked>
+                            <label class="custom-control-label" for="restart-after-update">更新后自动重启</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="startUpdate()">开始更新</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模态框 - SSL证书生成 -->
+    <div class="modal fade" id="sslCertModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">生成自签名SSL证书</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="ssl-cert-form">
+                        <div class="form-group">
+                            <label for="ssl-common-name">Common Name (CN)</label>
+                            <input type="text" class="form-control" id="ssl-common-name" value="localhost">
+                            <small class="form-text text-muted">您的域名或服务器IP</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ssl-organization">Organization (O)</label>
+                            <input type="text" class="form-control" id="ssl-organization" value="Xiaomi AIoT Edge Security">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="ssl-country">Country (C)</label>
+                                <input type="text" class="form-control" id="ssl-country" value="CN" maxlength="2">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="ssl-state">State (ST)</label>
+                                <input type="text" class="form-control" id="ssl-state" value="Beijing">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ssl-days">有效天数</label>
+                            <input type="number" class="form-control" id="ssl-days" value="365" min="1" max="3650">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="generateCertificate()">生成证书</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 设置保存通知 -->
+    <div class="toast settings-notification" id="settings-saved-toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+        <div class="toast-header">
+            <strong class="mr-auto"><i class="fas fa-check-circle text-success"></i> 成功</strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body">
+            设置已成功保存!
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 当文档加载完成后执行
+        $(document).ready(function() {
+            // 切换SSL设置可见性
+            $("#enable-ssl").change(function() {
+                if($(this).is(":checked")) {
+                    $("#ssl-settings").removeClass("d-none");
+                } else {
+                    $("#ssl-settings").addClass("d-none");
+                }
+            });
+            
+            // 切换MQTT设置可见性
+            $("#enable-mqtt").change(function() {
+                if($(this).is(":checked")) {
+                    $("#mqtt-settings").removeClass("d-none");
+                } else {
+                    $("#mqtt-settings").addClass("d-none");
+                }
+            });
+            
+            // MQTT认证方式切换
+            $("#mqtt-auth").change(function() {
+                if($(this).val() === "username") {
+                    $("#mqtt-username-auth").removeClass("d-none");
+                } else {
+                    $("#mqtt-username-auth").addClass("d-none");
+                }
+            });
+            
+            // 切换ThingsBoard认证方式
+            $("#tb-auth-type").change(function() {
+                if($(this).val() === "basic") {
+                    $("#tb-basic-auth").removeClass("d-none");
+                    $("#tb-token-auth").addClass("d-none");
+                } else {
+                    $("#tb-basic-auth").addClass("d-none");
+                    $("#tb-token-auth").removeClass("d-none");
+                }
+            });
+            
+            // 切换代理设置可见性
+            $("#enable-proxy").change(function() {
+                if($(this).is(":checked")) {
+                    $("#proxy-settings").removeClass("d-none");
+                } else {
+                    $("#proxy-settings").addClass("d-none");
+                }
+            });
+            
+            // 切换代理认证设置可见性
+            $("#proxy-auth").change(function() {
+                if($(this).is(":checked")) {
+                    $("#proxy-auth-settings").removeClass("d-none");
+                } else {
+                    $("#proxy-auth-settings").addClass("d-none");
+                }
+            });
+            
+            // 切换WebHook设置可见性
+            $("#enable-webhooks").change(function() {
+                if($(this).is(":checked")) {
+                    $("#webhook-settings").removeClass("d-none");
+                } else {
+                    $("#webhook-settings").addClass("d-none");
+                }
+            });
+        });
+        
+        // 保存所有设置
+        document.getElementById('save-all-settings').addEventListener('click', function() {
+            // 在实际应用中，这里应该会收集所有表单并提交
+            showSettingsSavedToast("所有设置已保存");
+        });
+        
+        // 保存通用设置
+        function saveGeneralSettings() {
+            // 获取表单数据
+            const data = {
+                platformName: $('#platform-name').val(),
+                adminEmail: $('#admin-email').val(),
+                dataStoragePath: $('#data-storage-path').val(),
+                dataRetention: $('#data-retention').val(),
+                autoUpdate: $('#auto-update').is(':checked'),
+                theme: $('input[name="theme"]:checked').attr('id').replace('theme-', '')
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("保存通用设置:", data);
+            
+            // 显示成功消息
+            showSettingsSavedToast("通用设置已保存");
+        }
+        
+        // 保存访问控制设置
+        function saveAccessControlSettings() {
+            // 获取表单数据
+            const data = {
+                sessionTimeout: $('#session-timeout').val(),
+                loginAttempts: $('#login-attempts').val(),
+                lockoutDuration: $('#lockout-duration').val(),
+                enforceComplexity: $('#enforce-complexity').is(':checked'),
+                requireUppercase: $('#require-uppercase').is(':checked'),
+                requireNumber: $('#require-number').is(':checked'),
+                requireSpecial: $('#require-special').is(':checked'),
+                passwordLength: $('#password-length').val(),
+                passwordExpiry: $('#password-expiry').val()
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("保存访问控制设置:", data);
+            
+            // 显示成功消息
+            showSettingsSavedToast("访问控制设置已保存");
+        }
+        
+        // 保存网络设置
+        function saveNetworkSettings() {
+            // 获取表单数据
+            const data = {
+                listenInterface: $('#listen-interface').val(),
+                httpPort: $('#listen-port').val(),
+                httpsPort: $('#listen-port-ssl').val(),
+                enableSsl: $('#enable-ssl').is(':checked'),
+                sslCert: $('#ssl-cert').val(),
+                sslKey: $('#ssl-key').val()
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("保存网络设置:", data);
+            
+            // 显示成功消息
+            showSettingsSavedToast("网络设置已保存");
+        }
+        
+        // 保存MQTT设置
+        function saveMqttSettings() {
+            // 获取表单数据
+            const data = {
+                enableMqtt: $('#enable-mqtt').is(':checked'),
+                mqttPort: $('#mqtt-port').val(),
+                mqttWsPort: $('#mqtt-ws-port').val(),
+                mqttAuth: $('#mqtt-auth').val(),
+                mqttUsername: $('#mqtt-username').val(),
+                mqttPassword: $('#mqtt-password').val()
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("保存MQTT设置:", data);
+            
+            // 显示成功消息
+            showSettingsSavedToast("MQTT设置已保存");
+        }
+        
+        // 保存代理设置
+        function saveProxySettings() {
+            // 获取表单数据
+            const data = {
+                enableProxy: $('#enable-proxy').is(':checked'),
+                proxyType: $('#proxy-type').val(),
+                proxyHost: $('#proxy-host').val(),
+                proxyPort: $('#proxy-port').val(),
+                proxyAuth: $('#proxy-auth').is(':checked'),
+                proxyUsername: $('#proxy-username').val(),
+                proxyPassword: $('#proxy-password').val()
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("保存代理设置:", data);
+            
+            // 显示成功消息
+            showSettingsSavedToast("代理设置已保存");
+        }
+        
+        // 保存攻击引擎设置
+        function saveAttackEngineSettings() {
+            // 获取表单数据
+            const data = {
+                enableAttackEngine: $('#enable-attack-engine').is(':checked'),
+                attackThreads: $('#attack-threads').val(),
+                attackTimeout: $('#attack-timeout').val(),
+                logLevel: $('#attack-log-level').val(),
+                automaticAnalysis: $('#automatic-analysis').is(':checked'),
+                reportVulnerabilities: $('#report-vulnerabilities').is(':checked')
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("保存攻击引擎设置:", data);
+            
+            // 显示成功消息
+            showSettingsSavedToast("攻击引擎设置已保存");
+        }
+        
+        // 保存攻击限制设置
+        function saveAttackLimitSettings() {
+            // 获取表单数据
+            const data = {
+                limitLocalNetwork: $('#limit-local-network').is(':checked'),
+                limitRegisteredDevices: $('#limit-registered-devices').is(':checked'),
+                prohibitedTargets: $('#prohibited-targets').val(),
+                prohibitPersistent: $('#prohibit-persistent').is(':checked'),
+                prohibitDataDestruction: $('#prohibit-data-destruction').is(':checked'),
+                prohibitRansom: $('#prohibit-ransom').is(':checked')
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("保存攻击限制设置:", data);
+            
+            // 显示成功消息
+            showSettingsSavedToast("攻击限制设置已保存");
+        }
+        
+        // 保存ThingsBoard设置
+        function saveThingsboardSettings() {
+            // 获取表单数据
+            const data = {
+                enableThingsboard: $('#enable-thingsboard').is(':checked'),
+                tbUrl: $('#tb-url').val(),
+                tbMqttPort: $('#tb-mqtt-port').val(),
+                tbAuthType: $('#tb-auth-type').val(),
+                tbUsername: $('#tb-username').val(),
+                tbPassword: $('#tb-password').val(),
+                tbToken: $('#tb-token').val(),
+                tbAutoSync: $('#tb-auto-sync').is(':checked'),
+                tbSyncInterval: $('#tb-sync-interval').val()
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("保存ThingsBoard设置:", data);
+            
+            // 显示成功消息
+            showSettingsSavedToast("ThingsBoard设置已保存");
+        }
+        
+        // 保存EdgeX设置
+        function saveEdgexSettings() {
+            // 获取表单数据
+            const data = {
+                enableEdgex: $('#enable-edgex').is(':checked'),
+                edgexUrl: $('#edgex-url').val(),
+                edgexCoreDataUrl: $('#edgex-core-data-url').val(),
+                edgexCoreMetadataUrl: $('#edgex-core-metadata-url').val(),
+                edgexServiceName: $('#edgex-service-name').val(),
+                edgexRegisterService: $('#edgex-register-service').is(':checked')
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("保存EdgeX设置:", data);
+            
+            // 显示成功消息
+            showSettingsSavedToast("EdgeX设置已保存");
+        }
+        
+        // 保存WebHook设置
+        function saveWebhookSettings() {
+            // 在实际应用中，这里会收集所有WebHook表单数据
+            // 这里仅为演示
+            console.log("保存WebHook设置");
+            
+            // 显示成功消息
+            showSettingsSavedToast("WebHook设置已保存");
+        }
+        
+        // 保存日志设置
+        function saveLogSettings() {
+            // 获取表单数据
+            const data = {
+                logLevel: $('#log-level').val(),
+                logPath: $('#log-path').val(),
+                logRotation: $('#log-rotation').val(),
+                logMaxSize: $('#log-max-size').val(),
+                logSystem: $('#log-system').is(':checked'),
+                logAttack: $('#log-attack').is(':checked'),
+                logSecurity: $('#log-security').is(':checked'),
+                logAudit: $('#log-audit').is(':checked')
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("保存日志设置:", data);
+            
+            // 显示成功消息
+            showSettingsSavedToast("日志设置已保存");
+        }
+        
+        // 显示添加用户模态框
+        function showAddUserModal() {
+            $('#addUserModal').modal('show');
+        }
+        
+        // 添加用户
+        function addUser() {
+            // 获取表单数据
+            const username = $('#new-username').val();
+            const password = $('#new-user-password').val();
+            const confirmPassword = $('#new-user-confirm-password').val();
+            const role = $('#new-user-role').val();
+            const email = $('#new-user-email').val();
+            
+            // 验证密码
+            if (password !== confirmPassword) {
+                alert("密码不匹配");
+                return;
+            }
+            
+            // 创建用户数据
+            const userData = {
+                username: username,
+                password: password,
+                role: role,
+                email: email
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("添加用户:", userData);
+            
+            // 隐藏模态框
+            $('#addUserModal').modal('hide');
+            
+            // 显示成功消息
+            showSettingsSavedToast("用户已成功添加");
+            
+            // 在实际应用中，这里会刷新用户列表
+        }
+        
+        // 编辑用户
+        function editUser(username) {
+            // 在实际应用中，这里会打开编辑用户的模态框
+            // 这里仅为演示
+            console.log("编辑用户:", username);
+            alert("编辑用户: " + username);
+        }
+        
+        // 删除用户
+        function deleteUser(username) {
+            // 在实际应用中，这里会显示确认对话框
+            // 这里仅为演示
+            if (confirm("确定要删除用户 " + username + " 吗？")) {
+                console.log("删除用户:", username);
+                showSettingsSavedToast("用户已删除");
+            }
+        }
+        
+        // 生成API密钥
+        function generateApiKey() {
+            $('#generateApiKeyModal').modal('show');
+        }
+        
+        // 创建API密钥
+        function createApiKey() {
+            // 获取表单数据
+            const keyName = $('#api-key-name').val();
+            const expiry = $('#api-key-expiry').val();
+            
+            // 创建API密钥数据
+            const keyData = {
+                name: keyName,
+                expiry: expiry,
+                permissions: {
+                    read: $('#perm-read').is(':checked'),
+                    write: $('#perm-write').is(':checked'),
+                    attack: $('#perm-attack').is(':checked'),
+                    admin: $('#perm-admin').is(':checked')
+                }
+            };
+            
+            // 发送到服务器（这里仅为演示）
+            console.log("创建API密钥:", keyData);
+            
+            // 隐藏生成模态框
+            $('#generateApiKeyModal').modal('hide');
+            
+            // 显示API密钥
+            $('#key-name-display').text(keyName);
+            $('#key-created-display').text("2025-04-16");
+            $('#key-expires-display').text(expiry === "never" ? "永不过期" : new Date(Date.now() + parseInt(expiry) * 24 * 60 * 60 * 1000).toLocaleDateString());
+            
+            // 随机生成一个示例密钥
+            const apiKey = "aiot_" + Math.random().toString(36).substr(2, 20);
+            $('#api-key-value').text(apiKey);
+            
+            // 显示API密钥模态框
+            $('#viewApiKeyModal').modal('show');
+        }
+        
+        // 复制API密钥
+        function copyApiKey() {
+            const keyText = document.getElementById('api-key-value').innerText;
+            navigator.clipboard.writeText(keyText).then(() => {
+                alert("API密钥已复制到剪贴板");
+            }).catch(err => {
+                console.error('无法复制API密钥:', err);
+                alert("无法复制API密钥。请手动选择并复制。");
+            });
+        }
+        
+        // 显示API密钥详情
+        function showApiKey(keyPrefix) {
+            // 在实际应用中，这里会从服务器获取密钥详情
+            // 这里仅为演示
+            $('#key-name-display').text(keyPrefix === "aiot_tb_1234" ? "ThingsBoard集成" : "攻击自动化");
+            $('#key-created-display').text(keyPrefix === "aiot_tb_1234" ? "2025-04-01" : "2025-04-10");
+            $('#key-expires-display').text("永不过期");
+            
+            // 密钥已创建，所以不显示实际值
+            $('#api-key-display').addClass('d-none');
+            $('#viewApiKeyModal .alert-success').html("<p>出于安全原因，已创建的密钥不会再次显示。</p>");
+            
+            // 显示API密钥模态框
+            $('#viewApiKeyModal').modal('show');
+        }
+        
+        // 撤销API密钥
+        function revokeApiKey(keyPrefix) {
+            // 在实际应用中，这里会显示确认对话框
+            // 这里仅为演示
+            if (confirm("确定要撤销此API密钥吗？使用此密钥的所有集成将停止工作。")) {
+                console.log("撤销API密钥:", keyPrefix);
+                showSettingsSavedToast("API密钥已撤销");
+            }
+        }
+        
+        // 重启服务
+        function restartService(service) {
+            // 在实际应用中，这里会发送重启服务的请求
+            // 这里仅为演示
+            console.log("重启服务:", service);
+            showSettingsSavedToast(service + " 服务已重启");
+        }
+        
+        // 重启系统
+        function restartSystem() {
+            // 在实际应用中，这里会显示确认对话框
+            // 这里仅为演示
+            if (confirm("确定要重启系统吗？所有活动连接将被中断。")) {
+                console.log("重启系统");
+                showSettingsSavedToast("系统正在重启...");
+                
+                // 模拟重启
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            }
+        }
+        
+        // 检查更新
+        function checkUpdates() {
+            // 在实际应用中，这里会发送检查更新的请求
+            // 这里仅为演示模拟发现更新
+            console.log("检查更新");
+            
+            // 显示系统更新模态框
+            $('#systemUpdateModal').modal('show');
+        }
+        
+        // 开始更新
+        function startUpdate() {
+            // 获取更新选项
+            const backupBeforeUpdate = $('#backup-before-update').is(':checked');
+            const restartAfterUpdate = $('#restart-after-update').is(':checked');
+            
+            // 在实际应用中，这里会发送开始更新的请求
+            // 这里仅为演示
+            console.log("开始更新，备份:", backupBeforeUpdate, "重启:", restartAfterUpdate);
+            
+            // 隐藏模态框
+            $('#systemUpdateModal').modal('hide');
+            
+            // 显示正在更新消息
+            showSettingsSavedToast("更新已开始，请稍候...");
+        }
+        
+        // 导出系统信息
+        function exportSystemInfo() {
+            // 在实际应用中，这里会生成并下载系统信息文件
+            // 这里仅为演示
+            console.log("导出系统信息");
+            showSettingsSavedToast("系统信息已导出");
+        }
+        
+        // 生成自签名证书模态框
+        function generateSelfSignedCert() {
+            $('#sslCertModal').modal('show');
+        }
+        
+        // 生成证书
+        function generateCertificate() {
+            // 获取表单数据
+            const data = {
+                commonName: $('#ssl-common-name').val(),
+                organization: $('#ssl-organization').val(),
+                country: $('#ssl-country').val(),
+                state: $('#ssl-state').val(),
+                days: $('#ssl-days').val()
+            };
+            
+            // 在实际应用中，这里会发送生成证书的请求
+            // 这里仅为演示
+            console.log("生成证书:", data);
+            
+            // 隐藏模态框
+            $('#sslCertModal').modal('hide');
+            
+            // 更新证书路径
+            $('#ssl-cert').val("/etc/ssl/certs/aiot-edge-" + new Date().toISOString().split('T')[0] + ".crt");
+            $('#ssl-key').val("/etc/ssl/private/aiot-edge-" + new Date().toISOString().split('T')[0] + ".key");
+            
+            // 显示成功消息
+            showSettingsSavedToast("SSL证书已生成");
+        }
+        
+        // 测试MQTT连接
+        function testMqttConnection() {
+            // 在实际应用中，这里会发送测试MQTT连接的请求
+            // 这里仅为演示
+            console.log("测试MQTT连接");
+            
+            // 模拟连接测试
+            setTimeout(() => {
+                showSettingsSavedToast("MQTT连接测试成功");
+            }, 1000);
+        }
+        
+        // 测试代理连接
+        function testProxyConnection() {
+            // 在实际应用中，这里会发送测试代理连接的请求
+            // 这里仅为演示
+            console.log("测试代理连接");
+            
+            // 模拟连接测试
+            setTimeout(() => {
+                showSettingsSavedToast("代理连接测试成功");
+            }, 1000);
+        }
+        
+        // 测试ThingsBoard连接
+        function testThingsboardConnection() {
+            // 在实际应用中，这里会发送测试ThingsBoard连接的请求
+            // 这里仅为演示
+            console.log("测试ThingsBoard连接");
+            
+            // 获取ThingsBoard URL和认证信息
+            const tbUrl = $('#tb-url').val();
+            const authType = $('#tb-auth-type').val();
+            
+            // 根据认证类型获取不同的认证信息
+            let authInfo;
+            if (authType === 'basic') {
+                authInfo = {
+                    username: $('#tb-username').val(),
+                    password: $('#tb-password').val()
+                };
+            } else {
+                authInfo = {
+                    token: $('#tb-token').val()
+                };
+            }
+            
+            // 模拟连接测试
+            setTimeout(() => {
+                showSettingsSavedToast("ThingsBoard连接测试成功");
+            }, 1000);
+        }
+        
+        // 立即同步
+        function syncNow() {
+            // 在实际应用中，这里会发送立即同步的请求
+            // 这里仅为演示
+            console.log("立即同步ThingsBoard");
+            
+            // 显示正在同步消息
+            showSettingsSavedToast("正在同步ThingsBoard数据...");
+            
+            // 模拟同步完成
+            setTimeout(() => {
+                showSettingsSavedToast("ThingsBoard同步完成");
+            }, 3000);
+        }
+        
+        // 测试EdgeX连接
+        function testEdgexConnection() {
+            // 在实际应用中，这里会发送测试EdgeX连接的请求
+            // 这里仅为演示
+            console.log("测试EdgeX连接");
+            
+            // 模拟连接测试
+            setTimeout(() => {
+                showSettingsSavedToast("EdgeX连接测试成功");
+            }, 1000);
+        }
+        
+        // 测试WebHook
+        function testWebhook() {
+            // 在实际应用中，这里会发送测试WebHook的请求
+            // 这里仅为演示
+            console.log("测试WebHook");
+            
+            // 模拟测试
+            setTimeout(() => {
+                showSettingsSavedToast("WebHook测试成功");
+            }, 1000);
+        }
+        
+        // 添加WebHook
+        function addWebhook() {
+            // 在实际应用中，这里会添加新的WebHook表单
+            // 这里仅为演示
+            alert("此功能在实际应用中将添加新的WebHook配置表单");
+        }
+        
+        // 清除日志
+        function clearLogs() {
+            // 在实际应用中，这里会发送清除日志的请求
+            // 这里仅为演示
+            if (confirm("确定要清除所选日志吗？此操作不可撤销。")) {
+                console.log("清除日志");
+                showSettingsSavedToast("日志已清除");
+            }
+        }
+        
+        // 刷新日志
+        function refreshLogs() {
+            // 在实际应用中，这里会从服务器获取最新日志
+            // 这里仅为演示
+            console.log("刷新日志");
+            
+            // 添加一条新的日志
+            const now = new Date().toISOString().replace('T', ' ').substr(0, 19);
+            $('#log-viewer').prepend(`<div class="log-line log-info">[${now}] INFO - dashboard.app - 刷新日志</div>`);
+        }
+        
+        // 下载日志
+        function downloadLogs() {
+            // 在实际应用中，这里会生成并下载日志文件
+            // 这里仅为演示
+            console.log("下载日志");
+            showSettingsSavedToast("日志下载已开始");
+        }
+        
+        // 搜索日志
+        function searchLogs() {
+            // 获取搜索参数
+            const searchTerm = $('#log-search').val();
+            const logFile = $('#log-file-select').val();
+            const logLevel = $('#log-filter-level').val();
+            
+            // 在实际应用中，这里会发送搜索日志的请求
+            // 这里仅为演示
+            console.log("搜索日志:", searchTerm, "文件:", logFile, "级别:", logLevel);
+            
+            // 模拟搜索结果
+            $('#log-viewer').html('');
+            
+            // 添加一些匹配的日志示例
+            const now = new Date().toISOString().replace('T', ' ').substr(0, 19);
+            if (searchTerm) {
+                $('#log-viewer').append(`<div class="log-line log-info">[${now}] INFO - dashboard.app - 搜索结果: "${searchTerm}"</div>`);
+                $('#log-viewer').append(`<div class="log-line">[${now}] INFO - dashboard.log_search - 在${logFile}中找到${searchTerm}</div>`);
+            } else {
+                refreshLogs();
+            }
+        }
+        
+        // 分析攻击日志
+        function analyzeAttackLogs() {
+            // 获取分析参数
+            const startDate = $('#attack-log-start-date').val();
+            const endDate = $('#attack-log-end-date').val();
+            const attackType = $('#attack-log-type').val();
+            
+            // 在实际应用中，这里会发送分析日志的请求
+            // 这里仅为演示
+            console.log("分析攻击日志:", startDate, "到", endDate, "类型:", attackType);
+            
+            // 显示正在分析消息
+            showSettingsSavedToast("正在分析攻击日志...");
+        }
+        
+        // 导出攻击分析
+        function exportAttackAnalysis() {
+            // 在实际应用中，这里会生成并下载攻击分析报告
+            // 这里仅为演示
+            console.log("导出攻击分析");
+            showSettingsSavedToast("攻击分析报告导出已开始");
+        }
+        
+        // 检查模块更新
+        function checkModuleUpdates() {
+            // 在实际应用中，这里会发送检查模块更新的请求
+            // 这里仅为演示
+            console.log("检查模块更新");
+            
+            // 模拟检查结果
+            setTimeout(() => {
+                showSettingsSavedToast("所有模块均为最新版本");
+            }, 1000);
+        }
+        
+        // 导入攻击模块
+        function importAttackModule() {
+            // 在实际应用中，这里会显示导入模块的对话框
+            // 这里仅为演示
+            console.log("导入攻击模块");
+            alert("此功能在实际应用中将允许导入自定义攻击模块");
+        }
+        
+        // 显示设置已保存的通知
+        function showSettingsSavedToast(message) {
+            $('#settings-saved-toast .toast-body').text(message || "设置已成功保存！");
+            $('#settings-saved-toast').toast('show');
+        }
+    </script>
+</body>
+</html>

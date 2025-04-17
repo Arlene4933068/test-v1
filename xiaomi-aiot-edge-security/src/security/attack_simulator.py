@@ -14,7 +14,7 @@ import socket
 import requests
 from typing import Dict, Any, List, Optional, Callable
 import scapy.all as scapy
-from .utils.logger import get_logger
+from ..utils.logger import get_logger
 
 class AttackSimulator:
     """攻击模拟器类，用于模拟各种攻击场景"""
